@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>00 Design system - Azeroth Guild Finder mockup</title>
+<link rel="stylesheet" href="agf.css">
+<script src="agf.js"></script>
+<style>
+  .sheet { position: absolute; inset: 18px; border-radius: 8px; padding: 18px 22px; display: grid; grid-template-columns: 1fr 1.05fr 1.1fr; gap: 22px;
+    background-color: var(--parch); background-image: var(--grain), radial-gradient(ellipse at 50% 30%, var(--parch-hi), var(--parch) 60%, var(--parch-lo)); background-blend-mode: multiply, normal;
+    box-shadow: 0 0 0 3px #3a4047, 0 0 0 4px #8a939b, var(--e5); }
+  .col { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+  h4 { margin: 4px 0 0; font: 700 12px/16px Roboto; letter-spacing: 1.3px; text-transform: uppercase; color: #8a5a2a; border-bottom: 1px solid var(--line); padding-bottom: 4px; }
+  .sws { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+  .sw2 { height: 38px; border-radius: 6px; box-shadow: inset 0 0 0 1px rgba(0,0,0,.25); position: relative; }
+  .sw2 small { position: absolute; left: 0; right: 0; bottom: -15px; font: 400 9.5px/12px 'Roboto Mono'; color: var(--ink-2); text-align: center; }
+  .row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .ts { display: grid; grid-template-columns: 92px 1fr; gap: 3px 10px; align-items: baseline; }
+  .ts .k { font: 400 10.5px/14px 'Roboto Mono'; color: var(--ink-3); }
+  .map { width: 100%; border-collapse: collapse; font: 400 12px/16px Roboto; }
+  .map td { padding: 4px 6px; border-bottom: 1px solid rgba(160,110,60,.25); }
+  .map td:first-child { color: var(--ink-2); white-space: nowrap; }
+  .embs { display: flex; align-items: flex-end; gap: 12px; }
+</style>
+</head>
+<body class="clean">
+<div class="stage">
+  <div class="sheet">
+    <div class="col">
+      <div><div class="headline">Design system</div><div class="caption">Albion-like fantasy skin on a Material Design 3 skeleton · v2 draft</div></div>
+      <h4>Colour tokens</h4>
+      <div class="sws" style="row-gap:20px">
+        <div class="sw2" style="background:#fbe3bd"><small>parch-hi</small></div>
+        <div class="sw2" style="background:#f6d6a6"><small>parch</small></div>
+        <div class="sw2" style="background:#e9c897"><small>page-left</small></div>
+        <div class="sw2" style="background:#3b2412"><small>ink</small></div>
+        <div class="sw2" style="background:#6a4526"><small>ink-2</small></div>
+        <div class="sw2" style="background:linear-gradient(#e9555a,#b81f25,#7d0f13)"><small>primary</small></div>
+        <div class="sw2" style="background:linear-gradient(#5d9bea,#2a64bd,#163d7c)"><small>discord</small></div>
+        <div class="sw2" style="background:linear-gradient(#f2bf3c,#b8820f)"><small>gold</small></div>
+        <div class="sw2" style="background:linear-gradient(135deg,#eef2f6,#9aa4ae,#4c545c)"><small>steel</small></div>
+        <div class="sw2" style="background:#2a2e33"><small>iron</small></div>
+        <div class="sw2" style="background:#2e7d32"><small>ok</small></div>
+        <div class="sw2" style="background:#b3261e"><small>bad</small></div>
+        <div class="sw2" style="background:#a8700a"><small>warn</small></div>
+        <div class="sw2" style="background:#7a4a22"><small>leather</small></div>
+        <div class="sw2" style="background:#e2efd3"><small>ok-bg</small></div>
+      </div>
+      <h4 style="margin-top:12px">Type · Roboto + Roboto Mono</h4>
+      <div class="ts">
+        <span class="k">headline 24/700</span><span class="headline">Aurora</span>
+        <span class="k">title-l 20/700</span><span class="title-l">Looking for</span>
+        <span class="k">title-m 16/500</span><span class="title-m">Pending applications</span>
+        <span class="k">body-m 13.5/400</span><span class="body-m">Competitive guild, relaxed raid night.</span>
+        <span class="k">label 12.5/500</span><span class="label">Recruiting only</span>
+        <span class="k">caption 12/400</span><span class="caption">Updated 2 days ago</span>
+        <span class="k">overline 11.5/700</span><span class="overline">Step 4 of 7</span>
+        <span class="k">mono 13/500</span><span class="mono" style="font-weight:500">https://discord.gg/aurora-it</span>
+        <span class="k">mono 13/400</span><span class="mono">20:00–23:30 · 19:00 UTC</span>
+      </div>
+      <div class="caption">Mono only for links, invite codes, times and slash commands (<span class="mono">/gf notify</span>). Minimum 12 px at 100 % UI scale; contrast ≥ 7:1 for body text.</div>
+    </div>
+
+    <div class="col">
+      <h4>Buttons · M3 filled / tonal / text</h4>
+      <div class="row"><span class="btn primary">Apply</span><span class="btn discord"><span class="ms">forum</span>Discord</span><span class="btn tonal">Decline</span></div>
+      <div class="row"><span class="btn metal"><span class="ms">tune</span>Filters</span><span class="btn disabled">Apply</span><span class="btn ghost">Open all<span class="ms">arrow_forward</span></span></div>
+      <div class="caption">One primary (red) action per screen. Discord blue only for the Discord action.</div>
+      <h4>Chips, switches, segmented</h4>
+      <div class="chips"><span class="chip on">Raids</span><span class="chip">Dungeons</span><span class="chip"><span data-role="r"></span>Ranged</span><span class="tag">IT</span><span class="tag ok">RECEIVED</span><span class="tag bad">DECLINED</span><span class="tag gold">NEW</span><span class="tag pace casual"><span class="ms">local_cafe</span>CASUAL</span><span class="tag pace soft"><span class="ms">event_available</span>SOFTCORE</span><span class="tag pace hard"><span class="ms">local_fire_department</span>HARDCORE</span></div>
+      <div class="row"><span class="sw on"></span><span class="sw"></span><span class="cb on"></span><span class="cb"></span><span class="cb x"></span><span class="badge">3</span>
+        <div class="seg" style="display:inline-flex;border-radius:999px;box-shadow:0 0 0 1.5px #7a5430;overflow:hidden"><span style="display:inline-flex;align-items:center;height:30px;padding:0 12px;font:500 12.5px Roboto;background:linear-gradient(#7a4a22,#5a3315);color:#ffeac2">Pending</span><span style="display:inline-flex;align-items:center;height:30px;padding:0 12px;font:500 12.5px Roboto;border-left:1.5px solid #7a5430">History</span></div></div>
+      <h4>Fields</h4>
+      <div class="field"><span class="ms">search</span><span class="ph-t">Search guild name…</span></div>
+      <div class="row" style="flex-wrap:nowrap"><div class="field select" style="flex:1"><span class="ms">translate</span>Italian</div><div class="field select sq mono" style="width:110px">20:00</div></div>
+      <div class="copy"><span class="ms" style="color:var(--blue)">forum</span><span class="grow"><span class="sel">https://discord.gg/aurora-it</span></span><span class="ms" style="color:var(--blue);font-size:18px">content_copy</span></div>
+      <h4>Feedback</h4>
+      <div class="snackbar"><span class="ms" style="color:var(--gold)">check_circle</span><span style="flex:1">Listing published. It reaches players over the next minutes.</span></div>
+      <div style="position:relative;height:40px"><div class="tooltip" style="left:0;top:4px">Estimated: exact only among members who use the addon</div></div>
+    </div>
+
+    <div class="col">
+      <h4>Emblem = WoW tabard layers in a metal frame</h4>
+      <div class="embs">
+        <div style="width:96px;height:115px" data-emblem='{"bg":"#141c2c","bc":"#d7dde4","ec":"#ffffff","symbol":"star","border":"solid"}'></div>
+        <div style="width:64px;height:77px" data-emblem='{"bg":"#4a1414","bc":"#e3b43d","ec":"#e3b43d","symbol":"crown","border":"double"}'></div>
+        <div style="width:48px;height:58px" data-emblem='{"bg":"#1f3a58","bc":"#e3b43d","ec":"#e3b43d","symbol":"beast","border":"studded"}'></div>
+        <div style="width:48px;height:58px" data-emblem='{"bg":"#f1ece0","bc":"#1b1b1b","ec":"#121212","symbol":"star8","border":"bold"}'></div>
+        <div style="width:48px;height:58px" data-emblem='{"bg":"#1d3a22","bc":"#e3b43d","ec":"#e3b43d","symbol":"leaf","border":"solid"}'></div>
+      </div>
+      <div class="caption">1 · guild tabard if it exists (background, border, emblem + colours). 2 · otherwise custom emblem from the same tabard pieces. Sizes 96 / 64 / 48.</div>
+      <h4>Class &amp; role tokens <span style="text-transform:none;letter-spacing:0;font-weight:400">(game icons in the addon)</span></h4>
+      <div class="row"><span data-cls="warrior"></span><span data-cls="hunter"></span><span data-cls="rogue"></span><span data-cls="priest"></span><span data-cls="shaman"></span><span data-cls="mage"></span><span data-cls="warlock"></span><span data-cls="druid"></span></div>
+      <div class="row caption"><span><span data-role="t"></span> Tank</span><span><span data-role="h"></span> Healer</span><span><span data-role="m"></span> Melee DPS</span><span><span data-role="r"></span> Ranged DPS</span></div>
+      <h4>Banner art (client loading screens in the addon)</h4>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
+        <div style="height:46px;border-radius:6px;overflow:hidden" data-art="emerald:3"></div><div style="height:46px;border-radius:6px;overflow:hidden" data-art="ember:11"></div><div style="height:46px;border-radius:6px;overflow:hidden" data-art="frost:5"></div>
+      </div>
+      <h4>Material 3 → our skin</h4>
+      <table class="map">
+        <tr><td>Navigation rail</td><td>metal side tabs <b>with labels</b> (fixes Albion's icon-only tabs)</td></tr>
+        <tr><td>Filled / tonal button</td><td>glossy red pill / parchment pill</td></tr>
+        <tr><td>Filter chip · switch</td><td>leather chip · metal-knob switch</td></tr>
+        <tr><td>Outlined text field</td><td>parchment field in a steel ring</td></tr>
+        <tr><td>Card · elevation</td><td>parchment card, soft brown shadows</td></tr>
+        <tr><td>Snackbar · badge</td><td>dark toast with gold accent · red badge</td></tr>
+        <tr><td>8 dp grid, type scale</td><td>kept as is, with Roboto</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+</body>
+</html>

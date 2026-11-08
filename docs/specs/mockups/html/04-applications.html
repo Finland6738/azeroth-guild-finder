@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>04 Applications (GM and officers) - Azeroth Guild Finder mockup</title>
+<link rel="stylesheet" href="agf.css">
+<script src="agf.js"></script>
+<style>
+  .seg { display: inline-flex; border-radius: var(--r-pill); box-shadow: 0 0 0 1.5px #7a5430; overflow: hidden; }
+  .seg > span { display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 16px; font: 500 13px/1 Roboto; color: #4a2c12; border-left: 1.5px solid #7a5430; background: rgba(255,245,225,.5); }
+  .seg > span:first-child { border-left: 0; }
+  .seg > span.on { background: linear-gradient(#7a4a22, #5a3315); color: #ffeac2; }
+  .counter { display: flex; gap: 10px; }
+  .counter .card { flex: 1; text-align: center; padding: 10px; }
+  .app { display: flex; align-items: center; gap: 14px; padding: 12px 14px; margin-bottom: 10px; border-radius: var(--r-md); background: linear-gradient(#fff3da, #f7e1b9); box-shadow: var(--e2), inset 0 0 0 1px rgba(160,110,60,.3); }
+  .app .who { flex: 1; min-width: 0; }
+  .app .nm { font: 700 16px/20px Roboto; }
+  .app .meta { font: 400 13px/18px Roboto; color: var(--ink-2); display: flex; gap: 10px; align-items: center; margin-top: 2px; white-space: nowrap; }
+  .app .meta .ms { font-size: 16px; color: #8a5a2a; }
+  .app.new { box-shadow: var(--e2), inset 0 0 0 2px var(--gold); }
+  .hist { display: grid; grid-template-columns: 26px 1.3fr 1fr 1.3fr; align-items: center; gap: 10px; height: 38px; padding: 0 12px; border-bottom: 1px solid rgba(160,110,60,.25); font: 400 13px/16px Roboto; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="book">
+    <div class="page page-left">
+      <div class="brand">
+        <div class="crest" data-emblem='{"bg":"#141c2c","bc":"#d7dde4","ec":"#ffffff","symbol":"star","border":"solid"}'></div>
+        <div><h1 style="font-size:24px">Aurora</h1><div class="sub">You are an officer</div></div>
+      </div>
+      <div class="plate"><span>Applications</span><span class="ms">inbox</span></div>
+      <div class="counter">
+        <div class="card"><div class="stat"><div class="n">3</div><div class="l">Pending</div></div></div>
+        <div class="card"><div class="stat"><div class="n">5</div><div class="l">Accepted · 30 days</div></div></div>
+      </div>
+      <div>
+        <div class="field-label">Show</div>
+        <div class="seg"><span class="on">Pending (3)</span><span>History</span></div>
+      </div>
+      <div class="divider"></div>
+      <div class="opt"><span>Notification icon on screen</span><span class="sw on"></span></div>
+      <div class="opt"><span>Only when something is pending</span><span class="sw"></span></div>
+      <div class="opt"><span>Sound on new application</span><span class="sw on"></span></div>
+      <div style="flex:1"></div>
+      <div class="card" style="padding:10px 12px">
+        <div class="title-s" style="display:flex;align-items:center;gap:6px"><span class="ms" style="color:var(--ok)">sync</span>Shared with officers</div>
+        <div class="caption">Kaelthar and Lyryn see the same list. Synced 1 min ago over the officer channel.</div>
+      </div>
+    </div>
+
+    <div class="page page-right">
+      <div class="ph">
+        <h2>Pending applications</h2><span class="badge">3</span>
+        <div class="grow"></div>
+        <span class="caption">Applications expire after 14 days</span>
+      </div>
+      <div class="content">
+        <div class="app new">
+          <span data-cls="mage" class="lg"></span>
+          <div class="who"><div class="nm" style="color:#1d86a6">Elarin <span class="tag gold" style="vertical-align:middle">NEW</span></div>
+            <div class="meta"><span>Mage · Level 32 · Troll</span><span><span class="ms">shield_with_heart</span> iLvl —</span><span><span class="ms">schedule</span>2 h ago</span><span class="tag ok">RECEIVED</span></div></div>
+          <span class="icon-btn" title="Whisper"><span class="ms">chat</span></span>
+          <span class="btn tonal sm">Decline</span>
+          <span class="btn primary sm"><span class="ms">person_add</span>Invite</span>
+        </div>
+        <div class="app">
+          <span data-cls="priest" class="lg"></span>
+          <div class="who"><div class="nm" style="color:#6b6b6b">Mirelle</div>
+            <div class="meta"><span>Priest · Level 60 · Undead</span><span><span class="ms">shield_with_heart</span> iLvl 58</span><span><span class="ms">schedule</span>Yesterday</span><span class="tag ok">RECEIVED</span></div></div>
+          <span class="icon-btn" title="Whisper"><span class="ms">chat</span></span>
+          <span class="btn tonal sm">Decline</span>
+          <span class="btn primary sm"><span class="ms">person_add</span>Invite</span>
+        </div>
+        <div class="app">
+          <span data-cls="warrior" class="lg"></span>
+          <div class="who"><div class="nm" style="color:#8a6a40">Brogan</div>
+            <div class="meta"><span>Warrior · Level 17 · Orc</span><span><span class="ms">schedule</span>3 days ago</span><span class="tag">EXPIRES IN 11 DAYS</span></div></div>
+          <span class="icon-btn" title="Whisper"><span class="ms">chat</span></span>
+          <span class="btn tonal sm">Decline</span>
+          <span class="btn primary sm"><span class="ms">person_add</span>Invite</span>
+        </div>
+
+        <div class="overline" style="margin:22px 0 6px">Recent history</div>
+        <div class="card" style="padding:4px 6px">
+          <div class="hist"><span data-cls="shaman" class="sm"></span><span><b>Tharok</b> · Shaman 41</span><span class="tag ok" style="justify-self:start">ACCEPTED</span><span class="caption">by Lyryn · 5 Nov 2026</span></div>
+          <div class="hist"><span data-cls="rogue" class="sm"></span><span><b>Velis</b> · Rogue 12</span><span class="tag bad" style="justify-self:start">DECLINED</span><span class="caption">by Kaelthar · 3 Nov 2026</span></div>
+          <div class="hist" style="border:0"><span data-cls="druid" class="sm"></span><span><b>Nym</b> · Druid 25</span><span class="tag" style="justify-self:start">WITHDRAWN</span><span class="caption">by the player · 1 Nov 2026</span></div>
+        </div>
+
+        <div class="snackbar" style="position:absolute;left:120px;right:120px;bottom:6px"><span class="ms" style="color:var(--gold)">send</span><span style="flex:1">Guild invite sent to <b>Elarin</b>. If they're offline, the game will tell you.</span><span style="color:var(--gold);font-weight:500">OK</span></div>
+      </div>
+    </div>
+
+    <div class="close"><span class="ms">close</span></div>
+    <div class="rail">
+      <div class="dest"><div class="ic"><span class="ms">settings</span></div><div class="lb">Settings</div></div>
+      <div class="dest"><div class="ic"><span class="ms">shield</span></div><div class="lb">My<br>Guild</div></div>
+      <div class="dest on"><div class="ic"><span class="ms">inbox</span></div><div class="lb">Applications</div><span class="badge">3</span></div>
+    </div>
+  </div>
+  <div class="note" style="left:1150px;top:340px;max-width:126px"><i>1</i><span>GM and officers only, badge = pending</span></div>
+  <div class="note" style="left:560px;top:90px;max-width:220px"><i>2</i><span>Auto-filled data only: no form for the player</span></div>
+  <div class="note" style="left:900px;top:180px;max-width:220px"><i>3</i><span>Invite = the normal guild invite of the game</span></div>
+  <div class="note" style="left:60px;top:700px;max-width:240px"><i>4</i><span>Officers' lists stay in sync</span></div>
+</div>
+</body>
+</html>

@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>01 Find a Guild - Azeroth Guild Finder mockup</title>
+<link rel="stylesheet" href="agf.css">
+<script src="agf.js"></script>
+</head>
+<body>
+<div class="stage">
+  <div class="book">
+    <!-- LEFT PAGE: brand + filters -->
+    <div class="page page-left">
+      <div class="brand">
+        <div class="crest" data-emblem='{"bg":"#c9a06a","bc":"#7a5430","ec":"#5a3a1c","symbol":"tower","border":"solid"}'></div>
+        <div><h1>Guild Finder</h1><div class="sub">Find your guild</div></div>
+      </div>
+      <div class="plate"><span>Filters <span style="opacity:.75;font-weight:500">· 4 active</span></span><span class="ms">restart_alt</span></div>
+
+      <div>
+        <div class="opt"><span>Recruiting only</span><span class="sw on"></span></div>
+        <div class="opt"><span>Looking for my class <span class="caption">(Mage)</span></span><span class="sw on"></span></div>
+        <div class="opt"><span>Requirements met</span><span class="sw"></span></div>
+        <div class="opt"><span>New player friendly</span><span class="sw"></span></div>
+      </div>
+            <div>
+        <div class="field-label">My role</div>
+        <div class="chips"><span class="chip"><span data-role="t"></span>Tank</span><span class="chip"><span data-role="h"></span>Healer</span><span class="chip"><span data-role="m"></span>Melee</span><span class="chip on"><span data-role="r"></span>Ranged</span></div>
+      </div>
+      <div>
+        <div class="field-label">Guild language</div>
+        <div class="field select"><span class="ms">translate</span><span>Italian, English</span></div>
+      </div>
+      <div>
+        <div class="field-label">Commitment</div>
+        <div class="chips"><span class="chip">Casual</span><span class="chip">Softcore</span><span class="chip">Hardcore</span></div>
+      </div>
+      <div>
+        <div class="field-label">Activity</div>
+        <div class="field select"><span class="ms">castle</span><span>Raids, Battlegrounds</span></div>
+      </div>
+      <div>
+        <div class="field-label">Play days &amp; time <span class="caption">(your time)</span></div>
+        <div class="days"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span class="on">S</span><span class="on">S</span></div>
+        <div style="display:flex;gap:10px;align-items:center;margin-top:10px">
+          <div class="field select sq mono" style="width:112px;height:34px">20:00</div><span class="muted">–</span>
+          <div class="field select sq mono" style="width:112px;height:34px">23:30</div>
+        </div>
+      </div>
+      <div class="opt" style="margin-top:2px"><span>Min. active members</span><div class="field select sq mono" style="width:76px;height:32px">10</div></div>
+    </div>
+
+    <!-- RIGHT PAGE: search + list -->
+    <div class="page page-right">
+      <div class="ph">
+        <div class="field" style="width:360px"><span class="ms">search</span><span>ordine</span><span class="grow"></span><span class="ms" style="font-size:18px">close</span></div>
+        <div class="grow"></div>
+        <div style="text-align:right">
+          <div class="title-s">3 of 142 guilds</div>
+          <div class="caption"><span class="ms" style="font-size:15px">sort_by_alpha</span> Sorted A → Z</div>
+        </div>
+      </div>
+
+      <div class="content">
+        <!-- card 1 -->
+        <div class="gcard hover">
+          <div class="top">
+            <div class="art" data-art="emerald:3"></div>
+            <div class="emb" data-emblem='{"bg":"#141c2c","bc":"#d7dde4","ec":"#ffffff","symbol":"star","border":"solid"}'></div>
+            <div class="txt">
+              <div class="name">Aurora</div>
+              <div class="sub">Open recruitment · small-scale PvP and a relaxed raid night on Wednesdays</div>
+              <div style="margin-top:8px;display:flex;gap:6px"><span class="tag">IT</span><span class="tag">EN</span><span class="tag pace soft"><span class="ms">event_available</span>SOFTCORE</span><span class="tag ok"><span class="ms" style="font-size:14px">check_circle</span>Looking for your class</span></div>
+            </div>
+            <div class="actions"><span class="btn discord sm"><span class="ms">forum</span>Discord</span><span class="btn primary sm">Apply</span></div>
+          </div>
+          <div class="info">
+            <div><span class="ms">groups</span><b>31</b>&nbsp;active <span class="muted">/ 149</span></div>
+            <div><span class="ms">event</span>Mon–Fri <span class="mono">20:00–23:30</span></div>
+            <div><span class="ms">person_search</span>Looking for <span data-cls="priest" class="sm"></span><span data-cls="shaman" class="sm"></span><span data-cls="warrior" class="sm"></span><span data-cls="mage" class="sm"></span><span class="caption">+1</span></div>
+            <div><span class="ms">castle</span>World PvP · Raids · Battlegrounds</div>
+            <div><span class="ms">verified</span>Level 20+ <span class="ms" style="color:var(--ok)">check</span></div>
+            <div><span class="ms">update</span><span class="muted">Updated 2 days ago</span></div>
+          </div>
+        </div>
+
+        <!-- card 2 -->
+        <div class="gcard">
+          <div class="top">
+            <div class="art" data-art="ember:11"></div>
+            <div class="emb" data-emblem='{"bg":"#14090a","bc":"#6d1515","ec":"#b3171d","symbol":"cross","border":"double"}'></div>
+            <div class="txt">
+              <div class="name">Ordine Cremisi</div>
+              <div class="sub">Italian raiding guild. Calm evenings, no drama, loot council.</div>
+              <div style="margin-top:8px;display:flex;gap:6px"><span class="tag">IT</span><span class="tag pace casual"><span class="ms">local_cafe</span>CASUAL</span><span class="tag ok"><span class="ms" style="font-size:14px">check_circle</span>Looking for your class</span></div>
+            </div>
+            <div class="actions"><span class="btn discord sm"><span class="ms">forum</span>Discord</span><span class="btn primary sm">Apply</span></div>
+          </div>
+          <div class="info">
+            <div><span class="ms">groups</span><b>18</b>&nbsp;active <span class="muted">/ 62</span></div>
+            <div><span class="ms">event</span>Wed, Sat, Sun <span class="mono">21:00–00:00</span></div>
+            <div><span class="ms">person_search</span>Looking for <span data-cls="mage" class="sm"></span><span data-cls="warlock" class="sm"></span><span data-cls="druid" class="sm"></span></div>
+            <div><span class="ms">castle</span>Raids · Dungeons · Social &amp; Chat</div>
+            <div><span class="ms">verified</span>Level 25+ <span class="ms" style="color:var(--ok)">check</span></div>
+            <div><span class="ms">update</span><span class="muted">Updated today</span></div>
+          </div>
+        </div>
+
+        <!-- card 3 -->
+        <div class="gcard">
+          <div class="top">
+            <div class="art" data-art="frost:5"></div>
+            <div class="emb" data-emblem='{"bg":"#1f3a58","bc":"#e3b43d","ec":"#e3b43d","symbol":"beast","border":"studded"}'></div>
+            <div class="txt">
+              <div class="name">Ordine del Drago</div>
+              <div class="sub">Hardcore progression. Voice chat required on raid nights.</div>
+              <div style="margin-top:8px;display:flex;gap:6px"><span class="tag">IT</span><span class="tag pace hard"><span class="ms">local_fire_department</span>HARDCORE</span><span class="tag bad"><span class="ms" style="font-size:14px">cancel</span>Requirements not met</span></div>
+            </div>
+            <div class="actions"><span class="btn discord sm"><span class="ms">forum</span>Discord</span><span class="btn sm disabled">Apply</span></div>
+          </div>
+          <div class="info">
+            <div><span class="ms">groups</span><b>44</b>&nbsp;active <span class="muted">/ 98</span></div>
+            <div><span class="ms">event</span>Every day <span class="mono">21:00–01:00</span></div>
+            <div><span class="ms">person_search</span>Looking for <span data-cls="mage" class="sm"></span><span data-cls="priest" class="sm"></span></div>
+            <div><span class="ms">castle</span>Raids · Dungeons</div>
+            <div style="color:var(--bad)"><span class="ms" style="color:var(--bad)">block</span>Level 40+ (you are 32)</div>
+            <div><span class="ms">update</span><span class="muted">Updated 5 days ago</span></div>
+          </div>
+        </div>
+        <div class="scroll"></div>
+      </div>
+
+      <div class="statusbar"><span class="dot"></span>142 guilds known · synced 2 min ago<span class="grow" style="flex:1"></span><span class="ms o" style="color:var(--ink-3)">info</span>Only guilds of your faction and realm</div>
+    </div>
+
+    <div class="close"><span class="ms">close</span></div>
+    <div class="rail">
+      <div class="dest"><div class="ic"><span class="ms">settings</span></div><div class="lb">Settings</div></div>
+      <div class="dest on"><div class="ic"><span class="ms">travel_explore</span></div><div class="lb">Find a<br>Guild</div></div>
+      <div class="dest"><div class="ic"><span class="ms">assignment_ind</span></div><div class="lb">My<br>Application</div></div>
+    </div>
+  </div>
+
+  <!-- annotations -->
+  <div class="note" style="left:1150px;top:340px;max-width:126px"><i>1</i><span>Albion-style metal rail, but every tab has a label</span></div>
+  <div class="note" style="left:360px;top:20px"><i>2</i><span>Name search and filters in the same view</span></div>
+  <div class="note" style="left:900px;top:20px"><i>3</i><span>Always A → Z (normalized name), no sort menu</span></div>
+  <div class="note" style="left:620px;top:150px;max-width:200px"><i>4</i><span>Banner art from the client, faded into the parchment</span></div>
+  <div class="note" style="left:860px;top:300px;max-width:190px"><i>5</i><span>Info band like Albion: activity, local times, classes wanted</span></div>
+  <div class="note" style="left:860px;top:660px;max-width:190px"><i>6</i><span>Disabled Apply + the reason on the card</span></div>
+</div>
+</body>
+</html>

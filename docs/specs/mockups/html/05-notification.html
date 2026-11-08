@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>05 Notification icon - Azeroth Guild Finder mockup</title>
+<link rel="stylesheet" href="agf.css">
+<script src="agf.js"></script>
+<style>
+  .world { position: absolute; inset: 0; }
+  .world svg { width: 100%; height: 100%; }
+  .minimap { position: absolute; right: 30px; top: 24px; width: 170px; height: 170px; border-radius: 50%;
+    background: radial-gradient(circle at 40% 40%, #5d7a46, #2f4426 70%); box-shadow: 0 0 0 6px #3b3f44, 0 0 0 8px #9aa4ae, var(--e3); }
+  .mm-btn { position: absolute; width: 34px; height: 34px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #eef2f6, #8f99a3 60%, #4a525a); box-shadow: var(--e2); display: grid; place-items: center; }
+  .mm-btn .in { width: 26px; height: 30px; }
+  .chat { position: absolute; left: 20px; bottom: 120px; width: 470px; padding: 10px 12px; border-radius: 6px; background: rgba(0,0,0,.42); font: 400 13px/20px Roboto; color: #e9e2d4; }
+  .bar { position: absolute; left: 50%; bottom: 20px; transform: translateX(-50%); display: flex; gap: 4px; padding: 6px; border-radius: 8px; background: rgba(15,15,15,.75); box-shadow: 0 0 0 2px #50565c; }
+  .bar span { width: 40px; height: 40px; border-radius: 5px; background: linear-gradient(135deg, #5e5040, #2a241d); box-shadow: inset 0 0 0 1.5px #8c7a5c; }
+  .fab { position: absolute; left: 860px; top: 250px; width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center;
+    background: radial-gradient(circle at 35% 30%, #4a5058, #1d2024 70%);
+    box-shadow: 0 0 0 3px var(--gold), 0 0 0 5px #2b1c06, 0 0 22px 6px rgba(242,191,60,.55), var(--e5); }
+  .fab .in { width: 40px; height: 48px; }
+  .fab .badge { position: absolute; top: -4px; right: -6px; min-width: 26px; height: 26px; font-size: 14px; }
+  .pop { position: absolute; left: 560px; top: 330px; width: 380px; border-radius: var(--r-md); padding: 14px 14px 10px;
+    background-image: var(--grain), radial-gradient(ellipse at 50% 30%, var(--parch-hi), var(--parch) 70%); background-color: var(--parch); background-blend-mode: multiply, normal;
+    box-shadow: 0 0 0 2px #3a4047, 0 0 0 3px #8a939b, var(--e5); }
+  .pop::before { content: ""; position: absolute; left: 318px; top: -9px; width: 16px; height: 16px; transform: rotate(45deg); background: var(--parch-hi); box-shadow: -2px -2px 0 0 #3a4047; }
+  .qi { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: var(--r-sm); background: rgba(255,245,225,.55); margin-bottom: 6px; box-shadow: inset 0 0 0 1px rgba(160,110,60,.3); }
+  .qi .who { flex: 1; } .qi b { display: block; font: 700 14px/18px Roboto; } .qi .caption { font-size: 11.5px; }
+  .menu { position: absolute; left: 950px; top: 160px; width: 270px; padding: 6px 0; border-radius: var(--r-xs); background: #1f1a15; border: 1px solid #6b5a40; box-shadow: var(--e5); color: #f3e6cf; font: 400 13px/18px Roboto; }
+  .menu div { display: flex; align-items: center; gap: 10px; height: 34px; padding: 0 14px; }
+  .menu .ms { font-size: 18px; width: 18px; color: var(--gold); }
+  .menu .t { font: 700 11.5px/16px Roboto; letter-spacing: 1px; text-transform: uppercase; color: #bfa77a; height: 28px; }
+  .menu .hr { height: 1px; padding: 0; margin: 4px 0; background: #4a3f30; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="world" data-art="frost:31"></div>
+  <div class="minimap"><div class="mm-btn" style="left:-8px;top:110px"><div class="in" data-emblem='{"bg":"#c9a06a","bc":"#7a5430","ec":"#5a3a1c","symbol":"tower","border":"solid"}'></div></div></div>
+
+  <div class="chat">
+    <div style="color:#ffd27a">[Guild Finder] New application from <b style="color:#3fc7eb">Elarin</b> (Mage 32). <u>Open</u></div>
+    <div style="color:#40ff40">[Guild] [Kaelthar]: a mage, finally!</div>
+    <div style="color:#ff7fff">[Lyryn] whispers: I'll check it tonight</div>
+  </div>
+  <div class="bar"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+
+  <div class="fab"><div class="in" data-emblem='{"bg":"#141c2c","bc":"#d7dde4","ec":"#ffffff","symbol":"star","border":"solid"}'></div><span class="badge">3</span></div>
+
+  <div class="pop">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><span class="title-m" style="flex:1">Pending applications</span><span class="caption">Aurora</span><span class="ms" style="font-size:18px;color:var(--ink-2)">close</span></div>
+    <div class="qi"><span data-cls="mage"></span><div class="who"><b style="color:#1d86a6">Elarin</b><span class="caption">Mage 32 · 2 h ago</span></div><span class="btn tonal sm">Decline</span><span class="btn primary sm">Invite</span></div>
+    <div class="qi"><span data-cls="priest"></span><div class="who"><b style="color:#6b6b6b">Mirelle</b><span class="caption">Priest 60 · yesterday</span></div><span class="btn tonal sm">Decline</span><span class="btn primary sm">Invite</span></div>
+    <div class="qi"><span data-cls="warrior"></span><div class="who"><b style="color:#8a6a40">Brogan</b><span class="caption">Warrior 17 · 3 days ago</span></div><span class="btn tonal sm">Decline</span><span class="btn primary sm">Invite</span></div>
+    <div style="text-align:right;margin-top:4px"><span class="btn ghost">Open all applications<span class="ms">arrow_forward</span></span></div>
+  </div>
+
+  <div class="menu">
+    <div class="t">Applications icon</div>
+    <div><span class="ms">lock</span>Lock position</div>
+    <div><span class="ms" style="color:transparent">check</span>Show only when something is pending</div>
+    <div><span class="ms">volume_up</span>Sound on new application</div>
+    <div class="hr"></div>
+    <div><span class="ms">visibility_off</span>Hide icon <span class="mono" style="color:#bfa77a;margin-left:auto">/gf notify</span></div>
+  </div>
+
+  <div class="note" style="left:640px;top:240px;max-width:200px"><i>1</i><span>Round metal button, GM and officers only. Drag to move</span></div>
+  <div class="note" style="left:960px;top:400px;max-width:200px"><i>2</i><span>Left click: last 5 pending with Invite / Decline</span></div>
+  <div class="note" style="left:950px;top:110px;max-width:220px"><i>3</i><span>Right click: lock, show only when pending, sound, hide</span></div>
+  <div class="note" style="left:500px;top:620px;max-width:220px"><i>4</i><span>Plus one chat line with a clickable “Open”</span></div>
+  <div class="note" style="left:860px;top:30px;max-width:180px"><i>5</i><span>Minimap button opens the main window</span></div>
+</div>
+</body>
+</html>

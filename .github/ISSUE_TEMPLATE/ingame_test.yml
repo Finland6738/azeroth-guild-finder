@@ -1,0 +1,41 @@
+name: In-game test report
+description: Report the result of a check done in the real WoW Forever client (spike M0 or the release checklist).
+title: "[In-game] "
+labels: ["in-game", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form for the checks that only the real client can answer (docs/specs/SPEC-09-quality-release.md).
+        **Privacy:** replace player, guild and account names with placeholders.
+  - type: input
+    id: check
+    attributes:
+      label: Check
+      description: The id of the check, for example S3 (minimum level to send in the channel).
+      placeholder: "S3"
+    validations:
+      required: true
+  - type: input
+    id: client
+    attributes:
+      label: Game client
+      placeholder: "1.60.1.70862, English"
+    validations:
+      required: true
+  - type: dropdown
+    id: result
+    attributes:
+      label: Result
+      options:
+        - Works as the spec expects
+        - Works differently (details below)
+        - Does not work
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: What you did and what you saw
+    validations:
+      required: true

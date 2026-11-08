@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>08 Listing editor (Activity) - Azeroth Guild Finder mockup</title>
+<link rel="stylesheet" href="agf.css">
+<script src="agf.js"></script>
+<style>
+  .steps { display: flex; flex-direction: column; gap: 4px; }
+  .step { display: flex; align-items: center; gap: 10px; height: 42px; padding: 0 12px; border-radius: var(--r-sm); font: 500 14px/18px Roboto; color: #4b2e14; }
+  .step .n { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font: 700 12px/1 Roboto; background: rgba(110,70,30,.18); }
+  .step .ms { margin-left: auto; font-size: 20px; color: var(--ok); }
+  .step.done .n { background: var(--ok); color: #fff; }
+  .step.on { background: linear-gradient(#fff2d4, #f6dfb1); box-shadow: inset 0 0 0 2px var(--gold-2), var(--e1); }
+  .step.on .n { background: #7a4a22; color: #fff; }
+  .seg { display: flex; border-radius: var(--r-md); box-shadow: 0 0 0 1.5px #7a5430; overflow: hidden; }
+  .seg > span { flex: 1; display: flex; flex-direction: column; gap: 3px; padding: 10px 14px; font: 500 14px/18px Roboto; color: #4a2c12; border-left: 1.5px solid #7a5430; background: rgba(255,245,225,.5); }
+  .seg > span:first-child { border-left: 0; }
+  .seg > span small { font: 400 11.5px/15px Roboto; color: var(--ink-2); }
+  .seg > span .h { display: flex; align-items: center; gap: 6px; }
+  .seg > span .h .ms { font-size: 18px; }
+  .seg > span.on { background: linear-gradient(#7a4a22, #5a3315); color: #ffeac2; }
+  .seg > span.on small { color: #f0d9b0; }
+  .seg > span.on .h::before { content: "check"; font-family: 'Material Symbols Rounded'; font-size: 16px; }
+  .acts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
+  .acts .chip { height: 34px; }
+  .limit { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: var(--r-sm); background: #f8e2a6; color: #6b4708; font: 500 12.5px/16px Roboto; }
+  .mini.gcard .top { min-height: 92px; padding: 8px; gap: 10px; }
+  .mini.gcard .emb { width: 58px; height: 70px; }
+  .mini.gcard .name { font-size: 15px; line-height: 18px; }
+  .mini.gcard .sub { font-size: 11.5px; line-height: 15px; }
+  .mini.gcard .art { width: 60%; }
+  .check { display: flex; align-items: center; gap: 8px; font: 400 13px/24px Roboto; }
+  .check .ms { font-size: 18px; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="book">
+    <div class="page page-left">
+      <div class="brand">
+        <div class="crest" data-emblem='{"bg":"#141c2c","bc":"#d7dde4","ec":"#ffffff","symbol":"star","border":"solid"}'></div>
+        <div><h1 style="font-size:24px">Aurora</h1><div class="sub">Create your listing</div></div>
+      </div>
+      <div class="plate"><span>Listing sections</span><span style="font-weight:500;opacity:.8">2 / 7 ready</span></div>
+      <div class="steps">
+        <div class="step done"><span class="n">1</span>Identity<span class="ms">check_circle</span></div>
+        <div class="step done"><span class="n">2</span>About<span class="ms">check_circle</span></div>
+        <div class="step on"><span class="n">3</span>Activity</div>
+        <div class="step"><span class="n">4</span>Recruitment</div>
+        <div class="step"><span class="n">5</span>Requirements</div>
+        <div class="step"><span class="n">6</span>Contact<span class="caption" style="margin-left:auto">optional</span></div>
+        <div class="step"><span class="n">7</span>Preview &amp; publish</div>
+      </div>
+      <div style="flex:1"></div>
+      <div class="caption"><span class="ms" style="font-size:16px;color:var(--ok)">cloud_done</span> Draft saved automatically · just now</div>
+      <span class="btn lg disabled" style="width:100%">Publish listing</span>
+    </div>
+
+    <div class="page page-right">
+      <div class="ph">
+        <div><div class="overline">Step 3 of 7</div><h2>Activity</h2></div>
+        <div class="grow"></div>
+        <span class="btn ghost"><span class="ms">arrow_back</span>Back</span><span class="btn tonal">Next<span class="ms">arrow_forward</span></span>
+      </div>
+      <div class="content" style="display:grid;grid-template-columns:1fr 290px;gap:18px">
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div>
+            <div class="field-label">Commitment <span class="caption">(required, one choice)</span></div>
+            <div class="seg">
+              <span><span class="h"><span class="ms">local_cafe</span>Casual</span><small>Play when you can, no fixed commitment</small></span>
+              <span class="on"><span class="h">Softcore</span><small>Regular activity and some scheduled events; attendance welcome, not required</small></span>
+              <span><span class="h"><span class="ms">local_fire_department</span>Hardcore</span><small>Demanding schedule, attendance required, come prepared</small></span>
+            </div>
+          </div>
+
+          <div>
+            <div class="field-label" style="display:flex">Activities <span class="caption" style="margin-left:6px">(1 to 3, in order of importance)</span><span style="margin-left:auto" class="tag gold">3 / 3</span></div>
+            <div class="acts">
+              <span class="chip on numd"><span class="num">2</span>Raids</span>
+              <span class="chip off">Dungeons</span>
+              <span class="chip off">Leveling</span>
+              <span class="chip off">Questing &amp; Exploration</span>
+              <span class="chip on numd"><span class="num">3</span>Battlegrounds</span>
+              <span class="chip on numd"><span class="num">1</span>World PvP</span>
+              <span class="chip off">Professions &amp; Crafting</span>
+              <span class="chip off">Gold &amp; Trading</span>
+              <span class="chip off">Reputation &amp; Collecting</span>
+              <span class="chip off">Roleplay</span>
+              <span class="chip off">Social &amp; Chat</span>
+              <span class="chip off">Events &amp; Community</span>
+            </div>
+            <div class="limit" style="margin-top:10px"><span class="ms" style="font-size:18px">info</span>Up to 3 activities: remove one to pick another. Number 1 is your main focus.</div>
+          </div>
+
+          <div>
+            <div class="field-label">Play days &amp; time <span class="caption">(your local time, saved as UTC)</span></div>
+            <div style="display:flex;align-items:center;gap:16px">
+              <div class="days"><span class="on">M</span><span class="on">T</span><span class="on">W</span><span class="on">T</span><span class="on">F</span><span>S</span><span>S</span></div>
+              <div class="field select sq mono" style="width:104px;height:34px">20:00</div><span class="muted">–</span>
+              <div class="field select sq mono" style="width:104px;height:34px">23:30</div>
+            </div>
+            <div class="field-help">Players see it in their own time zone · <span class="mono">19:00–22:30 UTC</span></div>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div class="overline">Live preview</div>
+          <div class="gcard mini" style="margin:0;box-shadow:var(--e2);border-radius:8px;background:rgba(255,245,225,.4)">
+            <div class="top">
+              <div class="art" data-art="emerald:3"></div>
+              <div class="emb" data-emblem='{"bg":"#141c2c","bc":"#d7dde4","ec":"#ffffff","symbol":"star","border":"solid"}'></div>
+              <div class="txt"><div class="name">Aurora</div><div class="sub">Open recruitment · small-scale PvP</div>
+                <div style="display:flex;gap:4px;margin-top:6px"><span class="tag pace soft"><span class="ms">event_available</span>SOFTCORE</span></div></div>
+            </div>
+            <div class="info" style="grid-template-columns:1fr;padding:4px 10px">
+              <div style="border:0"><span class="ms">castle</span>World PvP · Raids · Battlegrounds</div>
+            </div>
+          </div>
+          <div class="card e">
+            <h3><span class="ms">checklist</span>Before publishing</h3>
+            <div class="check"><span class="ms" style="color:var(--ok)">check_circle</span>You are the Guild Master</div>
+            <div class="check"><span class="ms" style="color:var(--ok)">check_circle</span>Subtitle and description</div>
+            <div class="check"><span class="ms" style="color:var(--ok)">check_circle</span>Main language</div>
+            <div class="check"><span class="ms" style="color:var(--ok)">check_circle</span>Commitment: Softcore</div>
+            <div class="check"><span class="ms" style="color:var(--ok)">check_circle</span>Activities: 3 of 3</div>
+            <div class="check"><span class="ms o" style="color:var(--ink-3)">radio_button_unchecked</span><span class="muted">“Looking for” (step 4)</span></div>
+            <div class="check"><span class="ms o" style="color:var(--ink-3)">radio_button_unchecked</span><span class="muted">Requirements (step 5)</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="close"><span class="ms">close</span></div>
+    <div class="rail">
+      <div class="dest"><div class="ic"><span class="ms">settings</span></div><div class="lb">Settings</div></div>
+      <div class="dest on"><div class="ic"><span class="ms">edit_note</span></div><div class="lb">Create<br>Listing</div></div>
+    </div>
+  </div>
+  <div class="note" style="left:640px;top:96px;max-width:220px"><i>1</i><span>Commitment: one choice, the meaning is written under each option</span></div>
+  <div class="note" style="left:400px;top:440px;max-width:240px"><i>2</i><span>Max 3 activities: after 3 the others are greyed out; numbers = importance</span></div>
+  <div class="note" style="left:920px;top:300px;max-width:200px"><i>3</i><span>The list card shows commitment + the 3 activities</span></div>
+</div>
+</body>
+</html>

@@ -1,0 +1,43 @@
+name: CI
+
+# Checks on every pull request and on every push to main. The job name "Tests" is the status check required by the
+# branch protection of main (ADR 0015). Today it runs the documentation checks; the offline addon tests
+# (Tests/run_tests.py, Lua 5.1 through lupa) join this job when the addon code starts (milestone M1).
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    name: Tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: "3.12"
+
+      # Links, wiki sidebar and links, ADR index, privacy scan, LF line endings, the docs rule's own cases.
+      - name: Check the documentation
+        run: python -I -X utf8 tools/check_docs.py
+
+      - name: Run the addon tests (when present)
+        run: |
+          if [ -f Tests/run_tests.py ]; then
+            python -m pip install lupa==2.8
+            python -I -X utf8 Tests/run_tests.py
+          else
+            echo "No addon tests yet (design phase)."
+          fi

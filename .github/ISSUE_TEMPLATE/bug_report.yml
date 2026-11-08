@@ -1,0 +1,60 @@
+name: Bug report
+description: Something in Azeroth Guild Finder does not work as expected.
+title: "[Bug] "
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for helping improve Azeroth Guild Finder.
+        **Privacy:** do not paste other players' names, whispers, chat logs, account names or folder paths from your PC. Replace them with placeholders such as `<player>`, `<guild>` or `<account>`.
+        Not sure it is a bug, or just want to share feedback? Use the [Feedback discussions](https://github.com/Finland6738/azeroth-guild-finder/discussions/categories/feedback) instead.
+  - type: input
+    id: version
+    attributes:
+      label: Addon version
+      description: Shown in the AddOns list at the character screen, or with `/gf debug`.
+      placeholder: "0.x.y"
+    validations:
+      required: true
+  - type: input
+    id: client
+    attributes:
+      label: Game client
+      description: WoW Forever build and client language.
+      placeholder: "1.60.1.70862, English"
+    validations:
+      required: true
+  - type: dropdown
+    id: role
+    attributes:
+      label: Your role when it happened
+      options:
+        - No guild (looking for a guild)
+        - Guild member
+        - Officer
+        - Guild Master
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What you did, what you expected and what you saw instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: How to reproduce
+      placeholder: |
+        1. Open Guild Finder with /gf
+        2. ...
+    validations:
+      required: true
+  - type: textarea
+    id: errors
+    attributes:
+      label: Lua errors and /gf debug output (optional)
+      description: Paste the error text or the diagnostic output. Remove player names first.
+      render: text
