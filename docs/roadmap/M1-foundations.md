@@ -23,9 +23,10 @@
 - Spec: SPEC-09 §2
 - Scope: `Tests/run_tests.py` (Lua 5.1 through `lupa`), `Tests/mock/` (frames, events, `C_Timer`, `C_ChatInfo`, `C_GuildInfo`, `C_EncodingUtil` stand-ins, SavedVariables round trip), a tiny assertion library, `.luarc.json` pointing to `../WoW-Addons/types`; CI already runs the suite when it exists.
 - Done when:
-  - [ ] `python -I -X utf8 Tests/run_tests.py` runs a sample test green locally and in CI.
-  - [ ] A `/reload` simulation passes SavedVariables from one run to the next.
+  - [x] `python -I -X utf8 Tests/run_tests.py` runs a sample test green locally and in CI. (CI uses `-I`; locally lupa in the user site-packages needs the plain `python -X utf8`, which `tools/ship_step.py` uses.)
+  - [x] A `/reload` simulation passes SavedVariables from one run to the next (`Mock.Reload()`).
 - Docs: CONTRIBUTING §4, ADR for the test approach if it differs from azeroth-unspoken.
+  - [x] CONTRIBUTING §4, README "Development", ADR 0019 (it differs: real Ace3, clock and chat recorder, in-place reload).
 
 ### M1.3 — Compat layer and capability probe
 - Branch: `step/m1-3-compat`

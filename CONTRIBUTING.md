@@ -41,9 +41,36 @@ Issues, pull requests, commit messages and public documentation are in **English
 
 ```
 python -I -X utf8 tools/check_docs.py
+python -m pip install lupa==2.8            # once
+python -X utf8 Tests/run_tests.py          # all offline tests
+python -X utf8 Tests/run_tests.py reload   # only the tests whose name contains "reload"; -v adds tracebacks
 ```
 
-It checks the addon TOC and `embeds.xml` (Interface 16001, every listed file exists), relative links, the wiki sidebar and links, the ADR index, personal data (emails and personal paths) and LF line endings. From milestone M1 the offline addon tests (`Tests/run_tests.py`, Lua 5.1 through lupa) run too. CI runs both on every pull request.
+`check_docs.py` checks the addon TOC and `embeds.xml` (Interface 16001, every listed file exists), relative links, the wiki sidebar and links, the ADR index, personal data (emails and personal paths) and LF line endings. CI runs it and the offline tests on every pull request. CI runs the tests with `-I`; if lupa is in your user site-packages, leave `-I` out locally.
+
+**How the tests work** ([ADR 0019](docs/adr/0019-offline-tests-with-lupa-and-a-mock-client.md)): the runner loads a mock WoW client (`Tests/mock/`), then the real libraries and the addon files in TOC order, fires the login events, and runs every `Tests/test_*.lua`. Each test starts on a freshly built client. The libraries must be fetched first (`tools/fetch_libs.py`; the runner does it if they are missing).
+
+**Writing a test**: add `Tests/test_<area>.lua`. `Tests/test_addon.lua` is the model.
+
+```lua
+describe("guild role", function()
+	before_boot(function(mock)                 -- runs before the addon loads, for every test of this group
+		mock.guild.Set({ name = "Night Watch", myRank = 1 })
+	end)
+
+	it("sees the officer rank", function()
+		truthy(C_GuildInfo.IsGuildOfficer())   -- the game's globals are plain globals
+		Mock.guild.SetMyRank(3)                -- fires PLAYER_GUILD_UPDATE
+		falsy(C_GuildInfo.IsGuildOfficer())
+	end)
+end)
+```
+
+- Assertions: `eq`, `ne`, `truthy`, `falsy`, `isNil`, `notNil`, `deepEq`, `near`, `contains`, `matches`, `raises(fn, pattern)`, `fail`. `T.log(...)` prints while debugging.
+- Read game globals (`AzerothGuildFinder`, `C_EncodingUtil`, ...) **inside** the test, not at the top of the file: the game is rebuilt before each test.
+- The fake client: `Mock.Fire(event, ...)`, `Mock.Advance(seconds)` (timers and `OnUpdate`), `Mock.Slash("/gf help")`, `Mock.output` / `Mock.PlainOutput()` (chat lines), `Mock.chat` (sent addon messages, `lockdown`, `forceResult`, `QueueResults`, `Receive`), `Mock.guild` (`Set`, `Leave`, `SetMyRank`, `invites`), `Mock.player`, `Mock.errors`. A Lua error inside a handler is caught as in the client and fails the test unless you call `Mock.ClearErrors()`.
+- `Mock.Reload()` simulates `/reload`: the declared SavedVariables are serialized, the Lua state is rebuilt, the variables come back before `ADDON_LOADED`; time, player and guild stay. `T.boot(setup)` starts a completely new client.
+- If a test needs an API the mock does not have, add it to the right file in `Tests/mock/` in the same pull request, say in its header which dump entry it imitates, and flag any value the dump does not give.
 
 ## 5. Git, issues and pull requests
 
