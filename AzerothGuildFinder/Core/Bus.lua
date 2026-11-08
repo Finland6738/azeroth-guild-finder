@@ -10,6 +10,10 @@
 --   TRANSPORT_LISTEN_ONLY(active, reason)                Net/Transport.lua; the channel refuses addon messages (reason "InvalidChannel")
 --                                                        or works again (active false).
 --   TRANSPORT_READ_ONLY(active)                          Net/Transport.lua; outgoing addon messages are restricted (true) or not.
+--   CHANNEL_READY(id)                                    Net/Channel.lua; the channel AzGuildFinder is joined (again), id is its number.
+--   CHANNEL_FAILED(reason)                               Net/Channel.lua; a join did not work: "limit", "throttled", "banned",
+--                                                        "refused", "timeout", "unavailable" or "left"; once per distinct reason.
+--   PING_DONE(result)                                    Net/Ping.lua; /gf debug ping finished: { answers, min, avg, max, error }.
 -- Later modules add their events here.
 local ADDON_NAME, ns = ...
 ns = ns or {}

@@ -72,6 +72,28 @@ end)
 - `Mock.Reload()` simulates `/reload`: the declared SavedVariables are serialized, the Lua state is rebuilt, the variables come back before `ADDON_LOADED`; time, player and guild stay. `T.boot(setup)` starts a completely new client.
 - If a test needs an API the mock does not have, add it to the right file in `Tests/mock/` in the same pull request, say in its header which dump entry it imitates, and flag any value the dump does not give.
 
+**Writing a network test** (the simulator, `Tests/sim/sim.lua`): `Sim` is a global in every test file. It builds N complete clients, each with its own game environment, mock client, SavedVariables and copy of the addon, connected by a virtual channel, whisper, guild and officer routing on one shared clock.
+
+```lua
+describe("pings", function()
+	it("every client hears the others", function()
+		local sim = Sim.new{ clients = 5, latency = { 0.05, 0.3 }, loss = 0.0, seed = 7 }   -- returns once all clients joined the channel
+		local a = sim:client(1)
+		a:slash("/gf debug ping")                       -- Mock.Slash on that client
+		sim:advance(8)                                  -- simulated seconds, every client runs frame by frame
+		eq(a:addon().Ping.state.last.answers, 4)        -- a:addon() is that client's AzerothGuildFinder, a.E its globals, a.Mock its mock
+		local st = sim:stats()                          -- messages and bytes per client and per minute (reset with sim:resetStats())
+		eq(st.perClient[1].byDist.CHANNEL.msgs, 1)
+	end)
+end)
+```
+
+- Options of `Sim.new`: `clients`, `latency` (seconds, or `{ min, max }`), `loss` (probability, or `function(from, to, entry)`), `seed`, `step`, `echo`, `ready`, `guild(i)`, `setup(Mock, i, client)`, `restrict`, `onSend`, `onDeliver`; the full list is at the top of the file.
+- Per client: `c:slash`, `c:output()`, `c:addon()`, `c:reload()`, `c:restrict{ listenOnly, lockdown, restricted }`, `c:setGuild(name, rank)`, `c:setOnline(false)`, `c:stats()`. Per network: `sim:advance(s)`, `sim:advanceUntil(fn, limit)`, `sim:setLoss`, `sim:setLatency`, `sim:stats()`.
+- Listen to what a client receives with its own Bus: `c:addon().Bus:On("NET_MESSAGE", function(msg, sender, dist) ... end)`. Build the sender of a whisper with `c:fullName()`.
+- Everything is deterministic for a given `seed`. A Lua error inside any client fails the test, like in the single-client tests. Fifty clients boot and run five simulated minutes in about three seconds; use a bigger `step` (0.2) only when a test does not depend on sub-second timing.
+- What the simulator does not do: it does not model the server's own throttling or the real client (only the addon's queue and ChatThrottleLib are real), so it shows that the protocol converges and stays inside the budget, not that Forever agrees ([the in-game checks](docs/checklists/M1.md)).
+
 ## 5. Git, issues and pull requests
 
 - One branch per step or fix from an up-to-date `main`: `step/m<N>-<name>`, `fix/<name>`, `docs/<name>`, `chore/<name>`.

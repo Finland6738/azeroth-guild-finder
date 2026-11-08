@@ -83,9 +83,13 @@
 ### M1.8 — Channel and network simulator
 - Branch: `step/m1-8-channel-simulator`
 - Depends on: M1.7
-- Spec: SPEC-02 §1
-- Scope: `Net/Channel.lua` (join `AzGuildFinder`, hide from chat windows, move to the end, filter notices, retry every 60 s, channel limit warning); `Tests/sim/` virtual network with N clients, latency and loss; `/gf debug ping`.
+- Spec: SPEC-02 §1 and §3
+- Scope: `Net/Channel.lua` (join `AzGuildFinder`, hide from chat windows, move to the end, filter notices, retry every 60 s, channel limit warning); `Net/Ping.lua` (`/gf debug ping`, `PING`/`PONG`); `Tests/sim/` virtual network with N clients, latency, loss and restrictions.
 - Done when:
-  - [ ] In the simulator, N clients see each other's pings.
-  - [ ] **Exit check in game:** two real installations exchange a ping on `AzGuildFinder`.
-- Real client: join, hiding, ping.
+  - [x] In the simulator, N clients see each other's pings.
+  - [ ] **Exit check in game:** two real installations exchange a ping on `AzGuildFinder` (steps in [docs/checklists/M1.md](../checklists/M1.md)).
+- Tests: channel join, retry, hide, move, filters and limit with the mock; simulator: pings between N clients, loss, listen-only and lockdown clients, routing, traffic statistics.
+  - [x] `Tests/test_channel.lua` (join, retry, failures, limit, hide, move in and out of combat, filters, ping command), `Tests/test_sim.lua` (50 clients, latency, loss, offline, listen-only, lockdown, whisper/guild/officer routing, statistics, determinism), the new mock features in `Tests/test_mock.lua`, the Compat helpers in `Tests/test_compat.lua`.
+- Docs: SPEC-02 §1 and §3, CONTRIBUTING §4 (writing a simulator test), `docs/checklists/M1.md`.
+  - [x] SPEC-01, SPEC-02, SPEC-09 §2, CONTRIBUTING §4, ADR 0019 (the simulator), wiki Commands, `docs/checklists/M1.md`.
+- Real client: join, hiding, moving, notice filters, the channel limit and the ping.

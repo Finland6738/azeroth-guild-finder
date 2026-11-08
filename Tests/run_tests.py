@@ -199,6 +199,8 @@ def main(argv):
     cfg = lua.table_from({
         b"addonName": b(ADDON_NAME),
         b"assertPath": b(os.path.join(HERE, "lib", "assert.lua")),
+        b"harnessPath": b(os.path.join(HERE, "lib", "harness.lua")),
+        b"simPath": b(os.path.join(HERE, "sim", "sim.lua")),
         b"tocFields": lua.table_from({b(k): b(v) for k, v in fields.items()}),
         b"savedVars": to_lua_list(lua, saved_vars),
         b"plan": lua.table_from([lua.table_from({(b"code" if "code" in p else b"path"): b(p.get("code") or p["path"]),

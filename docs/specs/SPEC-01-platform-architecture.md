@@ -17,7 +17,7 @@
 
 API rilevanti **presenti nel dump**: `C_ChatInfo.SendAddonMessage` (restituisce `SendAddonMessageResult`), `C_ChatInfo.RegisterAddonMessagePrefix`, `C_ChatInfo.InChatMessagingLockdown`, `C_ChatInfo.AreOutgoingAddonChatMessagesRestricted`, `C_GuildInfo.IsGuildOfficer`, `C_GuildInfo.GetGuildTabardInfo`, `C_GuildInfo.Invite`, `C_GuildInfo.GuildRoster`, `C_GuildInfo.GuildControlGetRankFlags`, `IsGuildLeader`, `IsInGuild`, `GetServerTime`, `C_Club.GetGuildClubId` / `GetMemberInfo` (`ClubMemberInfo` con `lastOnline*`, `level`, `classID`, `guid`), `C_EncodingUtil.SerializeCBOR/DeserializeCBOR/CompressString/DecompressString/EncodeBase/DecodeBase`, `C_ClubFinder.*`.
 
-API **[verificare]** (globali storici, assenti dal dump ma usate da addon installati su Forever): `GetGuildInfo`, `GetNumGuildMembers`, `GetGuildRosterInfo`, `GetGuildRosterLastOnline`, `JoinChannelByName`, `GetChannelName`, `LeaveChannelByName`, `ChatFrame_RemoveChannel`, `GetAverageItemLevel`, `GetMaxPlayerLevel`.
+API **[verificare]** (globali storici, assenti dal dump ma usate da addon installati su Forever): `GetGuildInfo`, `GetNumGuildMembers`, `GetGuildRosterInfo`, `GetGuildRosterLastOnline`, `JoinChannelByName`, `GetChannelName`, `GetChannelList`, `LeaveChannelByName`, `ChatFrame_RemoveChannel`, `ChatFrame_AddMessageEventFilter`, `GetAverageItemLevel`, `GetMaxPlayerLevel`.
 
 > **Da verificare subito: `C_ClubFinder`.** Il client contiene le API del Guild & Community Finder di Blizzard. Se `C_ClubFinder.IsEnabled()` restituisce `true` su Forever, esisterebbe già un catalogo **lato server** utilizzabile dall'addon, e l'architettura cambierebbe in meglio. È il primo punto dello spike ([SPEC-09 §1](SPEC-09-quality-release.md#1-spike-tecnico-m0)). Questa specifica presume che **non** sia attivo.
 
@@ -70,7 +70,8 @@ Struttura a moduli isolati con un bus di eventi interno, come in azeroth-unspoke
 | `Core/Bus` | eventi interni (`CATALOG_UPDATED`, `ROLE_CHANGED`, `APPLICATION_CHANGED`…) |
 | `Core/Role` | ruolo del giocatore (senza gilda / membro / ufficiale / GM) e pannelli visibili |
 | `Core/Normalize` | chiave di ordinamento e di ricerca dei nomi (D19), funzioni di hash |
-| `Net/Channel` | entrata nel canale, nasconderlo dalla chat, spostarlo in fondo, nuovi tentativi |
+| `Net/Channel` | entrata nel canale, nasconderlo dalla chat, spostarlo in fondo, filtrare gli avvisi, limite dei canali, nuovi tentativi ([SPEC-02 §1](SPEC-02-network-protocol.md#1-costanti)) |
+| `Net/Ping` | `/gf debug ping`: `PING` sul canale, `PONG` in WHISPER, conteggio e tempi ([SPEC-02 §3](SPEC-02-network-protocol.md#3-tipi-di-messaggio)) |
 | `Net/Transport` | code per GUILD / OFFICER / CHANNEL / WHISPER, limiti di traffico, frammentazione, blocchi del client |
 | `Net/Codec` | CBOR, compressione, Base64, intestazione e versione del protocollo |
 | `Net/Sync` | gossip del catalogo, richieste e risposte, scelta di chi risponde |

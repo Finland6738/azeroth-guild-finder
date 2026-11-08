@@ -43,6 +43,8 @@ Codec.SCHEMA = {
 	APPPING = { id = "string" },
 	APPWD   = { id = "string" },
 	APPSYNC = {},                                                     -- ids = { [id] = stateRev }, recs = { ... }
+	PING    = { nonce = "number" },                                   -- debug: /gf debug ping, channel (SPEC-02 §3)
+	PONG    = { nonce = "number" },                                   -- debug: the answer to a PING, whisper
 }
 
 local function compat() return ns.Compat end

@@ -1,6 +1,10 @@
 -- Transport (M1.7): the send queue with its limits (NET-01..NET-04), lockdown and read-only hold, keyed coalescing,
 -- BULK expiry, retries, listen-only mode and the receive path. Most tests replace the wire with a recorder so every
 -- timing is exact; the last groups run through the real ChatThrottleLib and the mock client.
+-- These tests drive the transport with their own channel id (withChannel): keep the Channel module (M1.8) from joining
+-- the real mock channel and giving the transport one of its own. Channel and simulator tests live elsewhere.
+before_boot(function(Mock) Mock.chat.joinIgnored = true end)
+
 local function Tr() return AzerothGuildFinder.Transport end
 local function Bus() return AzerothGuildFinder.Bus end
 local function Codec() return AzerothGuildFinder.Codec end

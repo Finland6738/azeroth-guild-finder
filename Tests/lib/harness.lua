@@ -6,6 +6,10 @@
 -- Booting empties E in place and fills it again, so a test that holds `_G` or `Mock` keeps a valid reference, while a
 -- value copied out of the game before a reload goes stale, as it would after a real /reload.
 --
+-- The network simulator (Tests/sim/sim.lua) needs several clients at once: H.newWorld() builds another instance of this
+-- harness (own game environment E, own Mock, own SavedVariables) in the same Lua state; the simulator registers each
+-- one in H.worlds so a Lua error in any of them fails the test that was running.
+--
 -- Boot order, as the client does it: the mock client, the addon files in TOC order (each called with the addon name
 -- and its private namespace table), the SavedVariables, ADDON_LOADED, PLAYER_LOGIN, PLAYER_ENTERING_WORLD.
 local cfg = ...
@@ -157,6 +161,16 @@ function H.reload()
 	Mock.savedText = saved
 end
 
+-- Another independent client: a second copy of this harness without test files. Returns its H (H.boot, H.E, H.Mock).
+H.worlds = {}
+function H.newWorld()
+	local chunk, err = loadstring(cfg.readfile(cfg.harnessPath), "@Tests/lib/harness.lua")
+	if not chunk then error(err, 0) end
+	local sub = copyTable(cfg)
+	sub.testFiles, sub.simPath = {}, nil
+	return chunk(sub)
+end
+
 -- Test files -------------------------------------------------------------------------------------------------------
 -- Test files see: the assertion library, Mock, the game's globals, and (while the game is not built, e.g. when the
 -- file is first loaded) the plain Lua library.
@@ -173,6 +187,12 @@ local testEnv = setmetatable({ T = T, Mock = Mock }, {
 	end,
 	__newindex = function(_, key, value) E[key] = value end,
 })
+
+-- The simulator module (nil in a sub-harness): test files see it as the global `Sim`.
+if cfg.simPath then
+	local simEnv = setmetatable({}, { __index = _G })
+	rawset(testEnv, "Sim", loadChunk(cfg.simPath, "Tests/sim/sim.lua", simEnv)(H, T))
+end
 
 local currentSetups = {}
 T.log = function(...)

@@ -37,6 +37,8 @@ Lo stesso approccio di azeroth-unspoken (ADR 0007): Lua 5.1 con un **finto ambie
 
 Obiettivo: il simulatore con 50 client e 100 gilde converge in meno di 5 minuti simulati, senza superare NET-01.
 
+**Il simulatore** (`Tests/sim/sim.lua`, M1.8) fa girare N copie complete dell'addon, ognuna con il proprio ambiente di gioco, il proprio finto client (orologio, timer, chat, gilda) e le proprie SavedVariables, su un orologio condiviso. Instrada `CHANNEL` (a tutti i client nel canale, compreso il mittente come fa il gioco), `WHISPER` (al destinatario), `GUILD` (alla stessa gilda) e `OFFICER` (agli ufficiali della stessa gilda), con latenza configurabile (fissa o in un intervallo), perdita di messaggi (probabilità o funzione) e restrizioni per client (solo ascolto, blocco della chat, addon in sola lettura, offline). `sim:stats()` dà messaggi e byte inviati per client e per minuto (e il minuto più carico sul canale) per verificare NET-01. Come scrivere un test: [CONTRIBUTING §4](../../CONTRIBUTING.md#4-checks-and-tests).
+
 ## 3. Prove in gioco (prima di ogni rilascio)
 
 Un elenco di controllo in `docs/checklists/release.md`:

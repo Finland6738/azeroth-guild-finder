@@ -24,6 +24,12 @@ The addon only runs inside WoW Forever, which cannot be started in continuous in
 - **Reloading by starting a new Lua runtime**: a test running inside the old runtime could not follow it; rebuilding one environment table in place keeps `_G` and `Mock` valid.
 - **A full simulator of the WoW interface**: too expensive; the mock covers what the addon uses and grows with it.
 
+## The network simulator (M1.8)
+
+`Tests/sim/sim.lua` runs N clients as N **instances of the harness inside the one Lua state** (`H.newWorld()`): each has its own game environment table, mock client, clock, timers, chat, guild and SavedVariables, and loads its own copy of the libraries and the addon, so a client knows nothing of the others except what the simulator delivers as `CHAT_MSG_ADDON`. The simulator advances them frame by frame on a shared clock and routes what each one sent (`Mock.chat.sent`) to the others with latency, loss and restrictions.
+
+Considered and rejected: **one `lupa` runtime per client**. Tables cannot cross between runtimes, so every inspection a test makes (Bus listeners, `Transport:Stats()`, the catalog of M2) would go through serialized strings or per-call glue, and the M2.3 scenario of 50 clients and 100 guilds would need a second protocol only to look inside a client. Isolation is the same: nothing is shared except the plain Lua library functions, which the addon does not change. Cost: fifty clients boot and run five simulated minutes in about three seconds.
+
 ## Consequences
 
 - Positive: a test run takes about a second; the network simulator of M1.8 builds on `Mock.chat` and `Mock.Advance`; Ace3 is exercised for real.

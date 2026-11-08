@@ -296,6 +296,68 @@ describe("time, encoding, channels", function()
 	end)
 end)
 
+describe("channel list, chat windows and filters (M1.8)", function()
+	it("reads GetChannelList in threes and skips what is not a channel", function()
+		local C = compat()
+		eq(#C.GetChannelList(), 0)
+		Mock.chat.AddChannel("General")
+		Mock.chat.AddChannel("Trade")
+		deepEq(C.GetChannelList(), { { id = 1, name = "General", disabled = false }, { id = 2, name = "Trade", disabled = false } })
+		GetChannelList = function() return 1, "One", false, "junk", 2, "Two", true end
+		deepEq(C.GetChannelList(), { { id = 1, name = "One", disabled = false }, { id = 2, name = "Two", disabled = true } })
+		GetChannelList = nil
+		eq(C.GetChannelList(), nil)
+		GetChannelList = function() error("restricted") end
+		eq(C.GetChannelList(), nil)
+	end)
+
+	it("removes a channel from every chat window, counting the windows", function()
+		local C = compat()
+		Mock.chat.AddChannel("General")
+		ChatFrame_AddChannel(ChatFrame5, "General")
+		eq(C.RemoveChannelFromChatFrames("General"), 10)
+		falsy(Mock.chat.Showing("General"))
+		NUM_CHAT_WINDOWS = nil
+		eq(C.RemoveChannelFromChatFrames("General"), 10, "ten windows when the constant is missing")
+		ChatFrame7 = nil
+		eq(C.RemoveChannelFromChatFrames("General"), 9, "a missing window is skipped")
+		ChatFrame_RemoveChannel = nil
+		eq(C.RemoveChannelFromChatFrames("General"), 0)
+	end)
+
+	it("swaps channels, adds filters and reads the combat state with their states", function()
+		local C = compat()
+		Mock.chat.AddChannel("A")
+		Mock.chat.AddChannel("B")
+		eq(C.SwapChatChannels(1, 2), "available")
+		eq(C.SwapChatChannels(8, 9), "error")
+		eq(C.AddChatFilter("CHAT_MSG_CHANNEL", function() return false end), "available")
+		Mock.world.inCombat = true
+		truthy(C.InCombat())
+		Mock.world.inCombat = false
+		falsy(C.InCombat())
+		C_ChatInfo.SwapChatChannelsByChannelIndex, ChatFrame_AddMessageEventFilter, InCombatLockdown = nil, nil, nil
+		eq(C.SwapChatChannels(1, 2), "missing")
+		eq(C.AddChatFilter("CHAT_MSG_CHANNEL", print), "missing")
+		falsy(C.InCombat())
+	end)
+
+	it("knows the character name", function()
+		eq(compat().Player.Name(), "Testchar")
+		UnitName = nil
+		eq(compat().Player.Name(), nil)
+	end)
+
+	it("lists the channel functions in the capability probe", function()
+		local C = compat()
+		C:Probe()
+		for _, id in ipairs({ "channel.GetChannelList", "channel.ChatFrame_RemoveChannel", "channel.ChatFrame_AddMessageEventFilter",
+			"channel.SwapChatChannelsByChannelIndex" }) do
+			eq(C:State(id), "available", id)
+		end
+	end)
+end)
+
 describe("capability probe and /gf debug", function()
 	it("probes at login", function()
 		local C = compat()
