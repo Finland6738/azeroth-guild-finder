@@ -53,4 +53,4 @@ Opening a guild from the list replaces the list with the guild's page and shows 
 
 ## Fonts
 
-The interface is designed for the Roboto font. Until the font files are part of the addon, it uses the game's own font, with the same sizes (never smaller than 12 pixels).
+The interface uses the **Roboto** font (and **Roboto Mono** for links, codes, times and commands), included in the addon under the SIL Open Font License, with the sizes never smaller than 12 pixels. They are used only by Guild Finder's own windows: the rest of the game keeps its fonts. If the game cannot load a font file, Guild Finder uses the game's own font instead.
