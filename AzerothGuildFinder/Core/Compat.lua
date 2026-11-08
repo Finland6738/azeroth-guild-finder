@@ -269,6 +269,23 @@ function Player.MaxLevel()
 	return type(v) == "number" and v or nil
 end
 
+-- Playable classes the client knows: { { id, name, file }, ... } sorted by id, or nil when the API is missing or gives
+-- nothing (C_CreatureInfo.GetClassInfo [verify on Forever]). Ids 1..GetNumClasses() are tried; gaps are skipped.
+function Compat.Classes()
+	local count = first("GetNumClasses")
+	local limit = type(count) == "number" and count >= 1 and count <= 40 and count or 20
+	local list = {}
+	for id = 1, limit do
+		local info = first("C_CreatureInfo.GetClassInfo", id)
+		if type(info) == "table" and type(info.classID) == "number" then
+			list[#list + 1] = { id = info.classID, name = type(info.className) == "string" and info.className or nil, file = type(info.classFile) == "string" and info.classFile or nil }
+		end
+	end
+	if #list == 0 then return nil end
+	table.sort(list, function(a, b) return a.id < b.id end)
+	return list
+end
+
 ---------------------------------------------------------------------------------------------------------------------
 -- Chat restrictions (SPEC-01 §7)
 ---------------------------------------------------------------------------------------------------------------------
