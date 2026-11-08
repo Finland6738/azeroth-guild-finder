@@ -16,6 +16,10 @@ All notable changes to this project are documented here. The format follows [Kee
 - Development roadmap in `docs/roadmap/`: one file per milestone (M0 spike to M5 release, 44 steps) with branch, dependencies, scope, acceptance criteria, tests, docs and real-client checks, plus the V2 backlog.
 - Decisions confirmed by the owner: names (addon, channel `AzGuildFinder`, prefix `AzGF`, `/gf`), one open application per character, optional role checkboxes in the application, 14-day expiry, 7-day cooldown, unique players as a range, anonymous alt count on by default.
 
+### Spike
+
+- M0.1: throwaway probe addon `AzGF_Probe` in `tools/probe/` (`/agfp list|run|export|reset`, check registry, results in `AzGF_ProbeDB`; checks S1–S11 are stubs), `tools/install_probe.py` with `tools/local.example.ini`, and `docs/spike/README.md`. Never distributed; not yet run in the real client.
+
 ### Project
 
 - README in English and Italian, CONTRIBUTING, Code of Conduct, roadmap, GPL-3.0 licence, funding link.
