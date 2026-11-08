@@ -27,11 +27,14 @@ python -I -X utf8 tools/install_probe.py
 | `/agfp ping` | Sends one small addon message to the channel and records the result code (S2, S3) |
 | `/agfp pong [on\|off]` | Toggles the automatic reply: with it ON, this client answers every ping from another client so the sender sees the round trip |
 | `/agfp burst <n> <gapSeconds>` | Sends `n` messages of about 200 bytes with a fixed gap and records the result codes (S6); `/agfp burst stop` aborts |
+| `/agfp whisper <name>` | Sends one addon whisper to the named character and records the result code; the name is never stored (logged as `<target>`) (S4) |
+| `/agfp officer` | Sends one test message on the `OFFICER` distribution and records the result code and your guild role (S5) |
+| `/agfp guild` | Same on `GUILD`, the fallback (S5) |
 | `/agfp channel` | Prints the channel status, the counters and the bursts seen by this client |
 | `/agfp export` | Opens a movable frame with all results as plain text, already selected: press Ctrl+C |
 | `/agfp reset` | Clears the stored results |
 
-Results are saved in `AzGF_ProbeDB.results[id]` as `{id, result, details, build, time}` where `result` is `pass`, `fail`, `info` or `todo`. Checks not yet implemented record "not implemented yet"; S1, S7 and S11 are implemented in M0.2 (`Checks_Environment.lua`), S2, S3 and S6 in M0.3 (`Checks_Channel.lua`), the others follow in M0.4–M0.6. Snapshots are stored in `AzGF_ProbeDB.snapshots` and included in `/agfp export`.
+Results are saved in `AzGF_ProbeDB.results[id]` as `{id, result, details, build, time}` where `result` is `pass`, `fail`, `info` or `todo`. Checks not yet implemented record "not implemented yet"; S1, S7 and S11 are implemented in M0.2 (`Checks_Environment.lua`), S2, S3 and S6 in M0.3 (`Checks_Channel.lua`), S4 and S5 in M0.4 (`Checks_Whisper.lua`), the others follow in M0.5–M0.6. Snapshots are stored in `AzGF_ProbeDB.snapshots` and included in `/agfp export`.
 
 ## M0.2: what to do in game (S1, S7, S11)
 
@@ -97,6 +100,24 @@ How to read it, gap by gap:
 - Repeat the clean gap with B sending to A, to see whether the limit is per client.
 
 Send the exports of A and B in the report. `/agfp reset` clears everything before a new session.
+
+## M0.4: what to do in game (S4, S5)
+
+Same safety rules as M0.3 (test prefix `AzGFP`, no names stored or printed, never the real channel). The channel is not used here: whispers and guild distributions need no `/agfp join`. Both clients run `/reload` first.
+
+**S4, addon whisper.** Needs **A** (sender) and **B** (receiver, online). B should **not** be on A's friend list and not in A's guild (a stranger); repeat once with a friend or guildmate for comparison.
+
+1. B: `/agfp pong on` (B auto-replies to whispers; the reply is itself a whisper, so it tests the other direction too).
+2. A: `/agfp whisper <B's character name>`. A prints "whisper #1 to <target> sent, result ..." and, when B answered, "whisper reply #1 ... round trip N ms (receiver level L, trial T)". Result `0:Success` with a reply: the whisper works. A refused code, or `0:Success` and no reply after about 10 seconds: it does not work (or B is offline or has the whisper blocked).
+3. Repeat with A on characters of **level 1, 5, 10 and 20** (and a trial or starter account if you have one): the log records A's level, `IsTrialAccount`, `IsVeteranTrialAccount` and `IsRestrictedAccount` with every send. Do the same with B low level and A high level to test receiving.
+4. Both: `/agfp run S4`, then `/agfp export`: `S4 tx` lines for sends (result code, sender level) and `S4 rx` lines for whispers and replies (peer placeholder, round trip, peer level and trial). S4 is `pass` only if a reply came back; send the exports of A and B.
+
+**S5, OFFICER channel.** Needs three characters of the **same guild**, on the same realm: an officer or the guild master (**A**), a second officer (**B**) and a **plain member** (**C**, a rank that cannot read officer chat). If the guild has only one officer, A and C are enough; the second officer is only a comparison. Everybody is in the guild and online; no channel join is needed.
+
+1. A: `/agfp officer`, then `/agfp guild`, then repeat both twice, a few seconds apart. A prints the result code and its own role (`IsGuildLeader`, `IsGuildOfficer`, rank index).
+2. B and C: when a message arrives chat says "OFFICER message #1 from <peer 1> (officer) arrived on OFFICER; you are member". Note whether **C (the plain member) received the OFFICER messages**: if it did, `OFFICER` is not private and that is a finding.
+3. Repeat with A as the plain member `/agfp officer`: the expected result is a refused send code. Also try a character not in a guild (sends are expected to fail).
+4. All: `/agfp run S5`, then `/agfp export`: `S5 tx` lines (distribution, result code, role of the sender) and `S5 rx` lines (distribution it arrived on, sender role, receiver role and rank index). The check is `pass` when an `OFFICER` message arrived at another client, `fail` when every `OFFICER` send was refused or `OFFICER` was accepted but never arrived while `GUILD` did: in that case use the `GUILD` fallback of [SPEC-02 §7](../specs/SPEC-02-network-protocol.md) (in Italian). Send the exports of A, B and C.
 
 ## Reporting results
 

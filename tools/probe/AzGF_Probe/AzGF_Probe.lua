@@ -130,6 +130,7 @@ function Probe:Reset()
     db().results = {}
     db().snapshots = nil
     db().channel = nil
+    db().whisper = nil
     out("results cleared")
 end
 
@@ -179,7 +180,7 @@ function Probe:Export()
 end
 
 -- Checks S1-S11: stubs in M0.1; M0.2-M0.6 replace them by calling Probe:Register with the same id
--- (S1, S7, S11 live in Checks_Environment.lua and S2, S3, S6 in Checks_Channel.lua, loaded after this file;
+-- (S1, S7, S11 live in Checks_Environment.lua and S2, S3, S6 in Checks_Channel.lua, S4, S5 in Checks_Whisper.lua, loaded after this file;
 -- those files also add slash commands with Probe.commands[name] = function(arg, rest)).
 local STUBS = {
     { "S2", "Join the test channel and exchange addon messages between two clients" },
@@ -197,7 +198,7 @@ for _, stub in ipairs(STUBS) do
     end)
 end
 
-local USAGE = "/agfp [list] | run <id> | snapshot <label> | join | leave | ping | pong | burst <n> <gap> | channel | export | reset"
+local USAGE = "/agfp [list] | run <id> | snapshot <label> | join | leave | ping | pong | burst <n> <gap> | channel | whisper <name> | officer | guild | export | reset"
 
 SLASH_AZGFPROBE1 = "/agfp"
 SlashCmdList["AZGFPROBE"] = function(msg)
