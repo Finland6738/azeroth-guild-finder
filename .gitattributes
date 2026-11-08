@@ -1,0 +1,18 @@
+# All text files use LF line endings, on Windows too
+* text=auto eol=lf
+
+# Windows scripts: CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Binaries
+*.tga binary
+*.blp binary
+*.png binary
+*.jpg binary
+*.webp binary
+*.gif binary
+*.ttf binary
+*.otf binary
+*.ogg binary
+*.mp3 binary

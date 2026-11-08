@@ -1,0 +1,22 @@
+# IDE settings
+.idea/
+.vscode/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# System files
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Development session worktrees
+.claude/
+
+# Personal paths (see tools/local.example.ini)
+tools/local.ini
+
+# Raw screenshots before the WebP conversion
+docs/specs/mockups/img/**/*.png
