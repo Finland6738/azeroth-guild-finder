@@ -21,3 +21,4 @@ Core\Bus.lua
 Core\Role.lua
 Core\Normalize.lua
 Net\Codec.lua
+Net\Transport.lua

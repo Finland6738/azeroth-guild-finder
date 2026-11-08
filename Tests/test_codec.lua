@@ -91,6 +91,12 @@ describe("Codec encode errors", function()
 		eq(select(2, codec():Encode("GLREQ", { rev = "1" })), "invalid")
 		eq(select(2, codec():Encode("GLREQ", "text")), "shape")
 	end)
+
+	it("refuses a message a receiver would reject for its size, even when it compresses well", function()
+		local payload, why = codec():Encode("DET", { k = "K", rev = 1, desc = string.rep("a", codec().MAX_DECODED + 1) })
+		eq(payload, nil); eq(why, "size")
+		truthy(codec():Encode("DET", { k = "K", rev = 1, desc = string.rep("a", codec().MAX_DECODED - 100) }))
+	end)
 end)
 
 describe("Codec malformed input", function()

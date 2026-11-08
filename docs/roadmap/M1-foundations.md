@@ -76,8 +76,9 @@
 - Spec: SPEC-02 §4, SPEC-01 §7–§8
 - Scope: `Net/Transport.lua`: queues per distribution (CHANNEL, WHISPER, GUILD, OFFICER), ChatThrottleLib priorities, NET-01…NET-04, queue during lockdown and restrictions, result codes, **listen-only mode** on `InvalidChannel`.
 - Done when:
-  - [ ] Traffic stays within the budget under load; lockdown holds and later releases messages.
+  - [x] Traffic stays within the budget under load; lockdown holds and later releases messages. (Verified on the mock client only; real throttling and lockdown on Forever pending M0 S6 and S11.)
 - Tests: rate limits with a fake clock, retries, listen-only switch.
+  - [x] `Tests/test_transport.lua`: validation, gap and byte budget (rolling minute, replies excluded, load test), CAT/DET limits, lockdown, restriction and read-only hold and release, keyed coalescing, BULK expiry, bounded queue, throttle retries, listen-only switch and hourly probe, receive path (invalid, oversized, newer protocol, sender never shown), and the real ChatThrottleLib path with chunking and reassembly.
 
 ### M1.8 — Channel and network simulator
 - Branch: `step/m1-8-channel-simulator`

@@ -4,6 +4,12 @@
 -- Events used so far (arguments in order):
 --   ROLE_CHANGED(role, guildKey, oldRole, oldGuildKey)   Core/Role.lua; role is "none"|"member"|"officer"|"gm",
 --                                                        emitted only when the role or the guild key changed.
+--   NET_MESSAGE(msg, sender, dist)                       Net/Transport.lua; a decoded message from AceComm (prefix AzGF); dist is
+--                                                        "CHANNEL"|"WHISPER"|"GUILD"|"OFFICER". The sender is not stored anywhere.
+--   PROTOCOL_NEWER()                                     Net/Transport.lua; a message with a newer protocol arrived, once per session.
+--   TRANSPORT_LISTEN_ONLY(active, reason)                Net/Transport.lua; the channel refuses addon messages (reason "InvalidChannel")
+--                                                        or works again (active false).
+--   TRANSPORT_READ_ONLY(active)                          Net/Transport.lua; outgoing addon messages are restricted (true) or not.
 -- Later modules add their events here.
 local ADDON_NAME, ns = ...
 ns = ns or {}
