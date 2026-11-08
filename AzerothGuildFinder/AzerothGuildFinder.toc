@@ -22,3 +22,5 @@ Core\Role.lua
 Core\Normalize.lua
 Net\Codec.lua
 Net\Transport.lua
+Net\Channel.lua
+Net\Ping.lua

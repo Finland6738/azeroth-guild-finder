@@ -20,6 +20,8 @@ local SAMPLES = {
 	APPPING = { id = "a1b2c3" },
 	APPWD = { id = "a1b2c3" },
 	APPSYNC = { ids = { a1b2c3 = 4 }, recs = { { id = "x", state = "sent" } } },
+	PING = { nonce = 424242 },
+	PONG = { nonce = 424242 },
 }
 
 local function long()

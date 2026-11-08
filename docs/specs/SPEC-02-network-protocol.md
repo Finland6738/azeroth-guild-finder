@@ -12,6 +12,14 @@
 
 Il canale viene nascosto da tutte le finestre della chat (`ChatFrame_RemoveChannel`), spostato in fondo all'elenco così `/1` resta il canale Generale, e i suoi avvisi di entrata e uscita vengono filtrati. Se l'entrata fallisce si riprova ogni 60 s (stesso schema di OneForAll e totalRP3).
 
+Il modulo `Net/Channel` (M1.8) fa così:
+
+- **Entrata**: 5 s dopo l'ingresso nel mondo (il client entra prima nei propri canali) chiama `JoinChannelByName("AzGuildFinder")` e aspetta la risposta per 5 s: un avviso `YOU_JOINED` per il nostro canale conferma l'entrata. Mai un canale temporaneo. Se il canale c'è già (dopo un `/reload`) lo adotta senza una seconda entrata; se il giocatore lo lascia con `/leave`, riprova dopo 60 s.
+- **Nascondere e spostare**: toglie il canale da tutte le finestre subito, dopo 1 s e dopo 5 s (il client può riaggiungerlo dopo l'avviso) e a ogni schermata di caricamento; lo sposta in fondo con `C_ChatInfo.SwapChatChannelsByChannelIndex`, ma non durante il combattimento (finisce a `PLAYER_REGEN_ENABLED`). Il numero del canale cambia con lo spostamento: il `Transport` lo chiede ogni volta (`Transport.channelId`).
+- **Filtri**: `CHAT_MSG_CHANNEL_NOTICE`, `CHAT_MSG_CHANNEL_NOTICE_USER`, `CHAT_MSG_CHANNEL_JOIN`, `CHAT_MSG_CHANNEL_LEAVE` e `CHAT_MSG_CHANNEL` con il nome `AzGuildFinder` sono nascosti con `ChatFrame_AddMessageEventFilter`; gli altri canali non cambiano.
+- **Limite dei canali**: il client ammette al massimo 10 canali (da confermare su Forever). Se il personaggio ne ha già 10 l'addon **non chiede** l'entrata (stamperebbe un errore nella chat a ogni tentativo), avvisa **una sola volta** (`/leave` di un canale qualsiasi) e riprova ogni 60 s.
+- **Eventi sul Bus**: `CHANNEL_READY(id)` e `CHANNEL_FAILED(reason)` con `reason` = `limit`, `throttled`, `banned`, `refused`, `timeout`, `unavailable` (nessuna funzione di entrata: non si riprova) o `left`; lo stesso motivo non viene ripetuto a ogni tentativo. Al nuovo `CHANNEL_READY` il `Transport` esce dal modo solo ascolto.
+
 ## 2. Formato dei messaggi
 
 ```
@@ -44,6 +52,10 @@ msg     = { v = PROTO, t = "<TIPO>", ... campi del tipo ... }
 | `APPPING` | WHISPER | candidato → contatto | `{id}` | quando vede online un contatto della gilda |
 | `APPWD` | WHISPER | candidato → contatto | ritiro `{id}` | il candidato ritira la candidatura |
 | `APPSYNC` | OFFICER | ufficiale ↔ ufficiale | elenco compatto `{id: stateRev}` e record mancanti | al login e dopo ogni cambio |
+| `PING` | CHANNEL | qualsiasi → tutti | `{nonce}`: **messaggio di diagnostica** | solo `/gf debug ping` (M1.8) |
+| `PONG` | WHISPER | chi risponde → mittente del `PING` | `{nonce}` | risposta a un `PING` |
+
+`PING` e `PONG` sono messaggi di **diagnostica**, non fanno parte del catalogo: servono a verificare che due installazioni si sentano sul canale (criterio di uscita di M1). `/gf debug ping` invia un `PING` (al massimo uno ogni 10 s per client), raccoglie i `PONG` per 5 s e stampa **quanti** peer hanno risposto e i tempi di andata e ritorno (minimo, medio, massimo), mai i nomi: i peer vengono contati una volta sola tramite un hash a 32 bit che vive solo fino alla stampa del risultato. Ogni client risponde a un solo `PING` ogni 5 s e mai al proprio (il canale rimanda i propri messaggi), così una raffica di `PING` non costa niente agli altri.
 
 Il dettaglio (descrizione e contatti) **non** viaggia negli `ANN`: la lista ha bisogno solo dei riassunti, e i dettagli si scaricano quando si apre la pagina.
 
@@ -51,7 +63,7 @@ Il dettaglio (descrizione e contatti) **non** viaggia negli `ANN`: la lista ha b
 
 | Priorità ChatThrottleLib | Messaggi |
 |---|---|
-| `ALERT` | `APPLY`, `APPACK`, `APPWD`, `CATACK`, `DETACK` |
+| `ALERT` | `APPLY`, `APPACK`, `APPWD`, `CATACK`, `DETACK`, `PING`, `PONG` (diagnostica) |
 | `NORMAL` | `DET`, `GLIST`, `APPSYNC`, `DEL` |
 | `BULK` | `ANN`, `CAT`, `CATREQ`, `GTOK` |
 

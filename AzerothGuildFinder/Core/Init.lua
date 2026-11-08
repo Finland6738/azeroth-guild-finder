@@ -29,7 +29,7 @@ end
 AGF.commands = {
 	{ name = "notify", help = L["HELP_NOTIFY"] },
 	{ name = "reset", help = L["HELP_RESET"] },
-	{ name = "debug", help = L["HELP_DEBUG"], handler = function(self) self:PrintDebug() end },
+	{ name = "debug", help = L["HELP_DEBUG"], handler = function(self, input) self:OnDebugCommand(input) end },
 	{ name = "help", help = L["HELP_HELP"], handler = function(self) self:PrintHelp() end },
 }
 
@@ -51,6 +51,16 @@ function AGF:PrintDebug()
 		self:Print(section.title .. ":")
 		for _, line in ipairs(lines or {}) do self:Print(line) end
 	end
+end
+
+-- /gf debug [ping]: the diagnostics, or the channel check.
+function AGF:OnDebugCommand(input)
+	local sub = tostring(input or ""):lower():match("^%s*%S+%s+(%S+)")
+	if sub == "ping" then
+		if ns.Ping then return ns.Ping:Command() end
+		return self:Print(L["COMING_SOON"])
+	end
+	self:PrintDebug()
 end
 
 function AGF:Toggle()

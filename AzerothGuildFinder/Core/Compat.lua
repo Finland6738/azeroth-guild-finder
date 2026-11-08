@@ -1,7 +1,7 @@
 -- Compat: the only door to the game API (SPEC-01 §1, §7). Every call is guarded: a missing, failing or restricted API
 -- turns one feature off, never the addon. Lua 5.1.
 -- Every name used here is in the Forever API dump, except the legacy globals marked [verify] (GetGuildRosterLastOnline,
--- ChatFrame_RemoveChannel is not used). The M0 probe has not run yet, so every [verify] API must degrade cleanly.
+-- ChatFrame_RemoveChannel, GetChannelList, ChatFrame_AddMessageEventFilter). The M0 probe has not run yet, so every [verify] API must degrade cleanly.
 local ADDON_NAME, ns = ...
 ns = ns or {}
 local Compat = {}
@@ -222,6 +222,13 @@ function Player.Faction()
 	return nil
 end
 
+-- The character name without the realm, nil when unknown.
+function Player.Name()
+	local v = first("UnitName", "player")
+	if type(v) == "string" and v ~= "" then return v end
+	return nil
+end
+
 -- Normalized realm name (no spaces), falling back to GetRealmName without spaces.
 function Player.Realm()
 	local v = first("GetNormalizedRealmName")
@@ -385,6 +392,58 @@ function Compat.LeaveChannelByName(name)
 	return state
 end
 
+-- The joined channels in list order: { { id = , name = , disabled = }, ... }; nil when the API is missing.
+-- GetChannelList returns id, name, disabled for every channel (flat), so the values are read in threes.
+function Compat.GetChannelList()
+	local values, count = all("GetChannelList")
+	if not values then return nil end
+	local list = {}
+	local i = 1
+	while i <= count do
+		local id, name = values[i], values[i + 1]
+		if type(id) == "number" and type(name) == "string" then
+			list[#list + 1] = { id = id, name = name, disabled = values[i + 2] and true or false }
+			i = i + 3
+		else
+			i = i + 1
+		end
+	end
+	return list
+end
+
+-- Takes the channel out of every chat window. Returns the number of windows it was applied to (0 when the API is missing).
+function Compat.RemoveChannelFromChatFrames(name)
+	if type(Resolve("ChatFrame_RemoveChannel")) ~= "function" then return 0 end
+	local windows = Resolve("NUM_CHAT_WINDOWS")
+	if type(windows) ~= "number" then windows = 10 end
+	local done = 0
+	for i = 1, windows do
+		local frame = Resolve("ChatFrame" .. i)
+		if frame ~= nil then
+			if select(2, first("ChatFrame_RemoveChannel", frame, name)) == AVAILABLE then done = done + 1 end
+		end
+	end
+	return done
+end
+
+-- Swaps two channel positions (the numbers of /1, /2 ...). Returns the state ("missing" when the API is not there).
+function Compat.SwapChatChannels(index, otherIndex)
+	local _, state = first("C_ChatInfo.SwapChatChannelsByChannelIndex", index, otherIndex)
+	return state
+end
+
+-- Registers a chat message filter: fn(chatFrame, event, ...) returns true to hide the message. Returns the state.
+function Compat.AddChatFilter(event, fn)
+	local _, state = first("ChatFrame_AddMessageEventFilter", event, fn)
+	return state
+end
+
+-- true while the player is in combat lockdown (UI changes are blocked); false when the function is missing.
+function Compat.InCombat()
+	local v = first("InCombatLockdown")
+	return v and true or false
+end
+
 ---------------------------------------------------------------------------------------------------------------------
 -- Build and capability probe
 ---------------------------------------------------------------------------------------------------------------------
@@ -429,6 +488,10 @@ local CAPS = {
 	{ "channel.JoinChannelByName", "channel", "JoinChannelByName", note = "[verify] legacy global" },
 	{ "channel.GetChannelName", "channel", "GetChannelName", note = "[verify] legacy global" },
 	{ "channel.LeaveChannelByName", "channel", "LeaveChannelByName", note = "[verify] legacy global" },
+	{ "channel.GetChannelList", "channel", "GetChannelList", note = "[verify] legacy global" },
+	{ "channel.ChatFrame_RemoveChannel", "channel", "ChatFrame_RemoveChannel", note = "[verify] FrameXML global" },
+	{ "channel.ChatFrame_AddMessageEventFilter", "channel", "ChatFrame_AddMessageEventFilter", note = "[verify] FrameXML global" },
+	{ "channel.SwapChatChannelsByChannelIndex", "channel", "C_ChatInfo.SwapChatChannelsByChannelIndex" },
 	{ "time.GetServerTime", "time", "GetServerTime", call = true },
 	{ "time.GetTime", "time", "GetTime", call = true },
 	{ "time.NewTicker", "time", "C_Timer.NewTicker" },

@@ -51,7 +51,7 @@ local RANK = { ALERT = 1, NORMAL = 2, BULK = 3 }
 
 -- Default priority per message type (SPEC-02 §4); types the table does not list go NORMAL.
 Transport.PRIORITY = {
-	APPLY = "ALERT", APPACK = "ALERT", APPWD = "ALERT", CATACK = "ALERT", DETACK = "ALERT",
+	APPLY = "ALERT", APPACK = "ALERT", APPWD = "ALERT", CATACK = "ALERT", DETACK = "ALERT", PING = "ALERT", PONG = "ALERT",
 	DET = "NORMAL", GLIST = "NORMAL", APPSYNC = "NORMAL", DEL = "NORMAL",
 	ANN = "BULK", CAT = "BULK", CATREQ = "BULK", GTOK = "BULK",
 }
