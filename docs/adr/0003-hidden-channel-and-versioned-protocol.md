@@ -1,6 +1,6 @@
 # 0003. A hidden permanent channel and a versioned protocol
 
-- Status: Accepted (the channel name waits for the owner's confirmation, [SPEC-10](../specs/SPEC-10-risks-open-questions.md) Q1)
+- Status: Accepted (the owner confirmed the names on 2026-11-08: addon "Azeroth Guild Finder", channel `AzGuildFinder`, prefix `AzGF`)
 - Date: 2026-11-08 ([SPEC-02](../specs/SPEC-02-network-protocol.md))
 
 ## Context

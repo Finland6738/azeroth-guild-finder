@@ -168,6 +168,7 @@ Esempi: `"Ördine del Drago"` → `ordinedeldrago`; `"[AD] GankEmAll"` → `adga
 | `who` | string | `Nome-Reame` del personaggio |
 | `cls`, `race`, `lvl` | int | letti dal client al momento dell'invio |
 | `ilvl` | int | livello medio dell'equipaggiamento, se l'API esiste |
+| `roles` | int | facoltativo: ruoli indicati dal candidato (Tank=1, Healer=2, Melee=4, Ranged=8), solo quelli validi per la classe |
 | `at` | int | epoch UTC dell'invio |
 | `state` | enum | `sent`, `received`, `accepted`, `declined`, `withdrawn`, `expired` |
 | `stateRev` | int | aumenta a ogni cambio di stato |

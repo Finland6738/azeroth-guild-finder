@@ -17,12 +17,12 @@
 
 | # | Domanda | Proposta |
 |---|---|---|
-| Q1 | **Nome dell'addon** e del canale: "Azeroth Guild Finder" / `AzGuildFinder` vanno bene? Il nome del canale **non** si potrà più cambiare | sì |
-| Q2 | "1 candidatura aperta **per giocatore**": per personaggio (ogni personaggio può candidarsi a una gilda) o per account (una sola in tutto l'account)? | per personaggio, perché la gilda in WoW è del personaggio |
-| Q3 | Scadenza delle candidature a 14 giorni e attesa di 7 giorni dopo un rifiuto: vanno bene? | sì |
-| Q4 | Nella candidatura, il candidato può indicare **i ruoli** (Tank/Healer/Melee/Ranged) con 4 caselle facoltative, senza testo? Aiuta molto gli ufficiali | sì, facoltative |
-| Q5 | "Giocatori unici" come **intervallo** stimato ("12–18") quando non tutti i membri usano l'addon: va bene, o preferisci mostrarlo solo quando è esatto? | intervallo con la spiegazione |
-| Q6 | I membri semplici possono avere **"Share anonymous alt count"** attivo di base? | sì, con la possibilità di disattivarlo |
+| Q1 | ~~Nome dell'addon e del canale~~ | **Deciso (2026-11-08)**: "Azeroth Guild Finder", cartella `AzerothGuildFinder`, canale `AzGuildFinder`, prefisso `AzGF`, comando `/gf` |
+| Q2 | ~~Una candidatura aperta: per personaggio o per account~~ | **Deciso**: per personaggio |
+| Q3 | ~~Scadenza e attesa dopo un rifiuto~~ | **Deciso**: 14 giorni e 7 giorni |
+| Q4 | ~~Ruoli nella candidatura~~ | **Deciso**: 4 caselle facoltative (Tank, Healer, Melee, Ranged), nessun testo libero |
+| Q5 | ~~Giocatori unici come intervallo~~ | **Deciso**: intervallo con la spiegazione |
+| Q6 | ~~Condivisione anonima del numero di personaggi~~ | **Deciso**: attiva di base, si può disattivare |
 | Q7 | ~~Licenza del codice~~ | **Decisa: GPL-3.0** ([ADR 0017](../adr/0017-license-gpl-3.md)) |
 | Q8 | ~~Lingua della documentazione~~ | **Decisa**: inglese per README, wiki e ADR; italiano per queste specifiche ([ADR 0016](../adr/0016-english-first-ui-and-documentation-languages.md)) |
 | Q9 | ~~Workflow Git~~ | **Deciso**: come azeroth-unspoken, con commit, push, PR e merge automatici ([ADR 0013](../adr/0013-git-flow-and-automated-shipping.md)) |

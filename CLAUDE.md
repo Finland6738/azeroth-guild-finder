@@ -4,7 +4,7 @@ The owner speaks Italian: talk to them in Italian. Code, commits, pull requests,
 
 ## Where things are
 
-- Specification: `docs/specs/` (SPEC-00…SPEC-10). Decisions: `docs/adr/` (index in `docs/adr/README.md`). User manual: `docs/wiki/`. Plan: `ROADMAP.md`.
+- Specification: `docs/specs/` (SPEC-00…SPEC-10). Decisions: `docs/adr/` (index in `docs/adr/README.md`). User manual: `docs/wiki/`. Plan: `ROADMAP.md` and the milestone files in `docs/roadmap/` (take the next unticked step, tick it in the same PR).
 - Mockups: `docs/specs/mockups/html/` (sources) → `bash docs/specs/mockups/render.sh` → `docs/specs/mockups/img/` (WebP).
 - WoW Forever API dump: `../WoW-Addons/docs/api.json` (consult only, never copy, [ADR 0002](docs/adr/0002-wow-forever-target-and-api-dump.md)).
 

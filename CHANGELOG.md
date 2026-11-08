@@ -11,6 +11,11 @@ All notable changes to this project are documented here. The format follows [Kee
 - Four roles (Tank, Healer, Melee DPS, Ranged DPS), up to three activities per guild and a commitment level (Casual, Softcore, Hardcore).
 - Architecture decisions 0001–0018 in `docs/adr/`.
 
+### Planning
+
+- Development roadmap in `docs/roadmap/`: one file per milestone (M0 spike to M5 release, 44 steps) with branch, dependencies, scope, acceptance criteria, tests, docs and real-client checks, plus the V2 backlog.
+- Decisions confirmed by the owner: names (addon, channel `AzGuildFinder`, prefix `AzGF`, `/gf`), one open application per character, optional role checkboxes in the application, 14-day expiry, 7-day cooldown, unique players as a range, anonymous alt count on by default.
+
 ### Project
 
 - README in English and Italian, CONTRIBUTING, Code of Conduct, roadmap, GPL-3.0 licence, funding link.

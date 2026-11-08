@@ -58,6 +58,8 @@ Un elenco di controllo in `docs/checklists/release.md`:
 
 ## 5. Tappe
 
+Gli step di sviluppo di ogni tappa sono in [docs/roadmap/](../roadmap/README.md), un file per tappa.
+
 | Tappa | Contenuto | Uscita |
 |---|---|---|
 | M0 | Spike S1–S11, bozzetti approvati | risultati + ADR |
