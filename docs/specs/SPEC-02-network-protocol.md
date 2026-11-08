@@ -111,4 +111,11 @@ Senza un server, chiunque abbia l'addon modificato può inviare un `ANN` falso. 
 | **INT-05** Un `DEL` è accettato solo da un mittente che in passato ha fatto `ANN` per la stessa gilda; se dopo arriva un `ANN` con `rev` maggiore, l'annuncio ritorna | limita i ritiri falsi |
 | **INT-06** Validazione completa di ogni campo ([SPEC-03 §6](SPEC-03-data-model.md#6-validazione)); i testi non vengono mai eseguiti né interpretati come codici di formattazione (`|` viene neutralizzato) | niente link o colori iniettati, niente errori Lua |
 
+Come le applica `Data/Catalog.lua` (M2.2), dove le regole lasciano margine:
+
+- **INT-01**: l'ordine riguarda il contenuto; le statistiche (`st`, `srev`) si fondono a parte, vince lo `srev` più recente (a parità, l'hash più basso), anche se arrivano in un riassunto di `rev` più vecchia. Per questo, a parità di aggiornamenti ricevuti, l'ordine di arrivo non cambia l'elenco.
+- **INT-03**: vale il primo `ownerId` conosciuto, quindi due `ownerId` in conflitto non convergono sullo stesso client finché il primo non tace da 30 giorni. Solo un `ANN` accettato (stesso `ownerId`, anche di `rev` più vecchia) rinnova il momento dell'ultimo annuncio.
+- **INT-04**: si applica solo agli `ANN` e ai `DEL` che arrivano nel canale; il divieto dura 24 h dal secondo annuncio e comprende anche i `DEL` e gli `ANN` della prima gilda. Un annuncio rifiutato per `ownerId` conta comunque come annuncio di quella gilda.
+- **INT-05**: chi ha annunciato una gilda si ricorda solo in memoria (mai nel file, per riservatezza): dopo un `/reload` un `DEL` viene accettato di nuovo solo da chi annuncia ancora. Il `DEL` ritira le `rev` fino a quella indicata; l'`ANN` con `rev` maggiore riporta l'annuncio. Gli annunci ritirati non vengono mai offerti agli altri in un `CAT`.
+
 Rischio residuo, accettato per la V1: un attaccante determinato può falsificare l'annuncio di **una** gilda per personaggio. Se succede davvero, la V2 introdurrà la firma degli annunci (Ed25519 in Lua puro, chiave del GM condivisa con gli ufficiali via `GUILD`) con un nuovo `PROTO`.

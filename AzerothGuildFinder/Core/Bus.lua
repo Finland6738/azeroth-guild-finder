@@ -13,6 +13,8 @@
 --   CHANNEL_READY(id)                                    Net/Channel.lua; the channel AzGuildFinder is joined (again), id is its number.
 --   CHANNEL_FAILED(reason)                               Net/Channel.lua; a join did not work: "limit", "throttled", "banned",
 --                                                        "refused", "timeout", "unavailable" or "left"; once per distinct reason.
+--   CATALOG_UPDATED(k, what)                             Data/Catalog.lua; a listing changed: what is "added", "updated", "stats",
+--                                                        "detail", "delisted" or "removed" (k = guild key), or "cleared" (k is nil).
 --   PING_DONE(result)                                    Net/Ping.lua; /gf debug ping finished: { answers, min, avg, max, error }.
 -- Later modules add their events here.
 local ADDON_NAME, ns = ...
