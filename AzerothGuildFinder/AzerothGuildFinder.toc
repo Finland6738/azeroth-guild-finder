@@ -17,3 +17,6 @@ Locale\enUS.lua
 Core\Init.lua
 Core\Compat.lua
 Core\Config.lua
+Core\Bus.lua
+Core\Role.lua
+Core\Normalize.lua

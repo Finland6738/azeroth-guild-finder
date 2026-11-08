@@ -55,9 +55,10 @@
 - Spec: SPEC-00 §5, SPEC-03 §1 and §7, ADR 0004, ADR 0009
 - Scope: `Core/Bus.lua` (internal events), `Core/Role.lua` (no guild / member / officer / Guild Master, `ROLE_CHANGED` on guild and rank events, `guildKey`), `Core/Normalize.lua` (`sortKey`, search key, UTF-8 length, FNV-1a hash).
 - Done when:
-  - [ ] The role matrix of SPEC-00 §5 is computed from the client state.
-  - [ ] `sortKey` handles accents, digits, symbols and empty keys as specified.
+  - [x] The role matrix of SPEC-00 §5 is computed from the client state.
+  - [x] `sortKey` handles accents, digits, symbols and empty keys as specified.
 - Tests: every role transition; the normalization examples of SPEC-03 §7.
+  - [x] `Tests/test_core.lua`: bus isolation and `Off`, every role transition and the panel matrix, the SPEC-03 §7 examples and edge cases, FNV-1a known vectors (with and without `bit`), UTF-8 helpers.
 
 ### M1.6 — Codec
 - Branch: `step/m1-6-codec`

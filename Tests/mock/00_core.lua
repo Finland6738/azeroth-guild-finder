@@ -53,6 +53,8 @@ function securecall(fn, ...)
 	if type(fn) == "string" then fn = _G[fn] end
 	return fn(...)
 end
+-- securecallfunction(fn, ...): CallbackHandler (AceEvent) calls handlers through it; the mock has no taint to protect.
+function securecallfunction(fn, ...) return fn(...) end
 function issecure() return true end
 function issecurevariable() return true end
 function issecretvalue() return false end        -- secret values are modelled by the Compat step (M1.3)
