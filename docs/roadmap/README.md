@@ -19,6 +19,8 @@ flowchart LR
   M0[M0 Spike] --> M1[M1 Foundations] --> M2[M2 Find a Guild] --> M3[M3 Listings] --> M4[M4 Applications] --> M5[M5 Release]
 ```
 
+> **M0.7 deferred** until the owner's in-game results; M1+ proceed on the specification's assumptions and will be revised after M0.7.
+
 M0 can change the plan: if Blizzard's Club Finder works on Forever (check S1), M1–M4 are revised before they start.
 
 ## How a step is written

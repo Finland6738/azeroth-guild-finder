@@ -25,7 +25,13 @@ All notable changes to this project are documented here. The format follows [Kee
 - Probe M0.5: checks S8 (`/agfp tabard`: every field of `C_GuildInfo.GetGuildTabardInfo("player")`, and a hidden `TabardModel` cycled with `CycleVariation` over every variation to find which index is which and to list emblem, border and background fileIDs and colours as numbers; `Save()` is never called; `/agfp export tabard` gives a Lua table for `Data/TabardParts.lua`) and S9 (`/agfp gallery`: movable 860 x 140 header preview with parchment fade and dark sample text, thumbnails of banner, parchment, class icon, role icon and emblem candidates, `/agfp tex` for extra candidates, `/agfp mark <n> ok|bad`, `/agfp export gallery`) in `tools/probe/AzGF_Probe/Checks_Tabard.lua` and `Checks_Textures.lua`; in-game instructions in `docs/spike/README.md`.
 - Probe M0.6: check S10 (`/agfp invite <name>`: a small window with an Invite button calling `C_GuildInfo.Invite` from a hardware event; `/agfp invite-timer <name>`: the same call from a timer; `pcall` result, blocked-action events and the system messages that follow are recorded, the name is never stored) in `tools/probe/AzGF_Probe/Checks_Invite.lua`; in-game instructions in `docs/spike/README.md`.
 
+### Addon
+
+- M1.1: addon skeleton `AzerothGuildFinder/` (TOC with Interface 16001, SavedVariables, AddOn Compartment entry points; `embeds.xml`; `Bindings.xml` with "Toggle Guild Finder"; `Locale/enUS.lua`; `Core/Init.lua` with the AceAddon object, the Forever check and `/gf` and `/guildfinder` with `/gf help`; other commands print "coming soon"). `.pkgmeta` pins Ace3 (Release-r1403), LibDataBroker (v1.1.4) and LibDBIcon (v8.0.4); `tools/fetch_libs.py` downloads them into the git-ignored `Libs/`, `tools/install_addon.py` copies the addon into the AddOns folder, `tools/check_addon.py` checks the TOC and `embeds.xml`. Not yet loaded in the real client.
+
 ### Project
+
+- M0.7 (results and decisions) is deferred until the owner's in-game results; M1+ proceed on the specification's assumptions and will be revised after M0.7.
 
 - README in English and Italian, CONTRIBUTING, Code of Conduct, roadmap, GPL-3.0 licence, funding link.
 - Automation: CI (`Tests`), docs rule (`Docs rule`), wiki sync from `docs/wiki/`, advisory DCO check, issue and pull request templates, `tools/ship_step.py` (commit, push, pull request, CI, squash merge).

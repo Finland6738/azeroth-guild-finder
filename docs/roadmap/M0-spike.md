@@ -70,6 +70,7 @@ The probe addon `AzGF_Probe` lives in `tools/probe/` and is **never distributed*
 - Real client: everything.
 
 ### M0.7 — Results and decisions
+> **M0.7 deferred** until the owner's in-game results; M1+ proceed on the specification's assumptions and will be revised after M0.7.
 - Branch: `step/m0-7-results`
 - Depends on: M0.2–M0.6
 - Scope: `docs/spike/M0-results.md` (one row per check, with the evidence), updates to SPEC-01/02/07/08/09 and ADRs (new ADRs for any changed decision), `Data/TabardParts` and banner registry values recorded for M3.

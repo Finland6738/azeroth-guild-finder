@@ -10,9 +10,10 @@
 - Spec: SPEC-01 §4–§5, ADR 0010
 - Scope: `AzerothGuildFinder/` with `AzerothGuildFinder.toc` (Interface 16001, SavedVariables, `AddonCompartmentFunc`), `embeds.xml`, `Bindings.xml` (empty binding "Toggle Guild Finder"), `Locale/enUS.lua`, `Core/Init.lua` (AceAddon, Forever check), `/gf help`; `.pkgmeta` with pinned externals (LibStub, CallbackHandler, AceAddon, AceEvent, AceDB, AceComm, AceLocale, AceConsole, LibDataBroker, LibDBIcon); `tools/install_addon.py` (copies the addon into the AddOns folder from `tools/local.ini`).
 - Done when:
-  - [ ] The addon loads on Forever with no Lua error and `/gf help` prints the commands.
-  - [ ] Libraries resolve from `.pkgmeta` (no library copied by hand).
+  - [ ] The addon loads on Forever with no Lua error and `/gf help` prints the commands. *(in-game check, pending)*
+  - [x] Libraries resolve from `.pkgmeta` (no library copied by hand): `tools/fetch_libs.py` reads the pinned tags.
 - Tests: a TOC check (interface, files exist) in `tools/check_docs.py` or the test suite.
+  - [x] `tools/check_addon.py`, called by `check_docs.py`.
 - Docs: README "Development", CONTRIBUTING §3, wiki Commands.
 - Real client: the addon loads.
 

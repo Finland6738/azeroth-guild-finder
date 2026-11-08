@@ -115,6 +115,15 @@ Step-by-step guide: [the wiki](https://github.com/Finland6738/azeroth-guild-find
 
 Full plan: [ROADMAP.md](ROADMAP.md).
 
+## Development
+
+```
+python -I -X utf8 tools/fetch_libs.py      # downloads the libraries pinned in .pkgmeta into AzerothGuildFinder/Libs/
+python -I -X utf8 tools/install_addon.py   # copies the addon into the AddOns folder set in tools/local.ini
+```
+
+In game: `/reload`, then `/gf help`. Setup of `tools/local.ini`: [tools/local.example.ini](tools/local.example.ini). Checks and tests: [CONTRIBUTING](CONTRIBUTING.md#4-checks-and-tests).
+
 ## Documentation
 
 - [User manual (wiki)](https://github.com/Finland6738/azeroth-guild-finder/wiki), generated from [`docs/wiki/`](docs/wiki/Home.md).

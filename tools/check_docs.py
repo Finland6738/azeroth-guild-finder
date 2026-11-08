@@ -122,6 +122,12 @@ def check_rules(problems):
             problems.append(f"tools/check_pr_docs.py: {files} {labels} gave {ok}, expected {expected}")
 
 
+def check_addon(problems):
+    sys.path.insert(0, os.path.join(ROOT, "tools"))
+    import check_addon as addon
+    addon.check(problems)
+
+
 def main():
     problems = []
     files = tracked_files()
@@ -130,6 +136,7 @@ def main():
     check_adr_index(problems)
     check_text_files(files, problems)
     check_rules(problems)
+    check_addon(problems)
     for p in problems:
         print(p)
     print(f"{len(files)} files checked, {len(problems)} problem(s).")

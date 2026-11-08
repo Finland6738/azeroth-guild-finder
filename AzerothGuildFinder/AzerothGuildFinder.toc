@@ -1,0 +1,17 @@
+## Interface: 16001
+## Title: Azeroth Guild Finder
+## Notes: Find a guild, or find members for yours. Client-only and peer-to-peer: no server, no internet.
+## Author: Finland6738
+## Version: @project-version@
+## SavedVariables: AzerothGuildFinderDB
+## SavedVariablesPerCharacter: AzerothGuildFinderCharDB
+## AddonCompartmentFunc: AzerothGuildFinder_OnAddonCompartmentClick
+## AddonCompartmentFuncOnEnter: AzerothGuildFinder_OnAddonCompartmentEnter
+## AddonCompartmentFuncOnLeave: AzerothGuildFinder_OnAddonCompartmentLeave
+## IconTexture: Interface\Icons\INV_Misc_Note_01
+## X-Website: https://github.com/Finland6738/azeroth-guild-finder
+## X-License: GPL-3.0
+
+embeds.xml
+Locale\enUS.lua
+Core\Init.lua
