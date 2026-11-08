@@ -9,7 +9,7 @@ local ADDON_NAME = ...
 local TEST_CHANNEL = "AzGFProbe"
 local REAL_CHANNEL = "AzGuildFinder" -- only used to refuse it, see Probe:AssertTestChannel
 
-local Probe = { checks = {}, order = {}, TEST_CHANNEL = TEST_CHANNEL }
+local Probe = { checks = {}, order = {}, commands = {}, exportHooks = {}, TEST_CHANNEL = TEST_CHANNEL }
 _G.AzGF_Probe = Probe
 
 local PREFIX = "|cff66ccffAzGF Probe:|r "
@@ -114,12 +114,22 @@ function Probe:ExportText()
             lines[#lines + 1] = l
         end
     end
+    -- extra sections added by the check files (Probe.exportHooks[name] = function() return { lines } end)
+    for _, hook in ipairs(self.exportHooks) do
+        local ok, extra = pcall(hook, self)
+        if ok and type(extra) == "table" then
+            for _, l in ipairs(extra) do
+                lines[#lines + 1] = l
+            end
+        end
+    end
     return table.concat(lines, "\n")
 end
 
 function Probe:Reset()
     db().results = {}
     db().snapshots = nil
+    db().channel = nil
     out("results cleared")
 end
 
@@ -169,7 +179,8 @@ function Probe:Export()
 end
 
 -- Checks S1-S11: stubs in M0.1; M0.2-M0.6 replace them by calling Probe:Register with the same id
--- (S1, S7, S11 live in Checks_Environment.lua, loaded after this file).
+-- (S1, S7, S11 live in Checks_Environment.lua and S2, S3, S6 in Checks_Channel.lua, loaded after this file;
+-- those files also add slash commands with Probe.commands[name] = function(arg, rest)).
 local STUBS = {
     { "S2", "Join the test channel and exchange addon messages between two clients" },
     { "S3", "Lowest level (or play time) that can send in the channel" },
@@ -186,7 +197,7 @@ for _, stub in ipairs(STUBS) do
     end)
 end
 
-local USAGE = "/agfp [list] | run <id> | snapshot <label> | export | reset"
+local USAGE = "/agfp [list] | run <id> | snapshot <label> | join | leave | ping | pong | burst <n> <gap> | channel | export | reset"
 
 SLASH_AZGFPROBE1 = "/agfp"
 SlashCmdList["AZGFPROBE"] = function(msg)
@@ -205,6 +216,11 @@ SlashCmdList["AZGFPROBE"] = function(msg)
         Probe:Export()
     elseif cmd == "reset" then
         Probe:Reset()
+    elseif Probe.commands[cmd] then
+        local ok, err = pcall(Probe.commands[cmd], arg, rest)
+        if not ok then
+            out("error in /agfp " .. cmd .. ": " .. tostring(err))
+        end
     else
         out(USAGE)
     end

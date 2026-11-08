@@ -39,6 +39,7 @@ The probe addon `AzGF_Probe` lives in `tools/probe/` and is **never distributed*
   - [ ] S2: two clients exchange messages in the channel.
   - [ ] S3: the lowest level (or play time) that can send is known.
   - [ ] S6: safe sending rate measured; `CHANNEL_GAP` confirmed or changed.
+  - [x] Offline: `Checks_Channel.lua` (join, hide, filter, ping/pong, burst, level and account flags), the `/agfp` commands and the owner instructions in `docs/spike/README.md` exist; `check_docs.py` passes.
 - Real client: everything.
 
 ### M0.4 — Whisper and officer channel (S4, S5)
