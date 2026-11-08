@@ -45,8 +45,9 @@
 - Spec: SPEC-01 §6, ADR 0011
 - Scope: `Core/Config.lua`: `AzerothGuildFinderDB` and `AzerothGuildFinderCharDB`, schema version 1, defaults merge, rules and `Sanitize`, migrations framework, read-only mode for newer data, `accountSecret` creation.
 - Done when:
-  - [ ] Damaged or newer saved data never breaks loading and is reported in `/gf debug`.
+  - [x] Damaged or newer saved data never breaks loading and is reported in `/gf debug`.
 - Tests: defaults, validation, a dummy migration, newer schema read-only, idempotent reload.
+  - [x] `Tests/test_config.lua`: defaults and merge, validation and `Set`, damaged data, timestamp clamping, migrations (order, idempotence, failure), newer schema read-only, reload round trips.
 
 ### M1.5 — Event bus, roles and name normalization
 - Branch: `step/m1-5-bus-role-normalize`
