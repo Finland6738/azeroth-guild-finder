@@ -38,6 +38,7 @@ guildKey = realm .. "|" .. faction .. "|" .. guildName
 | `bg` | int | indice | sfondo scelto dal catalogo verificato ([SPEC-08 §3](SPEC-08-assets-emblems-l10n.md#3-sfondi)) |
 | `st` | table | | statistiche (§4) |
 | `srev` | int | epoch UTC | ora del calcolo delle statistiche, arrotondata all'ora |
+| `test` | bool | | annuncio di prova inviato da `/gf debug announce` in una build di sviluppo; le build di rilascio lo ignorano (SPEC-02 §6) |
 
 Dimensione stimata: circa 160 byte in CBOR, circa 120 compressi.
 

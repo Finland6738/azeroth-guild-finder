@@ -27,3 +27,4 @@ Net\Codec.lua
 Net\Transport.lua
 Net\Channel.lua
 Net\Ping.lua
+Net\Sync.lua

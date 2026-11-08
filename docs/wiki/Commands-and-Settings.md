@@ -7,6 +7,7 @@
 | `/gf reset` | Resets window positions |
 | `/gf debug` | Diagnostics: addon version, client build and project id, every game feature the addon needs as `available`, `missing`, `restricted` or `error`, and the state of the saved data (schema versions, read-only when it comes from a newer version, and any value that was repaired); no character or guild names, and never the account secret |
 | `/gf debug ping` | Tests the Guild Finder channel: sends a ping to everyone who has the addon online and, after 5 seconds, tells you how many answered and how long the round trip took (never who). One ping every 10 seconds |
+| `/gf debug announce` | **Development builds only** (a copy of the repository, not a packaged release): announces a test listing called *AGF Test &lt;your character&gt;* on the channel, to check that listings travel between two clients. Release builds ignore test listings and refuse the command. Do not use it on a character that announces a real guild: the other clients would ignore that character for a day |
 | `/gf help` | The list of commands |
 
 Also: the minimap button (left click opens, right click settings) and a key binding under *Key Bindings → AddOns*.

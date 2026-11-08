@@ -1,5 +1,5 @@
 -- Config: SavedVariables, schema versions, defaults, validation and migrations (SPEC-01 §6, ADR 0011). Lua 5.1.
---   AzerothGuildFinderDB          (account)   = { schemaVersion, accountSecret, catalog[realm][faction], settings }
+--   AzerothGuildFinderDB          (account)   = { schemaVersion, accountSecret, catalog[realm][faction], syncAt, settings }
 --   AzerothGuildFinderCharDB      (character) = { schemaVersion, application, officerInbox, ownListing, ui, minimap }
 -- Load() runs on ADDON_LOADED (from AGF:OnInitialize): defaults are merged without overwriting anything, old data is
 -- migrated step by step, bad values are reset and listed in Config.issues. Data from a NEWER schema is never rewritten:
@@ -14,6 +14,14 @@ local type, pairs, ipairs, pcall, tostring, tonumber, next = type, pairs, ipairs
 local floor, huge = math.floor, math.huge
 
 Config.SCHEMA_VERSION = 1
+
+-- Development build. A checkout of the repository is one; the BigWigs packager comments out the block between the
+-- debug markers below in every packaged build, so a release has DEV = false. Development builds enable
+-- /gf debug announce and keep the test listings it sends; release builds ignore test listings (Net/Sync.lua).
+Config.DEV = false
+--@debug@
+Config.DEV = true
+--@end-debug@
 Config.VARIABLES = { account = "AzerothGuildFinderDB", char = "AzerothGuildFinderCharDB" }
 
 -- Limits of SPEC-01 §6, enforced by the modules that own the data (catalog, inbox).
@@ -29,6 +37,7 @@ Config.defaults = {
 		schemaVersion = Config.SCHEMA_VERSION,
 		accountSecret = "",            -- created once on first load, never sent anywhere
 		catalog = {},                  -- [realm][faction] = { ... } (SPEC-03)
+		syncAt = {},                   -- ["realm|faction"] = time of the last full catalog sync (SPEC-02 §6)
 		settings = {
 			minimapButton = true,
 			notifyIcon = true,
@@ -56,6 +65,7 @@ Config.rules = {
 	["account.schemaVersion"] = { type = "number", min = 0, integer = true },
 	["account.accountSecret"] = { type = "string", pattern = "^%x+$", minLen = 32, maxLen = 32 },
 	["account.catalog"] = { type = "table" },
+	["account.syncAt"] = { type = "table" },
 	["account.settings"] = { type = "table" },
 	["account.settings.minimapButton"] = { type = "boolean" },
 	["account.settings.notifyIcon"] = { type = "boolean" },

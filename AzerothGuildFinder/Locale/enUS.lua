@@ -28,6 +28,11 @@ L["PING_BUSY"] = "A ping is already running."
 L["PING_COOLDOWN"] = "Wait a little: one ping every %d seconds."
 L["PING_NO_CHANNEL"] = "The channel is not joined yet (see /gf debug)."
 
+-- Catalog sync and /gf debug announce (development builds)
+L["ANNOUNCE_DEV_ONLY"] = "'/gf debug announce' only works in development builds."
+L["ANNOUNCE_SENT"] = "Test listing '%s' announced on the channel. Other development builds show it; release builds ignore it."
+L["ANNOUNCE_FAILED"] = "The test listing could not be announced (%s)."
+
 -- Enums (SPEC-03 §5)
 L["LANG_en"] = "English"
 L["LANG_de"] = "German"

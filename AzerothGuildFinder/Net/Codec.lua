@@ -27,14 +27,14 @@ Codec.lastReject = nil      -- last rejection reason, for /gf debug
 
 -- Required fields per message type: name -> Lua type. Unlisted fields are optional and never rejected.
 Codec.SCHEMA = {
-	ANN     = { k = "string", rev = "number" },                       -- summary + stats; c = 1 for a contact
+	ANN     = { k = "string", rev = "number" },                       -- summary + stats; c = 1 for a contact, test
 	DEL     = { k = "string", rev = "number" },
-	CATREQ  = { nonce = "number", cat = "table" },                    -- cat = { { h, rev, srev }, ... }
-	CATACK  = { to = "string", nonce = "number" },
-	CAT     = { nonce = "number", items = "table" },                  -- items = summaries
-	DETREQ  = { k = "string", rev = "number", nonce = "number" },
-	DETACK  = { to = "string", nonce = "number" },
-	DET     = { k = "string", rev = "number" },                       -- detail fields (SPEC-03 §3)
+	CATREQ  = { nonce = "number", cat = "table" },                    -- cat = { h1, rev1, srev1, h2, ... }; p, n (part)
+	CATACK  = { to = "string", nonce = "number" },                    -- n = summaries to send, w = seconds before
+	CAT     = { nonce = "number", items = "table" },                  -- items = summaries; age = { s, ... }; i, of, n
+	DETREQ  = { k = "string", rev = "number", nonce = "number" },     -- d = detail rev the requester has (0: none)
+	DETACK  = { to = "string", nonce = "number" },                    -- r = detail rev to send
+	DET     = { k = "string", rev = "number" },                       -- detail fields (SPEC-03 §3) + nonce
 	GLIST   = { k = "string", rev = "number" },                       -- summary + detail
 	GLREQ   = { rev = "number" },
 	GTOK    = { token = "string", n = "number" },
