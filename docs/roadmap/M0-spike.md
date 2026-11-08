@@ -14,8 +14,9 @@ The probe addon `AzGF_Probe` lives in `tools/probe/` and is **never distributed*
 - Spec: SPEC-09 §1, ADR 0002
 - Scope: `tools/probe/AzGF_Probe/` (TOC 16001, one Lua file), `/agfp` commands, a results table saved in `AzGF_ProbeDB`, `/agfp export` showing all results as text to copy; `tools/install_probe.py` to copy it into the AddOns folder (path read from `tools/local.ini`, not tracked).
 - Done when:
-  - [ ] The probe loads on Forever without errors and `/agfp` lists the checks.
-  - [ ] Every check writes `{id, result, details, build, time}`; `/agfp export` copies them.
+  - [ ] The probe loads on Forever without errors and `/agfp` lists the checks. *(in game; not verified yet)*
+  - [ ] Every check writes `{id, result, details, build, time}`; `/agfp export` copies them. *(in game; not verified yet)*
+  - [x] Offline: probe files, `/agfp` commands, check registry, `tools/install_probe.py` and `docs/spike/README.md` exist; `check_docs.py` passes.
 - Tests: none (it is a throwaway tool); `check_docs.py` passes.
 - Docs: `docs/spike/README.md` with how to install and run the probe.
 - Real client: everything.
