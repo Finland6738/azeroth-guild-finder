@@ -58,6 +58,7 @@ The probe addon `AzGF_Probe` lives in `tools/probe/` and is **never distributed*
 - Done when:
   - [ ] S8: the tabard structure is documented and a list of emblem, border and background fileIDs and colours is exported.
   - [ ] S9: 12–16 banner images and the parchment are verified, with fileIDs.
+  - [x] Offline: `Checks_Tabard.lua` (info dump, `TabardModel` catalogue, `/agfp tabard`, `/agfp export tabard`), `Checks_Textures.lua` (gallery, `/agfp tex`, `/agfp mark`, `/agfp export gallery`) and the owner instructions in `docs/spike/README.md` exist; `check_docs.py` passes.
 - Real client: everything.
 
 ### M0.6 — Guild invite (S10)

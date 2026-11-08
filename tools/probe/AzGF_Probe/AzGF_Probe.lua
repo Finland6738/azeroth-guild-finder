@@ -9,7 +9,8 @@ local ADDON_NAME = ...
 local TEST_CHANNEL = "AzGFProbe"
 local REAL_CHANNEL = "AzGuildFinder" -- only used to refuse it, see Probe:AssertTestChannel
 
-local Probe = { checks = {}, order = {}, commands = {}, exportHooks = {}, TEST_CHANNEL = TEST_CHANNEL }
+-- exportTexts[name] = function() return text end: extra texts for "/agfp export <name>" (M0.5: tabard, gallery)
+local Probe = { checks = {}, order = {}, commands = {}, exportHooks = {}, exportTexts = {}, TEST_CHANNEL = TEST_CHANNEL }
 _G.AzGF_Probe = Probe
 
 local PREFIX = "|cff66ccffAzGF Probe:|r "
@@ -131,11 +132,14 @@ function Probe:Reset()
     db().snapshots = nil
     db().channel = nil
     db().whisper = nil
+    db().tabard = nil
+    db().textures = nil
     out("results cleared")
 end
 
 local exportFrame
-function Probe:Export()
+--- Opens the export frame with the results, or with `text` when given (a string).
+function Probe:Export(text)
     if not exportFrame then
         local template = BackdropTemplateMixin and "BackdropTemplate" or nil
         local f = CreateFrame("Frame", "AzGF_ProbeExportFrame", UIParent, template)
@@ -168,19 +172,21 @@ function Probe:Export()
         edit:SetAutoFocus(false)
         edit:SetFontObject("ChatFontNormal")
         edit:SetWidth(500)
+        pcall(edit.SetMaxLetters, edit, 0) -- 0 = no limit: the tabard catalogue is long
         edit:SetScript("OnEscapePressed", function(self) self:ClearFocus(); f:Hide() end)
         scroll:SetScrollChild(edit)
         f.edit = edit
         exportFrame = f
     end
-    exportFrame.edit:SetText(self:ExportText())
+    exportFrame.edit:SetText(text or self:ExportText())
     exportFrame:Show()
     exportFrame.edit:SetFocus()
     exportFrame.edit:HighlightText()
 end
 
 -- Checks S1-S11: stubs in M0.1; M0.2-M0.6 replace them by calling Probe:Register with the same id
--- (S1, S7, S11 live in Checks_Environment.lua and S2, S3, S6 in Checks_Channel.lua, S4, S5 in Checks_Whisper.lua, loaded after this file;
+-- (S1, S7, S11 live in Checks_Environment.lua and S2, S3, S6 in Checks_Channel.lua, S4, S5 in Checks_Whisper.lua, S8 in
+-- Checks_Tabard.lua and S9 in Checks_Textures.lua, loaded after this file;
 -- those files also add slash commands with Probe.commands[name] = function(arg, rest)).
 local STUBS = {
     { "S2", "Join the test channel and exchange addon messages between two clients" },
@@ -198,7 +204,7 @@ for _, stub in ipairs(STUBS) do
     end)
 end
 
-local USAGE = "/agfp [list] | run <id> | snapshot <label> | join | leave | ping | pong | burst <n> <gap> | channel | whisper <name> | officer | guild | export | reset"
+local USAGE = "/agfp [list] | run <id> | snapshot <label> | join | leave | ping | pong | burst <n> <gap> | channel | whisper <name> | officer | guild | tabard [slow|stop|status|info] | gallery | tex <path|fileID|atlas:name> | mark <n> ok|bad|clear | export [tabard|gallery] | reset"
 
 SLASH_AZGFPROBE1 = "/agfp"
 SlashCmdList["AZGFPROBE"] = function(msg)
@@ -214,7 +220,15 @@ SlashCmdList["AZGFPROBE"] = function(msg)
             out("snapshot: " .. Probe:Snapshot(label))
         end
     elseif cmd == "export" then
-        Probe:Export()
+        local textFn = Probe.exportTexts[arg:lower()]
+        if arg ~= "" and not textFn then
+            out("unknown export '" .. arg .. "' (available: tabard, gallery; or plain /agfp export)")
+        elseif textFn then
+            local ok, text = pcall(textFn)
+            Probe:Export(ok and text or ("export error: " .. tostring(text)))
+        else
+            Probe:Export()
+        end
     elseif cmd == "reset" then
         Probe:Reset()
     elseif Probe.commands[cmd] then

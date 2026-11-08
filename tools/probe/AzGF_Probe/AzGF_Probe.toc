@@ -2,10 +2,12 @@
 ## Title: AzGF Probe (development only)
 ## Notes: Throwaway spike addon for Azeroth Guild Finder (M0). Never distributed.
 ## Author: Finland6738
-## Version: 0.4.0
+## Version: 0.5.0
 ## SavedVariables: AzGF_ProbeDB
 
 AzGF_Probe.lua
 Checks_Environment.lua
 Checks_Channel.lua
 Checks_Whisper.lua
+Checks_Tabard.lua
+Checks_Textures.lua

@@ -31,10 +31,16 @@ python -I -X utf8 tools/install_probe.py
 | `/agfp officer` | Sends one test message on the `OFFICER` distribution and records the result code and your guild role (S5) |
 | `/agfp guild` | Same on `GUILD`, the fallback (S5) |
 | `/agfp channel` | Prints the channel status, the counters and the bursts seen by this client |
+| `/agfp tabard [slow\|stop\|status\|info]` | Dumps the tabard info (S8) and cycles a hidden `TabardModel` over every variation to build the catalogue of emblems, borders, backgrounds and colours; `slow` does one step per frame, `stop` aborts, `info` only repeats the info dump (S8) |
+| `/agfp gallery` | Opens the movable texture gallery: banner, parchment, class icon, role icon and emblem candidates (S9) |
+| `/agfp tex <path\|fileID\|atlas:name>` | Tests one extra texture candidate, adds it to the gallery and selects it (S9) |
+| `/agfp mark <n> ok\|bad\|clear` | Marks gallery candidate number `n` after looking at it (S9) |
+| `/agfp export tabard` | Same frame, with the tabard catalogue as a Lua table to paste back (S8) |
+| `/agfp export gallery` | Same frame, with every gallery candidate, its API result and your mark (S9) |
 | `/agfp export` | Opens a movable frame with all results as plain text, already selected: press Ctrl+C |
 | `/agfp reset` | Clears the stored results |
 
-Results are saved in `AzGF_ProbeDB.results[id]` as `{id, result, details, build, time}` where `result` is `pass`, `fail`, `info` or `todo`. Checks not yet implemented record "not implemented yet"; S1, S7 and S11 are implemented in M0.2 (`Checks_Environment.lua`), S2, S3 and S6 in M0.3 (`Checks_Channel.lua`), S4 and S5 in M0.4 (`Checks_Whisper.lua`), the others follow in M0.5–M0.6. Snapshots are stored in `AzGF_ProbeDB.snapshots` and included in `/agfp export`.
+Results are saved in `AzGF_ProbeDB.results[id]` as `{id, result, details, build, time}` where `result` is `pass`, `fail`, `info` or `todo`. Checks not yet implemented record "not implemented yet"; S1, S7 and S11 are implemented in M0.2 (`Checks_Environment.lua`), S2, S3 and S6 in M0.3 (`Checks_Channel.lua`), S4 and S5 in M0.4 (`Checks_Whisper.lua`), S8 in M0.5 (`Checks_Tabard.lua`) and S9 in M0.5 (`Checks_Textures.lua`), the last one follows in M0.6. Snapshots are stored in `AzGF_ProbeDB.snapshots` and included in `/agfp export`.
 
 ## M0.2: what to do in game (S1, S7, S11)
 
@@ -118,6 +124,27 @@ Same safety rules as M0.3 (test prefix `AzGFP`, no names stored or printed, neve
 2. B and C: when a message arrives chat says "OFFICER message #1 from <peer 1> (officer) arrived on OFFICER; you are member". Note whether **C (the plain member) received the OFFICER messages**: if it did, `OFFICER` is not private and that is a finding.
 3. Repeat with A as the plain member `/agfp officer`: the expected result is a refused send code. Also try a character not in a guild (sends are expected to fail).
 4. All: `/agfp run S5`, then `/agfp export`: `S5 tx` lines (distribution, result code, role of the sender) and `S5 rx` lines (distribution it arrived on, sender role, receiver role and rank index). The check is `pass` when an `OFFICER` message arrived at another client, `fail` when every `OFFICER` send was refused or `OFFICER` was accepted but never arrived while `GUILD` did: in that case use the `GUILD` fallback of [SPEC-02 §7](../specs/SPEC-02-network-protocol.md) (in Italian). Send the exports of A, B and C.
+
+## M0.5: what to do in game (S8, S9)
+
+Nothing here sends anything to other players: both checks are local. The probe never calls `Save()` on a tabard (the real tabard is never changed and no gold is spent), never prints or stores a guild or player name (strings returned by the game are reported by length only) and only references textures by path, fileID or atlas name (no game file is copied). `/reload` first.
+
+**S8, tabard info and the pieces catalogue.** Do it on two characters: **one in a guild that has a tabard**, and **one without a guild** (or in a guild without a tabard), so both answers of `GetGuildTabardInfo` are known.
+
+1. `/agfp tabard`. The probe prints the guild tabard info (every field with its type and value; colours as RGB and as `0xRRGGBB`), creates an invisible, off-screen `TabardModel` and waits up to 3 seconds for it to load. Then it cycles variation indices 1 to 10, one after the other, with `CycleVariation(index, 1)` until the model returns to its starting state (a few steps per frame, so the game does not freeze). Each variation prints one line, for example `variation 1: 33 steps, wraps, changes UE(upper emblem)=33 distinct`. When it ends, the S8 result is recorded. It takes roughly 5 to 30 seconds; `/agfp tabard status` shows progress, `/agfp tabard stop` aborts, `/agfp tabard slow` does one step per frame if the client lags.
+2. Read the lines: **which variation index is which** is what the catalogue answers. `UE` = upper emblem file, `UB` = upper border file, `UG` = upper background file (`LE`, `LB`, `LG` = the lower versions), `EC` = vertex colour of the emblem texture (a variation that only changes `EC` is a tint). A variation that changes one field with a small number of steps is typically a colour, one with many steps a style. Note anything surprising (a variation that changes two fields, one that does not wrap, an error line, "no visible change" for an index you expected to work).
+3. `/agfp run S8` repeats the info dump and records the result: `pass` when the API answered and at least one variation changes something, `fail` if the model never loaded or the API is missing.
+4. `/agfp export tabard` opens a frame with the whole catalogue as a Lua table (`AzGF_TabardCatalog`, numbers only). Press Ctrl+C and paste it into the report: it will seed `Data/TabardParts.lua` in M3. The first value of every list is the starting state. Do it on the character with a tabard (the `guildTabardInfo` and `start` lines then show how `GetGuildTabardInfo` maps to the model).
+5. On the character without a tabard, run `/agfp run S8` and `/agfp tabard` too: the info should say "no tabard"; whether the catalogue still lists the pieces from a default look is part of the answer, so report what it prints. Plain `/agfp export` has the summary lines of both.
+
+**S9, texture gallery.** The candidate list is built from known path patterns (loading-screen art, window parchments, `ClassIcon_<Class>` and `classicon-<class>`, the LFG role icons, guild banner textures); not every path exists in Forever and the probe cannot tell by itself, so **you** judge each image.
+
+1. `/agfp gallery`. A movable window opens: the **header preview** (860 × 140, the real banner size) with the **parchment fade** over its lower 60 % and **dark sample text** on top, and below it the thumbnails (about 12 are built per frame; the window fills in within a second or two). The number under every thumbnail is `n`; green = marked ok, red = marked bad. If you already ran `/agfp tabard`, the first fileIDs of every tabard piece are added as candidates (group `tabard`) and appear before the ones added with `/agfp tex`.
+2. Click a thumbnail: the header shows it, cropped to 860 × 140 from the middle of the image (mouse wheel over the header moves the crop up and down) and the text under the header tells the API result, for example `SetTexture=ok GetTexture=... fileID=...`. **A missing texture is shown as a solid green or empty square even when the API says ok**: the API result is only a hint and the picture is what counts.
+3. **Judge readability.** For a banner: keep it if the image is clearly there (not a green or black square) and the dark sample text on the parchment fade stays easy to read; try the `Parchment` button to compare with and without. Mark `bad` when the image is missing, mostly black, too busy or too bright for dark text, or if the crop shows nothing recognisable. For the parchment backgrounds: they must look like paper and keep the dark text readable on their own. For icons, the thumbnails are enough: they must be recognisable and not stretched.
+4. Mark with the **OK** and **Bad** buttons, or `/agfp mark <n> ok|bad` (`clear` removes a mark). Aim for **12 to 16 banners** and at least one parchment marked ok, plus the class icons and role icons that work (texture file or atlas: note which of the two exists for the classes).
+5. Any extra idea (a path or fileID you know, a loading screen of your favourite zone): `/agfp tex <path|fileID>` or `/agfp tex atlas:<name>`; it prints the API result, adds the candidate at the end of the gallery and selects it, so you can look and mark it. Paths use backslashes, for example `/agfp tex Interface\Glues\LoadingScreens\SomeName`.
+6. `/agfp run S9` refreshes the API result of every candidate and records the summary (`pass` when at least 12 banners and one parchment are marked ok, otherwise `info`, `todo` if nothing is marked). `/agfp export gallery` opens a frame with one line per candidate (`n | group | kind | value | API result | mark`) and the list of the ones marked ok with their fileIDs; send it in the report. Marks are kept in `AzGF_ProbeDB.textures.marks` across sessions.
 
 ## Reporting results
 
