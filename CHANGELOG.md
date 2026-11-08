@@ -28,6 +28,7 @@ All notable changes to this project are documented here. The format follows [Kee
 ### Addon
 
 - M1.1: addon skeleton `AzerothGuildFinder/` (TOC with Interface 16001, SavedVariables, AddOn Compartment entry points; `embeds.xml`; `Bindings.xml` with "Toggle Guild Finder"; `Locale/enUS.lua`; `Core/Init.lua` with the AceAddon object, the Forever check and `/gf` and `/guildfinder` with `/gf help`; other commands print "coming soon"). `.pkgmeta` pins Ace3 (Release-r1403), LibDataBroker (v1.1.4) and LibDBIcon (v8.0.4); `tools/fetch_libs.py` downloads them into the git-ignored `Libs/`, `tools/install_addon.py` copies the addon into the AddOns folder, `tools/check_addon.py` checks the TOC and `embeds.xml`. Not yet loaded in the real client.
+- M1.3: `Core/Compat.lua`, the only door to the game API. `Compat.Resolve` and `Compat.Call` (`pcall`; state `available`, `missing`, `error` or `restricted`, secret values dropped through `issecretvalue`/`canaccessvalue`), typed helpers for guild (with a `C_Club` fallback), player, chat lockdown and `Enum.AddOnRestrictionType`, server time, `C_EncodingUtil` wrappers and channels, and a capability table filled at login (`Compat:Probe()`). `/gf debug` prints version, client build, project id and each capability; modules add sections with `AddDebugSection`. APIs marked [verify] in the specification degrade cleanly because the M0 probe has not run yet.
 
 ### Project
 

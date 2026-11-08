@@ -34,9 +34,10 @@
 - Spec: SPEC-01 §1 and §7, ADR 0002
 - Scope: `Core/Compat.lua`: guarded calls, existence checks, secret values, restriction state, chat lockdown, outgoing restriction; the list of APIs from M0 results; `/gf debug` prints what is available.
 - Done when:
-  - [ ] Every game API used later is reached through Compat.
-  - [ ] `/gf debug` reports each capability as available, missing or restricted.
+  - [x] Every game API used later is reached through Compat (typed helpers and `Compat.Call`; later modules must not call the client directly).
+  - [x] `/gf debug` reports each capability as available, missing or restricted (and error).
 - Tests: Compat with missing functions, erroring functions, secret values.
+  - [x] `Tests/test_compat.lua`: missing, erroring and secret values, the `C_Club` fallback, restriction states, `/gf debug` output.
 
 ### M1.4 — Saved data and schema versions
 - Branch: `step/m1-4-config`

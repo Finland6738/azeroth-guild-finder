@@ -29,9 +29,29 @@ end
 AGF.commands = {
 	{ name = "notify", help = L["HELP_NOTIFY"] },
 	{ name = "reset", help = L["HELP_RESET"] },
-	{ name = "debug", help = L["HELP_DEBUG"] },
+	{ name = "debug", help = L["HELP_DEBUG"], handler = function(self) self:PrintDebug() end },
 	{ name = "help", help = L["HELP_HELP"], handler = function(self) self:PrintHelp() end },
 }
+
+-- /gf debug sections: modules add a function returning text lines (never player or guild names).
+AGF.debugSections = {}
+function AGF:AddDebugSection(title, linesFn)
+	for _, s in ipairs(self.debugSections) do
+		if s.title == title then s.linesFn = linesFn return end
+	end
+	self.debugSections[#self.debugSections + 1] = { title = title, linesFn = linesFn }
+end
+
+function AGF:PrintDebug()
+	local version = ns.Compat and select(2, ns.Compat.Call("C_AddOns.GetAddOnMetadata", ADDON_NAME, "Version"))
+	self:Print("Debug - version " .. tostring(version or "?"))
+	for _, section in ipairs(self.debugSections) do
+		local ok, lines = pcall(section.linesFn)
+		if not ok then lines = { "error: " .. tostring(lines):sub(1, 120) } end
+		self:Print(section.title .. ":")
+		for _, line in ipairs(lines or {}) do self:Print(line) end
+	end
+end
 
 function AGF:Toggle()
 	self:Print(L["COMING_SOON"])
@@ -68,6 +88,10 @@ function AGF:OnInitialize()
 	if not self:IsForever() then
 		self:Print(L["WARN_NOT_FOREVER"])  -- OnInitialize runs once per session
 	end
+end
+
+function AGF:OnEnable()
+	if ns.Compat then ns.Compat:Probe() end   -- PLAYER_LOGIN: the capability table for /gf debug and later modules
 end
 
 -- Key binding and AddOn Compartment entry points (globals named in the TOC and Bindings.xml).
