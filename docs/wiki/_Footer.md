@@ -1,0 +1,1 @@
+Azeroth Guild Finder · fan-made addon for World of Warcraft: Forever, not affiliated with Blizzard Entertainment · [Repository](https://github.com/Finland6738/azeroth-guild-finder) · [Feedback](https://github.com/Finland6738/azeroth-guild-finder/discussions/categories/feedback)

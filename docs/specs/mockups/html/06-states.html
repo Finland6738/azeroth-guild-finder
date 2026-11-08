@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>06 Role-based states - Azeroth Guild Finder mockup</title>
+<link rel="stylesheet" href="agf.css">
+<script src="agf.js"></script>
+<style>
+  .stage { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 26px 20px; padding: 22px 20px; }
+  .cell { position: relative; display: flex; flex-direction: column; gap: 6px; }
+  .cap { font: 700 14px/18px Roboto; color: #f3e6cf; z-index: 1; }
+  .cap span { font-weight: 400; color: #bfb19a; }
+  .win { position: relative; flex: 1; margin-right: 66px; display: flex; border-radius: 6px; overflow: visible; filter: drop-shadow(0 8px 14px rgba(0,0,0,.6)); z-index: 1; }
+  .win .page-left { width: 180px; padding: 16px; gap: 8px; }
+  .win .page-right { padding: 14px 16px; }
+  .win .brand h1 { font-size: 18px; line-height: 20px; }
+  .win .brand .crest { width: 38px; height: 46px; }
+  .tabs { position: absolute; right: -66px; top: 18px; display: flex; flex-direction: column; gap: 8px; }
+  .tabs .dest { width: 62px; padding: 6px 0; border-radius: 0 10px 10px 0; display: flex; flex-direction: column; align-items: center; gap: 3px;
+    background: linear-gradient(90deg, var(--iron-2), var(--iron) 30%, #3a4047); box-shadow: inset 0 0 0 2px #5c646d, var(--e2); color: #cfd6dc; font: 500 9.5px/11px Roboto; text-align: center; position: relative; }
+  .tabs .dest .ms { font-size: 20px; }
+  .tabs .dest.on { background: linear-gradient(90deg, #3b2a12, #5a4018 40%, #6e4e1c); box-shadow: inset 0 0 0 2px var(--gold), 0 0 10px rgba(242,191,60,.4); color: #fff3d1; }
+  .tabs .badge { position: absolute; top: 2px; right: 4px; min-width: 16px; height: 16px; font-size: 10px; padding: 0 4px; }
+  .empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 8px; }
+  .empty .ghost-emb { width: 70px; height: 84px; opacity: .45; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <!-- A -->
+  <div class="cell">
+    <div class="cap">A · Member <span>— guild has a listing: only “My Guild”, read-only</span></div>
+    <div class="win">
+      <div class="page page-left">
+        <div class="brand"><div class="crest" data-emblem='{"bg":"#141c2c","bc":"#d7dde4","ec":"#ffffff","symbol":"star","border":"solid"}'></div><div><h1>Aurora</h1><div class="sub">Member</div></div></div>
+        <div class="caption">This is how players without a guild see your guild.</div>
+        <div style="flex:1"></div>
+        <div class="card" style="padding:8px 10px"><div class="caption"><span class="ms" style="font-size:15px">lock</span> Only the Guild Master can edit the listing</div></div>
+      </div>
+      <div class="page page-right">
+        <div style="height:70px;border-radius:8px;overflow:hidden;box-shadow:inset 0 0 0 1.5px #6e4c2c" data-art="emerald:3"></div>
+        <div class="card gold" style="margin:-24px 10px 0;position:relative;padding:8px 12px">
+          <div class="title-s" style="margin-bottom:6px">Looking for</div>
+          <div style="display:flex;gap:6px"><span data-cls="priest"></span><span data-cls="shaman"></span><span data-cls="warrior"></span><span data-cls="mage"></span><span data-cls="druid"></span></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
+          <div class="card" style="padding:8px 10px"><div class="stat"><div class="n sm">31</div><div class="l">Active · 7 days</div></div></div>
+          <div class="card" style="padding:8px 10px"><div class="stat"><div class="n sm">19–24</div><div class="l">Unique players</div></div></div>
+        </div>
+        <div class="caption" style="margin-top:8px">About · Activity · Requirements · Contact …</div>
+      </div>
+      <div class="tabs"><div class="dest"><span class="ms">settings</span>Settings</div><div class="dest on"><span class="ms">shield</span>My Guild</div></div>
+    </div>
+  </div>
+
+  <!-- B -->
+  <div class="cell">
+    <div class="cap">B · Member / officer <span>— no listing yet</span></div>
+    <div class="win">
+      <div class="page page-left">
+        <div class="brand"><div class="crest" data-emblem='{"bg":"#1d3a22","bc":"#e3b43d","ec":"#e3b43d","symbol":"leaf","border":"solid"}'></div><div><h1>Verdemare</h1><div class="sub">Officer</div></div></div>
+        <div style="flex:1"></div>
+      </div>
+      <div class="page page-right">
+        <div class="empty">
+          <div class="ghost-emb" data-emblem='{"bg":"#c9a06a","bc":"#7a5430","ec":"#7a5430","symbol":"tower","border":"solid"}'></div>
+          <div class="title-m">Your guild has no listing yet</div>
+          <div class="body-m muted" style="max-width:330px">Ask your Guild Master to publish one with Guild Finder. Applications will appear here once the guild is listed.</div>
+          <span class="btn tonal sm" style="margin-top:4px"><span class="ms">content_copy</span>Copy a message for your GM</span>
+        </div>
+      </div>
+      <div class="tabs"><div class="dest"><span class="ms">settings</span>Settings</div><div class="dest on"><span class="ms">shield</span>My Guild</div></div>
+    </div>
+  </div>
+
+  <!-- C -->
+  <div class="cell">
+    <div class="cap">C · Guild Master <span>— no listing yet: only the editor</span></div>
+    <div class="win">
+      <div class="page page-left">
+        <div class="brand"><div class="crest" data-emblem='{"bg":"#4a1414","bc":"#e3b43d","ec":"#e3b43d","symbol":"crown","border":"double"}'></div><div><h1>Ordine Scarlatto</h1><div class="sub">Guild Master</div></div></div>
+        <div style="flex:1"></div>
+      </div>
+      <div class="page page-right">
+        <div class="empty">
+          <div class="title-l">Put your guild on the Guild Finder</div>
+          <div class="body-m muted" style="max-width:360px">Players without a guild will see your listing and the classes you need, and can apply with one click. About 3 minutes.</div>
+          <div style="display:flex;gap:6px;margin:4px 0 6px;flex-wrap:wrap;justify-content:center">
+            <span class="tag">1 IDENTITY</span><span class="tag">2 ABOUT</span><span class="tag">3 ACTIVITY</span><span class="tag">4 RECRUITMENT</span><span class="tag">5 REQUIREMENTS</span><span class="tag">6 CONTACT</span><span class="tag">7 PUBLISH</span>
+          </div>
+          <span class="btn primary lg">Start listing</span>
+        </div>
+      </div>
+      <div class="tabs"><div class="dest"><span class="ms">settings</span>Settings</div><div class="dest on"><span class="ms">edit_note</span>Create Listing</div></div>
+    </div>
+  </div>
+
+  <!-- D -->
+  <div class="cell">
+    <div class="cap">D · No guild <span>— “My Application”: one open application</span></div>
+    <div class="win">
+      <div class="page page-left">
+        <div class="brand"><div class="crest" data-emblem='{"bg":"#c9a06a","bc":"#7a5430","ec":"#5a3a1c","symbol":"tower","border":"solid"}'></div><div><h1>Guild Finder</h1><div class="sub">Elarin · Mage 32</div></div></div>
+        <div style="flex:1"></div>
+        <div class="caption">Want another guild? Withdraw first: one open application at a time.</div>
+      </div>
+      <div class="page page-right">
+        <div style="display:flex;gap:12px;align-items:center">
+          <div style="width:56px;height:68px" data-emblem='{"bg":"#141c2c","bc":"#d7dde4","ec":"#ffffff","symbol":"star","border":"solid"}'></div>
+          <div><div class="title-l">Aurora</div><div class="caption">Applied 2 h ago</div></div>
+        </div>
+        <div class="card" style="margin-top:12px;background:var(--ok-bg);box-shadow:inset 0 0 0 1.5px var(--ok)">
+          <div class="title-s" style="color:var(--ok);display:flex;gap:6px;align-items:center"><span class="ms">mark_email_read</span>Received by the guild</div>
+          <div class="caption" style="color:#2d4a22">An officer has your application. If accepted you'll get the normal guild invite in game. Expires in 14 days.</div>
+        </div>
+        <div style="display:flex;gap:4px;margin-top:10px;align-items:center" class="caption">
+          <span class="tag ok">SENT</span><span class="ms" style="font-size:16px">chevron_right</span><span class="tag ok">RECEIVED</span><span class="ms" style="font-size:16px">chevron_right</span><span class="tag">ACCEPTED / DECLINED</span>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:12px"><span class="btn tonal sm">View guild</span><span class="btn tonal sm">Withdraw</span></div>
+      </div>
+      <div class="tabs"><div class="dest"><span class="ms">settings</span>Settings</div><div class="dest"><span class="ms">travel_explore</span>Find a Guild</div><div class="dest on"><span class="ms">assignment_ind</span>My Application</div></div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

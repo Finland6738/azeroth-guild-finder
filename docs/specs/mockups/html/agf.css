@@ -1,0 +1,326 @@
+/* Azeroth Guild Finder - mockup design system (v2)
+   Fantasy "Albion-like" skin on a Material Design 3 skeleton.
+   Fonts: Roboto (UI), Roboto Mono (codes, links, times). Icons: Material Symbols (placeholder for game icons). */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&family=Roboto+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400..700,0..1,0&display=block');
+
+:root {
+  /* ink */
+  --ink: #3b2412;
+  --ink-2: #6a4526;
+  --ink-3: #8c6844;
+  --ink-inv: #fbe9cc;
+  /* parchment */
+  --parch-hi: #fbe3bd;
+  --parch: #f6d6a6;
+  --parch-lo: #eec58d;
+  --page-left: #e9c897;
+  --band: rgba(160, 100, 40, .10);
+  --line: #dcb07a;
+  --line-2: #b98a53;
+  /* metal */
+  --steel-hi: #eef2f6;
+  --steel: #9aa4ae;
+  --steel-lo: #4c545c;
+  --iron: #2a2e33;
+  --iron-2: #1a1d21;
+  --gold: #f2bf3c;
+  --gold-2: #b8820f;
+  /* actions */
+  --red-hi: #e9555a;
+  --red: #b81f25;
+  --red-lo: #7d0f13;
+  --red-txt: #ffdc7a;
+  --blue-hi: #5d9bea;
+  --blue: #2a64bd;
+  --blue-lo: #163d7c;
+  /* states */
+  --ok: #2e7d32;
+  --ok-bg: #e2efd3;
+  --warn: #a8700a;
+  --bad: #b3261e;
+  --bad-bg: #f6dccf;
+  /* class colours */
+  --c-warrior: #c69b6d; --c-paladin: #f48cba; --c-hunter: #aad372; --c-rogue: #fff468;
+  --c-priest: #f5f5f5; --c-shaman: #0070dd; --c-mage: #3fc7eb; --c-warlock: #8788ee; --c-druid: #ff7c0a;
+  /* Material 3 like scales */
+  --r-xs: 4px; --r-sm: 8px; --r-md: 12px; --r-lg: 16px; --r-pill: 999px;
+  --e1: 0 1px 2px rgba(50, 25, 0, .30), 0 1px 3px 1px rgba(50, 25, 0, .15);
+  --e2: 0 1px 2px rgba(40, 20, 0, .30), 0 2px 6px 2px rgba(40, 20, 0, .18);
+  --e3: 0 4px 8px 3px rgba(0, 0, 0, .25), 0 1px 3px rgba(0, 0, 0, .35);
+  --e5: 0 12px 32px rgba(0, 0, 0, .55), 0 4px 10px rgba(0, 0, 0, .4);
+  --grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .45 0 0 0 0 .28 0 0 0 0 .1 0 0 0 .55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  font-family: Roboto, system-ui, sans-serif;
+  color: var(--ink);
+  background: #110d0a;
+  -webkit-font-smoothing: antialiased;
+}
+.mono { font-family: 'Roboto Mono', ui-monospace, monospace; }
+.ms {
+  font-family: 'Material Symbols Rounded';
+  font-weight: 500; font-style: normal; font-size: 20px; line-height: 1;
+  letter-spacing: normal; text-transform: none; display: inline-block; white-space: nowrap;
+  font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+  vertical-align: middle;
+}
+.ms.o { font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24; }
+
+/* ---------- type scale (Material 3, slightly compacted for a game window) ---------- */
+.display { font: 900 34px/40px Roboto; letter-spacing: -.2px; }
+.headline { font: 700 24px/30px Roboto; }
+.title-l { font: 700 20px/26px Roboto; }
+.title-m { font: 500 16px/22px Roboto; letter-spacing: .1px; }
+.title-s { font: 500 14px/20px Roboto; letter-spacing: .1px; }
+.body-l { font: 400 15px/22px Roboto; }
+.body-m { font: 400 13.5px/20px Roboto; }
+.label { font: 500 12.5px/16px Roboto; letter-spacing: .3px; }
+.caption { font: 400 12px/16px Roboto; color: var(--ink-2); }
+.overline { font: 700 11.5px/16px Roboto; letter-spacing: 1.2px; text-transform: uppercase; color: var(--ink-2); }
+.muted { color: var(--ink-2); }
+
+/* ---------- game backdrop ---------- */
+.stage {
+  position: relative; width: 1280px; height: 820px; overflow: hidden;
+  background:
+    radial-gradient(ellipse 50% 40% at 85% 30%, rgba(64, 120, 150, .45), transparent 70%),
+    radial-gradient(ellipse 40% 50% at 10% 85%, rgba(90, 120, 60, .35), transparent 70%),
+    radial-gradient(ellipse 60% 50% at 50% 0%, rgba(170, 140, 90, .25), transparent 70%),
+    linear-gradient(180deg, #2b3328 0%, #1c211b 55%, #121410 100%);
+}
+.stage::after { /* vignette */
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, .55) 100%);
+}
+
+/* ---------- book window ---------- */
+.book { position: absolute; left: 34px; top: 26px; width: 1116px; height: 768px; display: flex; z-index: 1; filter: drop-shadow(0 14px 24px rgba(0,0,0,.6)); }
+.page {
+  position: relative; height: 100%;
+  background-color: var(--parch);
+  background-image:
+    var(--grain),
+    radial-gradient(ellipse at 50% 40%, var(--parch-hi) 0%, var(--parch) 55%, var(--parch-lo) 100%);
+  background-blend-mode: multiply, normal;
+}
+.page-left {
+  width: 312px; padding: 24px 26px 20px 30px; display: flex; flex-direction: column; gap: 11px;
+  background-color: var(--page-left);
+  background-image:
+    var(--grain),
+    linear-gradient(90deg, #dcb47c 0%, var(--page-left) 18%, #efd2a4 85%, #d8ae75 100%);
+}
+.page-right {
+  flex: 1; margin-left: -6px; padding: 18px 26px 18px 28px;
+  box-shadow: inset 10px 0 18px -8px rgba(90, 50, 10, .45), inset 0 0 0 2px rgba(150, 100, 50, .25);
+  display: flex; flex-direction: column; min-width: 0;
+}
+.page-right .content { flex: 1; overflow: hidden; position: relative; }
+
+/* brand on the left page */
+.brand { display: flex; align-items: center; gap: 12px; }
+.brand .crest { width: 58px; height: 70px; }
+.brand h1 { margin: 0; font: 900 30px/32px Roboto; letter-spacing: -.3px; color: #5a3a1c; text-shadow: 0 1px 0 rgba(255, 240, 210, .7); }
+.brand .sub { font: 500 12px/14px Roboto; color: var(--ink-3); letter-spacing: .6px; text-transform: uppercase; }
+
+/* section plate (Albion "Filtra gilde" plate) */
+.plate {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 12px; border-radius: var(--r-xs);
+  background: linear-gradient(#a57d55, #8a6440); color: #fff4df;
+  box-shadow: inset 0 0 0 1px rgba(255, 230, 190, .35), 0 0 0 2px #6e4c2c, var(--e1);
+  font: 700 14px/18px Roboto; letter-spacing: .3px;
+}
+.plate .ms { font-size: 18px; }
+
+/* right page header */
+.ph { display: flex; align-items: center; gap: 14px; padding-bottom: 12px; border-bottom: 1px solid var(--line); margin-bottom: 12px; }
+.ph h2 { margin: 0; font: 700 19px/24px Roboto; color: #6a4523; }
+.ph .grow { flex: 1; }
+.divider { height: 1px; background: linear-gradient(90deg, transparent, var(--line-2), transparent); margin: 6px 0; }
+
+/* close button (metal ring + gold disc) */
+.close {
+  position: absolute; right: -12px; top: -12px; width: 42px; height: 42px; border-radius: 50%; z-index: 5;
+  background: radial-gradient(circle at 35% 30%, var(--steel-hi), var(--steel) 45%, var(--steel-lo) 100%);
+  box-shadow: var(--e3); display: grid; place-items: center;
+}
+.close::before { content: ""; position: absolute; inset: 5px; border-radius: 50%; background: radial-gradient(circle at 40% 35%, #ffe28a, var(--gold) 55%, var(--gold-2)); box-shadow: inset 0 0 0 2px #3a2a10; }
+.close .ms { position: relative; color: #2b1a05; font-size: 22px; font-variation-settings: 'FILL' 1, 'wght' 800; }
+
+/* ---------- navigation rail (Material 3 nav rail, metal skin, ALWAYS labelled) ---------- */
+.rail { position: absolute; right: -92px; top: 46px; width: 92px; display: flex; flex-direction: column; gap: 14px; z-index: 0; }
+.rail .dest { position: relative; display: flex; flex-direction: column; align-items: center; gap: 5px; width: 84px; padding: 9px 0 8px;
+  border-radius: 0 var(--r-md) var(--r-md) 0;
+  background: linear-gradient(90deg, var(--iron-2), var(--iron) 30%, #3a4047);
+  box-shadow: inset 0 0 0 2px #5c646d, inset 0 0 0 3px #1a1c1f, var(--e3);
+  color: #cfd6dc; }
+.rail .dest .ic { width: 42px; height: 32px; border-radius: var(--r-pill); display: grid; place-items: center; }
+.rail .dest .ms { font-size: 24px; }
+.rail .dest .lb { font: 500 11.5px/14px Roboto; letter-spacing: .2px; text-align: center; }
+.rail .dest.on { width: 92px; margin-left: -8px; color: #fff3d1;
+  background: linear-gradient(90deg, #3b2a12, #5a4018 40%, #6e4e1c);
+  box-shadow: inset 0 0 0 2px var(--gold), inset 0 0 0 3px #2b1c06, 0 0 14px rgba(242, 191, 60, .45), var(--e3); }
+.rail .dest.on .ic { background: rgba(242, 191, 60, .25); color: var(--gold); }
+.rail .badge { position: absolute; top: 4px; right: 12px; }
+.rail .spacer { height: 200px; }
+
+/* ---------- buttons (M3 filled / tonal / text, pill shape, glossy Albion skin) ---------- */
+.btn {
+  --rim: #3a2614;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  height: 36px; padding: 0 20px; border-radius: var(--r-pill); border: 0; cursor: pointer;
+  font: 500 14px/20px Roboto; letter-spacing: .2px; white-space: nowrap;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .45), inset 0 -3px 4px rgba(0, 0, 0, .28), 0 0 0 2px var(--rim), 0 0 0 3px rgba(225, 190, 130, .7), var(--e1);
+}
+.btn .ms { font-size: 18px; }
+.btn.lg { height: 44px; padding: 0 28px; font-size: 16px; }
+.btn.sm { height: 30px; padding: 0 14px; font-size: 13px; }
+.btn.primary { background: linear-gradient(180deg, var(--red-hi) 0%, var(--red) 50%, var(--red-lo) 100%); color: var(--red-txt); text-shadow: 0 1px 1px rgba(0,0,0,.5); --rim: #4a080b; }
+.btn.discord { background: linear-gradient(180deg, var(--blue-hi) 0%, var(--blue) 50%, var(--blue-lo) 100%); color: #f2f7ff; text-shadow: 0 1px 1px rgba(0,0,0,.45); --rim: #0d244a; }
+.btn.tonal { background: linear-gradient(180deg, #f3d7a9, #dcb27a); color: #4a2c12; --rim: #7a5430; box-shadow: inset 0 1px 0 rgba(255,255,255,.6), inset 0 -2px 3px rgba(90,50,10,.2), 0 0 0 1.5px var(--rim), var(--e1); }
+.btn.ghost { background: transparent; color: #6a3e14; box-shadow: none; padding: 0 10px; }
+.btn.metal { background: linear-gradient(180deg, #5c646c, #30353b 55%, #1d2024); color: #e9edf1; --rim: #111; }
+.btn[disabled], .btn.disabled { background: linear-gradient(180deg, #a4a4a4, #7a7a7a 50%, #5d5d5d); color: #e3e3e3; text-shadow: none; --rim: #3c3c3c; cursor: default; }
+.icon-btn { width: 36px; height: 36px; border-radius: 50%; display: inline-grid; place-items: center; color: var(--ink-2); }
+.icon-btn:hover { background: rgba(120, 70, 20, .1); }
+
+/* ---------- fields (Albion metal pill + M3 outlined field) ---------- */
+.field {
+  display: flex; align-items: center; gap: 8px; height: 38px; padding: 0 14px; border-radius: var(--r-pill);
+  background: linear-gradient(#fff4dd, #f6e2bd); color: var(--ink);
+  box-shadow: inset 0 2px 3px rgba(90, 50, 10, .25), 0 0 0 2px #3a4047, 0 0 0 3px #8a939b, var(--e1);
+  font: 400 14px/20px Roboto;
+}
+.field .ms { color: var(--ink-2); font-size: 20px; }
+.field .ph-t { color: var(--ink-3); }
+.field.sq { border-radius: var(--r-sm); }
+.field .grow { flex: 1; }
+.field.select::after { content: "arrow_drop_down"; font-family: 'Material Symbols Rounded'; font-size: 24px; color: #4b3420; margin-left: auto; }
+.field-label { font: 700 13px/18px Roboto; color: #4b2e14; margin: 0 0 6px; }
+.field-help { font: 400 11.5px/15px Roboto; color: var(--ink-3); margin-top: 6px; }
+.textarea { height: auto; min-height: 90px; padding: 10px 14px; align-items: flex-start; border-radius: var(--r-md); }
+
+/* ---------- chips (M3 filter / assist chips) ---------- */
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 12px; border-radius: var(--r-sm);
+  font: 500 12.5px/16px Roboto; color: #4a2c12; background: rgba(255, 245, 225, .45);
+  box-shadow: inset 0 0 0 1px var(--line-2);
+}
+.chip .ms { font-size: 17px; }
+.chip.on { background: linear-gradient(#7a4a22, #5a3315); color: #ffeac2; box-shadow: inset 0 0 0 1px #3d210b, var(--e1); }
+.chip.on::before { content: "check"; font-family: 'Material Symbols Rounded'; font-size: 16px; margin-left: -4px; }
+.tag { display: inline-flex; align-items: center; gap: 4px; height: 22px; padding: 0 8px; border-radius: var(--r-xs); font: 700 11px/14px Roboto; letter-spacing: .5px; background: rgba(110, 70, 30, .14); color: #5b391a; }
+.tag.ok { background: var(--ok-bg); color: var(--ok); }
+.tag.bad { background: var(--bad-bg); color: var(--bad); }
+.tag.gold { background: #f8e2a6; color: #7a5208; }
+
+/* ---------- switch (M3 switch, leather/metal skin) ---------- */
+.sw { position: relative; width: 46px; height: 26px; border-radius: var(--r-pill); flex: none;
+  background: linear-gradient(#cdab7d, #b8925f); box-shadow: inset 0 0 0 2px #7a5430, inset 0 2px 3px rgba(0,0,0,.25); }
+.sw::after { content: ""; position: absolute; left: 6px; top: 6px; width: 14px; height: 14px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #eef2f6, #8f99a3 60%, #4a525a); box-shadow: 0 1px 2px rgba(0,0,0,.5); }
+.sw.on { background: linear-gradient(#3f9a45, #276b2c); box-shadow: inset 0 0 0 2px #1d4d20, inset 0 2px 3px rgba(0,0,0,.25); }
+.sw.on::after { left: 23px; top: 3px; width: 20px; height: 20px; background: radial-gradient(circle at 35% 30%, #fffdf6, #f1dfb6 60%, #c9ad78); }
+.opt { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 30px; font: 400 13.5px/18px Roboto; }
+
+/* checkbox (grid in editor) */
+.cb { width: 22px; height: 22px; border-radius: 6px; display: inline-grid; place-items: center; background: #fff6e4; box-shadow: inset 0 0 0 2px #8a6237; }
+.cb.on { background: linear-gradient(#3f9a45, #276b2c); box-shadow: inset 0 0 0 2px #1d4d20; }
+.cb.on::after { content: "check"; font-family: 'Material Symbols Rounded'; color: #fff; font-size: 18px; font-variation-settings: 'wght' 700; }
+.cb.x { background: repeating-linear-gradient(45deg, #e3cfab 0 4px, #d6bf98 4px 8px); box-shadow: inset 0 0 0 1.5px #c3a77c; }
+
+/* badge */
+.badge { min-width: 20px; height: 20px; padding: 0 6px; border-radius: var(--r-pill); display: inline-grid; place-items: center;
+  background: linear-gradient(#ef4c4c, #b31212); color: #fff; font: 700 11.5px/1 Roboto; box-shadow: 0 0 0 2px #2a0808, var(--e1); }
+
+/* class icon (game icon; ring in the class colour) */
+.cls { --c: #999; width: 26px; height: 26px; border-radius: 5px; display: inline-block; flex: none; vertical-align: middle;
+  background: #222 center / cover no-repeat; box-shadow: 0 0 0 1.5px #1a120a, 0 0 0 3px var(--c), 0 1px 3px 3px rgba(0,0,0,.25); }
+.cls.lg { width: 40px; height: 40px; border-radius: 7px; }
+.cls.sm { width: 20px; height: 20px; border-radius: 4px; box-shadow: 0 0 0 1px #1a120a, 0 0 0 2px var(--c); }
+.role { width: 22px; height: 22px; border-radius: 50%; display: inline-grid; place-items: center; background: #3a2a1a; color: #ffe3a3; box-shadow: 0 0 0 1.5px #b9a37a; }
+.role .ms { font-size: 14px; }
+.role.t { background: #2c4f86; } .role.h { background: #2f7a36; } .role.m, .role.d { background: #8e2a1f; } .role.r { background: #6a3f9e; }
+.role.lg { width: 28px; height: 28px; } .role.lg .ms { font-size: 18px; }
+.chip .role { width: 20px; height: 20px; margin-left: -6px; box-shadow: none; } .chip .role .ms { font-size: 13px; }
+
+/* ---------- guild list card (Albion row) ---------- */
+.gcard { position: relative; border-radius: var(--r-sm); margin-bottom: 12px; }
+.gcard .top { position: relative; display: flex; gap: 16px; min-height: 120px; padding: 10px 14px 10px 10px; border-radius: var(--r-sm) var(--r-sm) 0 0; overflow: hidden; }
+.gcard .art { position: absolute; right: 0; top: 0; bottom: 0; width: 56%;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, rgba(0,0,0,.65) 22%, #000 45%); mask-image: linear-gradient(90deg, transparent 0%, rgba(0,0,0,.65) 22%, #000 45%); }
+.gcard .art svg { width: 100%; height: 100%; display: block; }
+.gcard .emb { width: 84px; height: 100px; flex: none; position: relative; z-index: 1; filter: drop-shadow(0 3px 3px rgba(60, 30, 0, .45)); }
+.gcard .txt { position: relative; z-index: 1; max-width: 360px; padding-top: 6px; }
+.gcard .name { font: 700 19px/24px Roboto; color: #3a200c; }
+.gcard .sub { font: 400 13.5px/19px Roboto; color: #5d3d20; margin-top: 2px; }
+.gcard .actions { position: absolute; right: 14px; bottom: 12px; display: flex; gap: 10px; z-index: 2; }
+.gcard .flag { position: absolute; left: 110px; bottom: 10px; z-index: 2; }
+.gcard .info { display: grid; grid-template-columns: 1.05fr 1fr 1.25fr; gap: 0 18px; padding: 6px 14px; border-radius: 0 0 var(--r-sm) var(--r-sm); background: rgba(150, 95, 40, .07); }
+.gcard .info > div { display: flex; align-items: center; gap: 8px; height: 26px; font: 400 13px/16px Roboto; color: #4b2e14; white-space: nowrap; }
+.gcard .info > div:nth-child(-n+3) { border-bottom: 1px solid rgba(160, 110, 60, .25); }
+.gcard .info .ms { font-size: 17px; color: #8a5a2a; }
+.gcard.sel .top { box-shadow: inset 0 0 0 2px var(--gold); }
+.gcard.hover .top::before { content: ""; position: absolute; inset: 0; background: rgba(255, 240, 200, .35); }
+
+/* generic cards (M3 elevated card on parchment) */
+.card { border-radius: var(--r-md); background: rgba(255, 244, 222, .55); box-shadow: inset 0 0 0 1px rgba(160, 110, 60, .35); padding: 14px 16px; }
+.card.e { background: linear-gradient(#fff3da, #f7e1b9); box-shadow: var(--e2), inset 0 0 0 1px rgba(160,110,60,.3); }
+.card.gold { background: linear-gradient(#fff4d2, #f9e3ac); box-shadow: inset 0 0 0 2px #d6a23a, inset 0 0 0 4px rgba(255,255,255,.5), var(--e2); }
+.card h3 { margin: 0 0 8px; font: 700 15px/20px Roboto; color: #4b2e14; display: flex; align-items: center; gap: 8px; }
+.card h3 .ms { font-size: 20px; color: #8a5a2a; }
+
+/* stats */
+.stat .n { font: 700 28px/32px Roboto; color: #3a200c; }
+.stat .n.sm { font-size: 20px; line-height: 24px; }
+.stat .l { font: 400 12px/16px Roboto; color: var(--ink-2); }
+.classbar { display: flex; height: 12px; border-radius: 6px; overflow: hidden; box-shadow: 0 0 0 1px #6a4526; }
+.classbar span { display: block; height: 100%; }
+
+/* days */
+.days { display: flex; gap: 4px; }
+.days span { width: 30px; height: 28px; border-radius: 6px; display: grid; place-items: center; font: 700 12px/1 Roboto; color: #8c6844; background: rgba(160, 110, 60, .14); }
+.days span.on { color: #ffeac2; background: linear-gradient(#7a4a22, #5a3315); box-shadow: var(--e1); }
+
+/* copy field */
+.copy { display: flex; align-items: center; gap: 6px; height: 38px; padding: 0 6px 0 12px; border-radius: var(--r-sm);
+  background: #fffaf0; box-shadow: inset 0 0 0 2px var(--blue), 0 0 0 4px rgba(42, 100, 189, .18); font: 500 12px/1 'Roboto Mono', monospace; color: #1b3d73; white-space: nowrap; overflow: hidden; }
+.copy .grow { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.copy .sel { background: #b8d3fb; padding: 2px 0; }
+
+/* scrollbar (Albion metal) */
+.scroll { position: absolute; right: -14px; top: 0; bottom: 0; width: 12px; border-radius: 6px; background: linear-gradient(90deg, #2a2e33, #4a5158, #2a2e33); box-shadow: inset 0 0 0 1px #111; }
+.scroll::after { content: ""; position: absolute; left: 1px; right: 1px; top: 8px; height: 140px; border-radius: 5px; background: linear-gradient(90deg, #8b939b, #d9dfe5, #8b939b); }
+
+/* status bar */
+.statusbar { display: flex; align-items: center; gap: 14px; padding-top: 10px; margin-top: 8px; border-top: 1px solid var(--line); font: 400 12px/16px Roboto; color: var(--ink-2); }
+.statusbar .ms { font-size: 16px; color: var(--ok); }
+.dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; background: #43a047; box-shadow: 0 0 0 2px rgba(67,160,71,.25); }
+.dot.off { background: #9e9e9e; box-shadow: none; }
+
+/* snackbar / tooltip (M3) */
+.snackbar { display: flex; align-items: center; gap: 14px; padding: 12px 16px; border-radius: var(--r-sm); background: #2d241b; color: #f7ead2; font: 400 13.5px/18px Roboto; box-shadow: var(--e3); }
+.snackbar b { color: var(--gold); font-weight: 500; }
+.tooltip { position: absolute; padding: 8px 10px; border-radius: var(--r-xs); background: #1f1a15; color: #f3e6cf; font: 400 12px/16px Roboto; box-shadow: var(--e3); z-index: 9; border: 1px solid #6b5a40; }
+
+/* annotation callouts (only in mockups) */
+.note { position: absolute; z-index: 20; display: flex; align-items: flex-start; gap: 6px; max-width: 220px; font: 500 11.5px/15px Roboto; color: #0d2f5c; }
+.note i { flex: none; width: 20px; height: 20px; border-radius: 50%; background: #1565c0; color: #fff; font: 700 11px/20px Roboto; text-align: center; font-style: normal; box-shadow: 0 0 0 2px #fff, var(--e2); }
+.note span { background: rgba(227, 240, 255, .96); padding: 5px 8px; border-radius: 6px; box-shadow: var(--e2); }
+body.clean .note { display: none; }
+
+/* commitment (pace) tags and numbered activity chips */
+.tag.pace { gap: 3px; }
+.tag.pace .ms { font-size: 13px; }
+.tag.casual { background: #dcebd0; color: #2e6b2e; }
+.tag.soft { background: #f6e1a8; color: #7a5208; }
+.tag.hard { background: #f3c9bd; color: #8e1b12; }
+.chip .num { width: 18px; height: 18px; margin-left: -6px; border-radius: 50%; display: inline-grid; place-items: center; background: var(--gold); color: #3a2405; font: 700 11px/1 Roboto; }
+.chip.on.numd::before { content: none; }
+.chip.off { opacity: .45; }

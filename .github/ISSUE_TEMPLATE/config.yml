@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Feedback, questions and ideas
+    url: https://github.com/Finland6738/azeroth-guild-finder/discussions/categories/feedback
+    about: Share feedback, ask a question or suggest a feature in the Feedback discussions.
+  - name: Announcements
+    url: https://github.com/Finland6738/azeroth-guild-finder/discussions/categories/announcements
+    about: Releases and project news.

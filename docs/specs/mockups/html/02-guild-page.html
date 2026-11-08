@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>02 Guild page - Azeroth Guild Finder mockup</title>
+<link rel="stylesheet" href="agf.css">
+<script src="agf.js"></script>
+<style>
+  .hero-emb { width: 150px; height: 180px; margin: 4px auto 0; filter: drop-shadow(0 6px 6px rgba(60,30,0,.45)); }
+  .gname { text-align: center; font: 900 28px/32px Roboto; color: #3a200c; margin-top: 4px; }
+  .gsub { text-align: center; font: 400 13.5px/19px Roboto; color: #5d3d20; }
+  .facts { display: grid; grid-template-columns: auto 1fr; gap: 6px 10px; font: 400 13px/18px Roboto; }
+  .facts .ms { font-size: 18px; color: #8a5a2a; }
+  .contact { display: flex; align-items: center; gap: 10px; height: 34px; font: 400 13.5px/18px Roboto; }
+  .banner { position: relative; height: 150px; border-radius: var(--r-md); overflow: hidden; box-shadow: var(--e2), inset 0 0 0 2px #6e4c2c; }
+  .banner svg { width: 100%; height: 100%; display: block; }
+  .banner::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 45%, rgba(246, 214, 166, .95) 100%); }
+  .lf { position: relative; margin: -58px 18px 0; z-index: 2; }
+  .lf-grid { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+  .lf-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px 8px 8px; border-radius: var(--r-sm); background: rgba(255,255,255,.55); box-shadow: inset 0 0 0 1px rgba(184,130,15,.45); }
+  .lf-item b { display: block; font: 700 13.5px/16px Roboto; }
+  .lf-item .roles { display: flex; gap: 4px; margin-top: 3px; }
+  .cols { display: grid; grid-template-columns: 1.1fr 1fr; gap: 14px; margin-top: 14px; }
+  .stack { display: flex; flex-direction: column; gap: 14px; }
+  .req { display: flex; align-items: center; gap: 8px; font: 400 13.5px/22px Roboto; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="book">
+    <!-- LEFT PAGE: identity + actions -->
+    <div class="page page-left" style="gap:12px">
+      <span class="btn tonal sm" style="align-self:flex-start"><span class="ms">arrow_back</span>Back to results</span>
+      <div class="hero-emb" data-emblem='{"bg":"#141c2c","bc":"#d7dde4","ec":"#ffffff","symbol":"star","border":"solid"}'></div>
+      <div>
+        <div class="gname">Aurora</div>
+        <div class="gsub">Open recruitment · small-scale PvP</div>
+        <div style="display:flex;gap:6px;justify-content:center;margin-top:8px"><span class="tag">ITALIAN</span><span class="tag">ENGLISH</span><span class="tag" style="background:#5a1414;color:#ffd9a0">HORDE</span></div><div style="display:flex;justify-content:center;margin-top:6px"><span class="tag pace soft"><span class="ms">event_available</span>SOFTCORE</span></div>
+      </div>
+      <span class="btn primary lg" style="width:100%;margin-top:4px">Apply to Aurora</span>
+      <div class="caption" style="text-align:center;margin-top:-4px">Sends your character, class and level to the officers</div>
+      <div class="divider"></div>
+      <div class="overline">Contact</div>
+      <div class="copy"><span class="ms" style="color:var(--blue)">forum</span><span class="grow"><span class="sel">https://discord.gg/aurora-it</span></span><span class="ms" style="color:var(--blue);font-size:18px">content_copy</span></div>
+      <div class="caption" style="margin-top:-6px">Selected — press <b class="mono">Ctrl+C</b> to copy</div>
+      <div class="contact"><span class="dot"></span><b>Lyryn</b><span class="caption">Guild Master</span><span style="flex:1"></span><span class="btn tonal sm"><span class="ms">chat</span>Whisper</span></div>
+      <div class="contact"><span class="dot off"></span><b>Kaelthar</b><span class="caption">Officer</span><span style="flex:1"></span><span class="btn tonal sm"><span class="ms">chat</span>Whisper</span></div>
+      <div style="flex:1"></div>
+      <div class="caption">Listed since <b>12 Oct 2026</b> · Updated <b>2 days ago</b></div>
+    </div>
+
+    <!-- RIGHT PAGE: details -->
+    <div class="page page-right">
+      <div class="content" style="overflow:visible">
+        <div class="banner" data-art="emerald:3"></div>
+
+        <div class="card gold lf">
+          <h3><span class="ms" style="color:#b8820f">person_search</span>Looking for <span class="tag ok" style="margin-left:6px">RECRUITING</span><span style="flex:1"></span><span class="tag ok"><span class="ms" style="font-size:14px">check_circle</span>They need your class: Mage · Ranged DPS</span></h3>
+          <div class="lf-grid">
+            <div class="lf-item"><span data-cls="priest" class="lg"></span><div><b>Priest</b><div class="roles"><span data-role="h"></span></div></div></div>
+            <div class="lf-item"><span data-cls="shaman" class="lg"></span><div><b>Shaman</b><div class="roles"><span data-role="h"></span></div></div></div>
+            <div class="lf-item"><span data-cls="warrior" class="lg"></span><div><b>Warrior</b><div class="roles"><span data-role="t"></span></div></div></div>
+            <div class="lf-item"><span data-cls="mage" class="lg"></span><div><b>Mage</b><div class="roles"><span data-role="r"></span></div></div></div>
+            <div class="lf-item"><span data-cls="druid" class="lg"></span><div><b>Druid</b><div class="roles"><span data-role="t"></span><span data-role="h"></span><span data-role="m"></span></div></div></div>
+          </div>
+          <div class="caption" style="display:flex;gap:14px;margin-top:8px;align-items:center"><span><span data-role="t"></span> Tank</span><span><span data-role="h"></span> Healer</span><span><span data-role="m"></span> Melee DPS</span><span><span data-role="r"></span> Ranged DPS</span></div>
+        </div>
+
+        <div class="cols">
+          <div class="stack">
+            <div class="card">
+              <h3><span class="ms">auto_stories</span>About</h3>
+              <div class="body-m">Competitive guild focused on small-scale PvP, with a relaxed raid night on Wednesdays. We help new players gear up and level. Italian first, English welcome.</div>
+            </div>
+            <div class="card">
+              <h3><span class="ms">event</span>Activity</h3>
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span class="tag pace soft"><span class="ms">event_available</span>SOFTCORE</span><span class="caption">Regular activity, some scheduled events</span></div>
+              <div class="chips" style="margin-bottom:10px"><span class="chip"><span class="num">1</span>World PvP</span><span class="chip"><span class="num">2</span>Raids</span><span class="chip"><span class="num">3</span>Battlegrounds</span></div>
+              <div style="display:flex;align-items:center;gap:14px">
+                <div class="days"><span class="on">M</span><span class="on">T</span><span class="on">W</span><span class="on">T</span><span class="on">F</span><span>S</span><span>S</span></div>
+              </div>
+              <div style="margin-top:10px"><span class="mono title-m">20:00 – 23:30</span> <span class="caption">your time</span> · <span class="mono caption">19:00–22:30 UTC</span></div>
+            </div>
+          </div>
+          <div class="stack">
+            <div class="card">
+              <h3><span class="ms">groups</span>Members <span class="caption" style="margin-left:auto">updated 3 h ago</span></h3>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 12px">
+                <div class="stat"><div class="n">31</div><div class="l">Active characters · 7 days</div></div>
+                <div class="stat"><div class="n">19–24</div><div class="l">Unique players · 7 days <span class="ms o" style="font-size:14px">info</span></div></div>
+                <div class="stat"><div class="n sm">149</div><div class="l">Total members</div></div>
+                <div class="stat"><div class="n sm">12</div><div class="l">At max level</div></div>
+              </div>
+              <div class="classbar" style="margin-top:12px">
+                <span style="width:18%;background:var(--c-warrior)"></span><span style="width:11%;background:var(--c-priest)"></span><span style="width:14%;background:var(--c-mage)"></span><span style="width:9%;background:var(--c-hunter)"></span><span style="width:13%;background:var(--c-rogue)"></span><span style="width:10%;background:var(--c-warlock)"></span><span style="width:10%;background:var(--c-druid)"></span><span style="width:15%;background:var(--c-shaman)"></span>
+              </div>
+              <div class="caption" style="margin-top:6px">Class mix of active characters</div>
+            </div>
+            <div class="card">
+              <h3><span class="ms">verified</span>Requirements</h3>
+              <div class="req"><span class="ms" style="color:var(--ok)">check_circle</span>Level 20+ <span class="caption">(you are 32)</span></div>
+              <div class="req"><span class="ms o" style="color:var(--ink-3)">remove</span><span class="muted">No item level requirement</span></div>
+              <div class="req"><span class="ms o" style="color:var(--ink-3)">headset_mic</span><i class="muted">“Discord voice chat for raids”</i></div>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:14px;display:flex;align-items:center;gap:18px">
+          <span class="ms" style="font-size:28px;color:#8a5a2a">help</span>
+          <div style="flex:1"><div class="title-s">How applying works</div>
+            <div class="caption">1. Apply sends your character, class and level · 2. Officers are notified in game · 3. If accepted you get the normal guild invite. One open application at a time, it expires after 14 days.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="close"><span class="ms">close</span></div>
+    <div class="rail">
+      <div class="dest"><div class="ic"><span class="ms">settings</span></div><div class="lb">Settings</div></div>
+      <div class="dest on"><div class="ic"><span class="ms">travel_explore</span></div><div class="lb">Find a<br>Guild</div></div>
+      <div class="dest"><div class="ic"><span class="ms">assignment_ind</span></div><div class="lb">My<br>Application</div></div>
+    </div>
+  </div>
+
+  <div class="note" style="left:200px;top:40px"><i>1</i><span>Page replaces the list; Back keeps filters and scroll</span></div>
+  <div class="note" style="left:60px;top:470px;max-width:250px"><i>2</i><span>Left page = who they are + the actions (Apply, Discord, Whisper)</span></div>
+  <div class="note" style="left:900px;top:180px;max-width:220px"><i>3</i><span>"Looking for" first, gold card over the banner</span></div>
+  <div class="note" style="left:1000px;top:420px;max-width:150px"><i>4</i><span>Aggregate stats only; range = estimate</span></div>
+  <div class="note" style="left:520px;top:690px;max-width:200px"><i>5</i><span>Times in your local time, UTC smaller</span></div>
+</div>
+</body>
+</html>

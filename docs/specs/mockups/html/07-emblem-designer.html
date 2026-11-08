@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>07 Emblem designer (Identity step) - Azeroth Guild Finder mockup</title>
+<link rel="stylesheet" href="agf.css">
+<script src="agf.js"></script>
+<style>
+  .steps { display: flex; flex-direction: column; gap: 4px; }
+  .step { display: flex; align-items: center; gap: 10px; height: 42px; padding: 0 12px; border-radius: var(--r-sm); font: 500 14px/18px Roboto; color: #4b2e14; }
+  .step .n { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font: 700 12px/1 Roboto; background: rgba(110,70,30,.18); }
+  .step .ms { margin-left: auto; font-size: 20px; color: var(--ok); }
+  .step.done .n { background: var(--ok); color: #fff; }
+  .step.on { background: linear-gradient(#fff2d4, #f6dfb1); box-shadow: inset 0 0 0 2px var(--gold-2), var(--e1); }
+  .step.on .n { background: #7a4a22; color: #fff; }
+  .seg { display: inline-flex; border-radius: var(--r-pill); box-shadow: 0 0 0 1.5px #7a5430; overflow: hidden; }
+  .seg > span { display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 16px; font: 500 13px/1 Roboto; color: #4a2c12; border-left: 1.5px solid #7a5430; background: rgba(255,245,225,.5); }
+  .seg > span:first-child { border-left: 0; }
+  .seg > span.on { background: linear-gradient(#7a4a22, #5a3315); color: #ffeac2; }
+  .seg > span.on::before { content: "check"; font-family: 'Material Symbols Rounded'; font-size: 16px; }
+  .sec { display: flex; flex-direction: column; gap: 8px; }
+  .sec-h { display: flex; align-items: center; gap: 10px; }
+  .sec-h .plate { flex: 1; padding: 6px 12px; font-size: 13px; }
+  .sw-row { display: flex; gap: 6px; flex-wrap: wrap; }
+  .swatch { width: 26px; height: 26px; border-radius: 6px; box-shadow: inset 0 0 0 1.5px rgba(0,0,0,.45), 0 1px 2px rgba(0,0,0,.3); }
+  .swatch.on { box-shadow: 0 0 0 2px #fff7e0, 0 0 0 4px var(--gold-2), 0 2px 4px rgba(0,0,0,.4); }
+  .syms { display: grid; grid-template-columns: repeat(8, 46px); gap: 6px; }
+  .sym { width: 46px; height: 46px; border-radius: 8px; padding: 7px; background: linear-gradient(#5b636b, #2c3136); box-shadow: inset 0 0 0 2px #8e979f, inset 0 0 0 3px #1a1d20, var(--e1); }
+  .sym.on { box-shadow: inset 0 0 0 2px var(--gold), inset 0 0 0 3px #2b1c06, 0 0 10px rgba(242,191,60,.6); }
+  .stepper { display: inline-flex; align-items: center; gap: 4px; height: 32px; padding: 0 4px; border-radius: var(--r-pill); background: linear-gradient(#5c646c, #30353b); color: #f0f3f6; font: 500 12.5px/1 Roboto; box-shadow: 0 0 0 1.5px #111, var(--e1); }
+  .stepper .ms { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; background: radial-gradient(circle at 40% 35%, #ffe28a, var(--gold) 55%, var(--gold-2)); color: #2b1a05; font-size: 18px; }
+  .stepper b { padding: 0 8px; min-width: 110px; text-align: center; font-weight: 500; }
+  .preview { width: 100%; height: 300px; border-radius: var(--r-md); position: relative; overflow: hidden; box-shadow: inset 0 0 0 2px #6e4c2c, var(--e2); }
+  .preview .bg { position: absolute; inset: 0; }
+  .preview .bg svg { width: 100%; height: 100%; }
+  .preview .big { position: absolute; left: 50%; top: 24px; width: 180px; height: 216px; transform: translateX(-50%); filter: drop-shadow(0 10px 10px rgba(0,0,0,.6)); }
+  .thumbs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .thumb { height: 44px; border-radius: 6px; overflow: hidden; box-shadow: inset 0 0 0 1.5px #6e4c2c; }
+  .thumb svg { width: 100%; height: 100%; display: block; }
+  .thumb.on { box-shadow: 0 0 0 2px #fff7e0, 0 0 0 4px var(--gold-2); }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="book">
+    <div class="page page-left">
+      <div class="brand">
+        <div class="crest" data-emblem='{"bg":"#4a1414","bc":"#e3b43d","ec":"#e3b43d","symbol":"crown","border":"double"}'></div>
+        <div><h1 style="font-size:24px">Ordine Scarlatto</h1><div class="sub">Create your listing</div></div>
+      </div>
+      <div class="plate"><span>Listing sections</span><span style="font-weight:500;opacity:.8">0 / 7 ready</span></div>
+      <div class="steps">
+        <div class="step on"><span class="n">1</span>Identity</div>
+        <div class="step"><span class="n">2</span>About</div>
+        <div class="step"><span class="n">3</span>Activity</div>
+        <div class="step"><span class="n">4</span>Recruitment</div>
+        <div class="step"><span class="n">5</span>Requirements</div>
+        <div class="step"><span class="n">6</span>Contact<span class="caption" style="margin-left:auto">optional</span></div>
+        <div class="step"><span class="n">7</span>Preview &amp; publish</div>
+      </div>
+      <div style="flex:1"></div>
+      <div class="card" style="padding:10px 12px">
+        <div class="title-s" style="display:flex;align-items:center;gap:6px"><span class="ms" style="color:#8a5a2a">info</span>No guild tabard yet</div>
+        <div class="caption">Design an emblem here: it is used only in Guild Finder. Your in-game tabard is never changed.</div>
+      </div>
+    </div>
+
+    <div class="page page-right">
+      <div class="ph">
+        <div><div class="overline">Step 1 of 7</div><h2>Identity · Emblem</h2></div>
+        <div class="grow"></div>
+        <div class="seg"><span><span class="ms" style="font-size:16px">checkroom</span>Guild tabard</span><span class="on">Custom emblem</span></div>
+      </div>
+
+      <div class="content" style="display:grid;grid-template-columns:1fr 290px;gap:20px">
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div class="sec">
+            <div class="sec-h"><div class="plate">Background</div></div>
+            <div class="sw-row">
+              <span class="swatch" style="background:#141c2c"></span><span class="swatch on" style="background:#4a1414"></span><span class="swatch" style="background:#1f3a58"></span><span class="swatch" style="background:#1d3a22"></span><span class="swatch" style="background:#3a2450"></span><span class="swatch" style="background:#5a3a14"></span><span class="swatch" style="background:#14090a"></span><span class="swatch" style="background:#f1ece0"></span><span class="swatch" style="background:#c9a06a"></span><span class="swatch" style="background:#8a1d1d"></span><span class="swatch" style="background:#2a64bd"></span><span class="swatch" style="background:#2e7d32"></span><span class="swatch" style="background:#6b6b6b"></span><span class="swatch" style="background:#d07a2a"></span>
+            </div>
+          </div>
+          <div class="sec">
+            <div class="sec-h"><div class="plate">Border</div><div class="stepper"><span class="ms">chevron_left</span><b>Style 3 of 6 · Double</b><span class="ms">chevron_right</span></div></div>
+            <div class="sw-row">
+              <span class="swatch on" style="background:#e3b43d"></span><span class="swatch" style="background:#d7dde4"></span><span class="swatch" style="background:#1b1b1b"></span><span class="swatch" style="background:#8a1d1d"></span><span class="swatch" style="background:#f1ece0"></span><span class="swatch" style="background:#5a3a14"></span><span class="swatch" style="background:#2a64bd"></span>
+            </div>
+          </div>
+          <div class="sec">
+            <div class="sec-h"><div class="plate">Emblem</div><div class="stepper"><span class="ms">chevron_left</span><b>Page 1 of 12</b><span class="ms">chevron_right</span></div></div>
+            <div class="syms">
+              <div class="sym" data-emblem='{"bg":"transparent","bc":"transparent","ec":"#f0f0f0","symbol":"star","border":"none","bare":true}'></div>
+              <div class="sym" data-emblem='{"bg":"transparent","bc":"transparent","ec":"#f0f0f0","symbol":"star8","border":"none","bare":true}'></div>
+              <div class="sym" data-emblem='{"bg":"transparent","bc":"transparent","ec":"#f0f0f0","symbol":"sun","border":"none","bare":true}'></div>
+              <div class="sym" data-emblem='{"bg":"transparent","bc":"transparent","ec":"#f0f0f0","symbol":"cross","border":"none","bare":true}'></div>
+              <div class="sym" data-emblem='{"bg":"transparent","bc":"transparent","ec":"#f0f0f0","symbol":"crescent","border":"none","bare":true}'></div>
+              <div class="sym" data-emblem='{"bg":"transparent","bc":"transparent","ec":"#f0f0f0","symbol":"sword","border":"none","bare":true}'></div>
+              <div class="sym on" data-emblem='{"bg":"transparent","bc":"transparent","ec":"#f2bf3c","symbol":"crown","border":"none","bare":true}'></div>
+              <div class="sym" data-emblem='{"bg":"transparent","bc":"transparent","ec":"#f0f0f0","symbol":"tower","border":"none","bare":true}'></div>
+              <div class="sym" data-emblem='{"bg":"transparent","bc":"transparent","ec":"#f0f0f0","symbol":"flame","border":"none","bare":true}'></div>
+              <div class="sym" data-emblem='{"bg":"transparent","bc":"transparent","ec":"#f0f0f0","symbol":"hood","border":"none","bare":true}'></div>
+              <div class="sym" data-emblem='{"bg":"transparent","bc":"transparent","ec":"#f0f0f0","symbol":"beast","border":"none","bare":true}'></div>
+              <div class="sym" data-emblem='{"bg":"transparent","bc":"transparent","ec":"#f0f0f0","symbol":"leaf","border":"none","bare":true}'></div>
+            </div>
+            <div class="sw-row">
+              <span class="swatch on" style="background:#e3b43d"></span><span class="swatch" style="background:#ffffff"></span><span class="swatch" style="background:#1b1b1b"></span><span class="swatch" style="background:#b3171d"></span><span class="swatch" style="background:#9bd1ff"></span><span class="swatch" style="background:#7ad67a"></span><span class="swatch" style="background:#c49bff"></span>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1.4fr;gap:12px;margin-top:2px">
+            <div><div class="field-label">Guild name</div><div class="field sq" style="background:#efe2c6"><span class="ms">lock</span><b>Ordine Scarlatto</b></div></div>
+            <div><div class="field-label">Subtitle <span class="caption" style="float:right">38 / 60</span></div><div class="field sq"><span>Roleplay and raids, Italian evenings</span></div></div>
+          </div>
+          <div class="caption" style="margin-top:-2px"><span class="ms" style="font-size:15px">inventory_2</span> Pieces = the game's own tabard emblems, borders and colours (referenced by fileID, nothing copied)</div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div class="preview">
+            <div class="bg" data-art="ember:21"></div>
+            <div class="big" data-emblem='{"bg":"#4a1414","bc":"#e3b43d","ec":"#e3b43d","symbol":"crown","border":"double"}'></div>
+          </div>
+          <div style="display:flex;gap:8px"><span class="btn tonal sm" style="flex:1"><span class="ms">casino</span>Random</span><span class="btn tonal sm" style="flex:1"><span class="ms">restart_alt</span>Reset</span></div>
+          <div class="field-label" style="margin:4px 0 0">Banner background</div>
+          <div class="thumbs">
+            <div class="thumb" data-art="emerald:3"></div><div class="thumb on" data-art="ember:21"></div><div class="thumb" data-art="frost:5"></div><div class="thumb" data-art="dusk:9"></div>
+            <div class="thumb" data-art="gold:4"></div><div class="thumb" data-art="storm:8"></div><div class="thumb" data-art="emerald:14"></div><div class="thumb" data-art="frost:17"></div>
+          </div>
+          <div class="caption">Only client images verified with <span class="mono">/gf debug textures</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="close"><span class="ms">close</span></div>
+    <div class="rail">
+      <div class="dest"><div class="ic"><span class="ms">settings</span></div><div class="lb">Settings</div></div>
+      <div class="dest on"><div class="ic"><span class="ms">edit_note</span></div><div class="lb">Create<br>Listing</div></div>
+    </div>
+  </div>
+  <div class="note" style="left:900px;top:20px;max-width:230px"><i>1</i><span>Tabard first: if the guild has one, it is copied as is (icon, border, colours)</span></div>
+  <div class="note" style="left:520px;top:180px;max-width:220px"><i>2</i><span>Same sections as Albion's designer, built from WoW tabard pieces</span></div>
+  <div class="note" style="left:960px;top:340px;max-width:160px"><i>3</i><span>Big live preview on the chosen banner</span></div>
+</div>
+</body>
+</html>
