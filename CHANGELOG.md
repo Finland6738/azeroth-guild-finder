@@ -19,6 +19,7 @@ All notable changes to this project are documented here. The format follows [Kee
 ### Spike
 
 - M0.1: throwaway probe addon `AzGF_Probe` in `tools/probe/` (`/agfp list|run|export|reset`, check registry, results in `AzGF_ProbeDB`; checks S1–S11 are stubs), `tools/install_probe.py` with `tools/local.example.ini`, and `docs/spike/README.md`. Never distributed; not yet run in the real client.
+- Probe M0.2: checks S1 (Club Finder), S7 (guild APIs, async roster) and S11 (chat lockdown snapshots, `/agfp snapshot <label>`) in `tools/probe/AzGF_Probe/Checks_Environment.lua`; owner instructions in `docs/spike/README.md`.
 
 ### Project
 

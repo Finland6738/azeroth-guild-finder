@@ -109,11 +109,17 @@ function Probe:ExportText()
             lines[#lines + 1] = id .. " | no result"
         end
     end
+    if self.SnapshotLines then
+        for _, l in ipairs(self:SnapshotLines()) do
+            lines[#lines + 1] = l
+        end
+    end
     return table.concat(lines, "\n")
 end
 
 function Probe:Reset()
     db().results = {}
+    db().snapshots = nil
     out("results cleared")
 end
 
@@ -162,19 +168,17 @@ function Probe:Export()
     exportFrame.edit:HighlightText()
 end
 
--- Checks S1-S11: stubs in M0.1; M0.2-M0.6 replace them by calling Probe:Register with the same id.
+-- Checks S1-S11: stubs in M0.1; M0.2-M0.6 replace them by calling Probe:Register with the same id
+-- (S1, S7, S11 live in Checks_Environment.lua, loaded after this file).
 local STUBS = {
-    { "S1", "Club Finder enabled? (C_ClubFinder.IsEnabled / ShouldShowClubFinder / GetClubFinderDisableReason)" },
     { "S2", "Join the test channel and exchange addon messages between two clients" },
     { "S3", "Lowest level (or play time) that can send in the channel" },
     { "S4", "Addon WHISPER to a non-friend, also from a low-level character" },
     { "S5", "OFFICER as an addon channel" },
     { "S6", "Real channel throttle (messages per second before throttling)" },
-    { "S7", "Guild globals (GetGuildInfo, roster, GetMaxPlayerLevel, GetAverageItemLevel, C_Club)" },
     { "S8", "Tabard info and TabardModel CycleVariation catalogue" },
     { "S9", "Texture gallery: banners, parchment, class and role icons" },
     { "S10", "C_GuildInfo.Invite from an addon button" },
-    { "S11", "Behaviour during InChatMessagingLockdown (instances, encounters, PvP)" },
 }
 for _, stub in ipairs(STUBS) do
     Probe:Register(stub[1], stub[2], function()
@@ -182,16 +186,21 @@ for _, stub in ipairs(STUBS) do
     end)
 end
 
-local USAGE = "/agfp [list] | run <id> | export | reset"
+local USAGE = "/agfp [list] | run <id> | snapshot <label> | export | reset"
 
 SLASH_AZGFPROBE1 = "/agfp"
 SlashCmdList["AZGFPROBE"] = function(msg)
-    local cmd, arg = (msg or ""):match("^%s*(%S*)%s*(%S*)")
+    local cmd, arg, rest = (msg or ""):match("^%s*(%S*)%s*(%S*)%s*(.-)%s*$")
     cmd = cmd:lower()
     if cmd == "" or cmd == "list" then
         Probe:List()
     elseif cmd == "run" and arg ~= "" then
         Probe:Run(arg:upper())
+    elseif cmd == "snapshot" then
+        if Probe.Snapshot then
+            local label = (arg .. " " .. rest):gsub("^%s+", ""):gsub("%s+$", "")
+            out("snapshot: " .. Probe:Snapshot(label))
+        end
     elseif cmd == "export" then
         Probe:Export()
     elseif cmd == "reset" then
