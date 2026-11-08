@@ -1,7 +1,8 @@
 -- Mock client, part 3: frames, widgets, events, scripts, chat frames, tooltips and slash commands.
 --
 -- Imitates: CreateFrame and the widget methods the addon and Ace3 use, RegisterEvent / SetScript / Show / Hide,
--- UIParent, GameTooltip, DEFAULT_CHAT_FRAME, SlashCmdList.
+-- UIParent, GameTooltip, DEFAULT_CHAT_FRAME, SlashCmdList, CreateFont (font objects, Mock.missingFonts), UISpecialFrames, stateful
+-- text/colour/font/focus methods, EditBox text events (Mock.TypeInto) and inert animation groups (LibDBIcon).
 -- Dump files: ../WoW-Addons/docs/api/UI-Widgets-Frames/ (widget API), the event names come from api.json when it is
 -- next to the repository (see Mock.validEvents), otherwise every event name is accepted.
 --
@@ -163,7 +164,14 @@ function Widget:Enable() self._enabled = true end
 function Widget:Disable() self._enabled = false end
 function Widget:IsEnabled() return self._enabled end
 function Widget:SetEnabled(v) self._enabled = v and true or false end
-function Widget:SetText(t) self._text = t or "" end
+function Widget:SetText(t)
+	t = t or ""
+	local changed = self._text ~= t
+	self._text = t
+	if changed and self._type == "EditBox" and self._scripts.OnTextChanged then
+		Mock.safecall(self._scripts.OnTextChanged, self, false)
+	end
+end
 function Widget:GetText() return self._text end
 function Widget:GetStringWidth() return #(self._text or "") * 6 end
 function Widget:GetStringHeight() return 12 end
@@ -208,21 +216,82 @@ function Widget:GetNumRegions() return #self._regions end
 for _, name in ipairs({
 	"SetMovable", "SetResizable", "SetClampedToScreen", "SetToplevel", "RegisterForDrag", "RegisterForClicks",
 	"StartMoving", "StopMovingOrSizing", "SetUserPlaced", "Raise", "Lower", "SetFixedFrameStrata", "SetFixedFrameLevel",
-	"EnableKeyboard", "SetPropagateKeyboardInput", "SetHitRectInsets", "SetBackdrop", "SetBackdropColor",
-	"SetBackdropBorderColor", "SetFont", "SetFontObject", "SetJustifyH", "SetJustifyV", "SetTextColor", "SetWordWrap",
-	"SetShadowColor", "SetShadowOffset", "SetNonSpaceWrap", "SetMaxLines", "SetTexCoord", "SetVertexColor",
-	"SetBlendMode", "SetDesaturated", "SetDrawLayer", "SetAtlas", "SetGradient", "SetMaskTexture", "SetRotation",
-	"SetAutoFocus", "SetFocus", "ClearFocus", "SetMaxLetters", "SetMultiLine", "SetNumeric", "HighlightText",
+	"EnableKeyboard", "SetHitRectInsets", "SetBackdrop", "SetBackdropColor",
+	"SetBackdropBorderColor", "SetJustifyV", "SetWordWrap",
+	"SetShadowColor", "SetShadowOffset", "SetNonSpaceWrap", "SetMaxLines",
+	"SetBlendMode", "SetDesaturated", "SetDrawLayer", "SetGradient", "SetMaskTexture", "SetRotation",
+	"SetMaxLetters", "SetMultiLine", "SetNumeric",
 	"SetOrientation", "SetValueStep", "SetObeyStepOnDrag", "SetStatusBarTexture", "SetStatusBarColor",
 	"SetDisabledTexture", "SetDisabledFontObject", "SetHighlightFontObject", "SetPushedTextOffset",
 	"SetCheckedTexture", "SetDisabledCheckedTexture", "SetHighlightLocked", "LockHighlight", "UnlockHighlight",
 	"SetMouseClickEnabled", "SetMouseMotionEnabled", "SetIgnoreParentScale", "SetIgnoreParentAlpha", "SetFlattensRenderLayers",
-	"SetClipsChildren", "SetDontSavePosition", "SetTitle", "SetPassThroughButtons", "SetScrollChild", "SetVerticalScroll",
+	"SetClipsChildren", "SetClampRectInsets", "SetTextInsets", "SetHorizTile", "SetVertTile", "SetSubTexCoord", "SetDontSavePosition", "SetTitle", "SetPassThroughButtons", "SetScrollChild", "SetVerticalScroll",
 	"SetHorizontalScroll", "SetInsertMode", "SetFading", "SetFadeDuration", "SetTimeVisible", "SetSpacing",
 	"SetMaxResize", "SetMinResize", "SetResizeBounds", "SetFlashing", "SetSubTexCoord", "SetModel", "SetUnit",
 }) do
 	Widget[name] = function() end
 end
+
+-- Text, colour, font and focus state that tests look at (dump: UI-Widgets-Frames, FontString, Texture, EditBox).
+function Widget:SetFontObject(font) self._fontObject = font end
+function Widget:GetFontObject() return self._fontObject end
+function Widget:SetFont(path, size, flags)
+	if Mock.missingFonts and Mock.missingFonts[path] then return false end
+	self._font = { path, size, flags }
+	return true
+end
+function Widget:GetFont() if self._font then return self._font[1], self._font[2], self._font[3] end end
+function Widget:SetJustifyH(j) self._justifyH = j end
+function Widget:SetTextColor(r, g, b, a) self._textColor = { r, g, b, a or 1 } end
+function Widget:GetTextColor() local c = self._textColor or { 1, 1, 1, 1 }; return c[1], c[2], c[3], c[4] end
+function Widget:SetTexCoord(...) self._texCoord = { ... } end
+function Widget:SetVertexColor(r, g, b, a) self._vertex = { r, g, b, a or 1 } end
+function Widget:GetVertexColor() local c = self._vertex or { 1, 1, 1, 1 }; return c[1], c[2], c[3], c[4] end
+function Widget:SetAtlas(atlas) self._atlas = atlas end
+function Widget:SetPropagateKeyboardInput(v) self._propagate = v and true or false end
+function Widget:SetAutoFocus(v) self._autoFocus = v end
+
+-- EditBox: SetText fires OnTextChanged(self, false) like the client when the text changes; Mock.TypeInto simulates the player.
+function Widget:HasFocus() return self._focused == true end
+function Widget:SetFocus()
+	if not self._focused then
+		self._focused = true
+		runScript(self, "OnEditFocusGained")
+	end
+end
+function Widget:ClearFocus()
+	if self._focused then
+		self._focused = false
+		runScript(self, "OnEditFocusLost")
+	end
+end
+function Widget:HighlightText() self._highlighted = true end
+function Widget:SetCursorPosition(n) self._cursor = n end
+function Widget:GetCursorPosition() return self._cursor or 0 end
+
+function Mock.TypeInto(edit, text)
+	edit._text = text
+	runScript(edit, "OnTextChanged", true)
+end
+
+-- Fonts: CreateFont(name) gives a font object that remembers SetFont; Mock.missingFonts[path] = true makes SetFont fail.
+Mock.missingFonts = {}
+STANDARD_TEXT_FONT = "Fonts\\FRIZQT__.TTF"
+UISpecialFrames = {}
+function CreateFont(name)
+	local font = setmetatable({ _name = name }, { __index = Widget })
+	if name then _G[name] = font end
+	return font
+end
+
+-- Animations (LibDBIcon fades its button): the groups and animations are inert objects that accept every call.
+local function inert()
+	return setmetatable({}, { __index = function(self, key)
+		if key == "CreateAnimation" then return function() return inert() end end
+		return function() return self end
+	end })
+end
+function Widget:CreateAnimationGroup() return inert() end
 
 -- GameTooltip: records what the addon puts in it (Mock.tooltips can be inspected through the widget fields).
 function Widget:SetOwner(owner, anchor) self._owner, self._anchor, self._lines = owner, anchor, {} end

@@ -57,7 +57,7 @@ describe("slash commands", function()
 	end)
 
 	it("a command with no handler yet says so", function()
-		Mock.Slash("/gf reset")
+		Mock.Slash("/gf notify")
 		contains(table.concat(Mock.PlainOutput(), "\n"), "coming soon")
 	end)
 end)

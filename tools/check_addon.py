@@ -1,5 +1,8 @@
 """Offline checks of the addon package: TOC interface, listed files, embeds.xml (Libs only when fetched).
 
+It also checks that every texture of Media/ named in the UI code exists, and that every L["KEY"] used in the code
+has an English string (AceLocale answers with the key itself for a missing one, which would hide the mistake).
+
 Usage: python -I -X utf8 tools/check_addon.py (also called by tools/check_docs.py)
 """
 import os
@@ -31,6 +34,52 @@ def check_embeds(embeds, problems):
             check_embeds(target, problems)
 
 
+LUA_DIRS = ("Core", "Data", "Net", "UI")
+MEDIA_PATTERNS = (
+    r'NineSlice\(\s*[\w.]+\s*,\s*"(\w+)"',          # W.NineSlice(parent, "card", ...)
+    r'W\.Texture\(\s*[\w.]+\s*,\s*"(\w+)"',         # W.Texture(parent, "glyph_gear", ...)
+    r'W\.Media\(\s*"(\w+)"\s*\)',                    # W.Media("solid")
+    r'glyph(?:Texture)?\s*=\s*"(\w+)"',                # glyph = "glyph_back"
+    r'glyph\s*=\s*"(\w+)"',
+    r'SetGlyph\(\s*"(\w+)"',
+    r'\w+\s*=\s*"(role_\w+)"',                        # ROLE_MEDIA values
+)
+
+
+def lua_files():
+    for sub in LUA_DIRS:
+        for folder, _, names in os.walk(os.path.join(ADDON, sub)):
+            for name in names:
+                if name.endswith(".lua"):
+                    yield os.path.join(folder, name)
+
+
+def check_media(problems):
+    media = os.path.join(ADDON, "Media")
+    have = {f[:-4] for f in os.listdir(media) if f.endswith(".tga")} if os.path.isdir(media) else set()
+    for path in lua_files():
+        with open(path, encoding="utf-8") as f:
+            text = f.read()
+        for pattern in MEDIA_PATTERNS:
+            for name in re.findall(pattern, text):
+                if name not in have:
+                    problems.append(f"{os.path.relpath(path, ROOT)}: Media/{name}.tga is used but missing")
+
+
+def check_locale(problems):
+    locale = os.path.join(ADDON, "Locale", "enUS.lua")
+    if not os.path.isfile(locale):
+        return
+    with open(locale, encoding="utf-8") as f:
+        have = set(re.findall(r'^L\["([^"]+)"\]\s*=', f.read(), re.M))
+    for path in lua_files():
+        with open(path, encoding="utf-8") as f:
+            text = f.read()
+        used = set(re.findall(r'L\["([A-Za-z0-9_]+)"\]', text)) | set(re.findall(r'labelKey\s*=\s*"(\w+)"', text))
+        for key in sorted(used - have):
+            problems.append(f"{os.path.relpath(path, ROOT)}: L[\"{key}\"] has no string in Locale/enUS.lua")
+
+
 def check(problems):
     if not os.path.isfile(TOC):
         problems.append("AzerothGuildFinder/AzerothGuildFinder.toc is missing")
@@ -59,6 +108,8 @@ def check(problems):
             check_embeds(_path(ADDON, rel), problems)
     if not os.path.isfile(os.path.join(ADDON, "Bindings.xml")):
         problems.append("AzerothGuildFinder/Bindings.xml is missing")
+    check_media(problems)
+    check_locale(problems)
 
 
 def main():

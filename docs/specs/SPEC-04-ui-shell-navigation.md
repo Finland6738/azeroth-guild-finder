@@ -13,7 +13,7 @@
 
 ## 2. Finestra principale
 
-- Dimensioni: 1116 × 768 px a scala 100 %, scalabile (60–140 %), spostabile; posizione e scala salvate. Si chiude con `Esc` (registrata in `UISpecialFrames`) o con il pulsante rotondo dorato in alto a destra.
+- Dimensioni: 1116 × 768 px a scala 100 %, scalabile (60–140 %), spostabile; posizione e scala salvate. Si chiude con `Esc` (registrata in `UISpecialFrames`) o con il pulsante rotondo dorato in alto a destra. Su uno schermo piccolo la scala usata viene ridotta perché il libro, la barra laterale e il pulsante di chiusura restino visibili; la scala scelta resta salvata (`Nav.FitScale`). La scala è salvata per tutto l'account, la posizione per personaggio, e la posizione si conserva sullo schermo quando la scala cambia.
 - Struttura a **libro aperto**, come in Albion (bozzetti in [`mockups/img/`](mockups/img/)):
 
 ```
@@ -42,7 +42,7 @@
 |---|---|
 | Pulsante sulla minimappa | LibDBIcon. Clic sinistro apre o chiude; clic destro apre le impostazioni; il tooltip mostra "3 pending applications" per GM e ufficiali |
 | Addon Compartment | `## AddonCompartmentFunc` nel TOC (il client lo supporta) |
-| Comando | `/gf`, con l'alias `/guildfinder` se `/gf` è già usato. Sottocomandi: `/gf notify` (icona di notifica), `/gf reset` (posizioni), `/gf debug` (diagnostica e verifica delle API), `/gf help` |
+| Comando | `/gf`, con l'alias `/guildfinder` se `/gf` è già usato. Sottocomandi: `/gf notify` (icona di notifica), `/gf reset` (posizione della finestra), `/gf scale 60`–`140` (dimensione), `/gf debug` (diagnostica e verifica delle API; `/gf debug gallery`, solo nelle build di sviluppo, mostra un esemplare di ogni widget per la verifica in gioco), `/gf help` |
 | Tasto rapido | `Bindings.xml`, voce "Toggle Guild Finder" in Tasti → AddOns. Nessun tasto assegnato di base |
 
 ## 4. Impostazioni
@@ -74,7 +74,7 @@ Corrispondenze principali: navigation rail → schede metalliche **con etichetta
 
 - **Roboto** per tutta l'interfaccia (Regular 400, Medium 500, Bold 700, Black 900 per il titolo della finestra).
 - **Roboto Mono** solo dove serve allineare o distinguere caratteri: link e codici Discord, orari (`20:00–23:30`), comandi (`/gf notify`), diagnostica.
-- Inclusi nell'addon in `Media/Fonts/` (licenza aperta: Apache 2.0 / SIL OFL, da allegare `LICENSE` nella cartella) e registrati come `FontObject` dell'addon (`CreateFont` + `SetFont`). Non si cambiano i font del resto del gioco.
+- Inclusi nell'addon in `Media/Fonts/` (licenza aperta: Apache 2.0 / SIL OFL, da allegare `LICENSE` nella cartella) e registrati come `FontObject` dell'addon (`CreateFont` + `SetFont`). Non si cambiano i font del resto del gioco. Finché i file non sono nell'addon (decisione del proprietario, [ADR 0020](../adr/0020-original-media-own-nine-slice-and-font-fallback.md)) ogni stile usa il font del client con le stesse dimensioni; `/gf debug` elenca gli stili in ripiego.
 - **Copertura dei caratteri**: Roboto copre latino, latino esteso, greco e cirillico. Per nomi con caratteri non coperti si ripiega sul font del client: `FontFamily` con i fallback per alfabeto [verificare].
 - Scala tipografica (px a scala 100 %): headline 24/700 · title-l 20/700 · title-m 16/500 · body 13,5/400 · label 12,5/500 · caption 12/400 · mono 12–13. **Minimo 12 px.**
 

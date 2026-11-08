@@ -28,7 +28,8 @@ end
 -- Commands planned for the first version; handlers are replaced by the modules that implement them.
 AGF.commands = {
 	{ name = "notify", help = L["HELP_NOTIFY"] },
-	{ name = "reset", help = L["HELP_RESET"] },
+	{ name = "reset", help = L["HELP_RESET"], handler = function(self) self:ResetWindow() end },
+	{ name = "scale", help = L["HELP_SCALE"], handler = function(self, input) self:OnScaleCommand(input) end },
 	{ name = "debug", help = L["HELP_DEBUG"], handler = function(self, input) self:OnDebugCommand(input) end },
 	{ name = "help", help = L["HELP_HELP"], handler = function(self) self:PrintHelp() end },
 }
@@ -53,11 +54,16 @@ function AGF:PrintDebug()
 	end
 end
 
--- /gf debug [ping|announce]: the diagnostics, the channel check, or a test listing (development builds only).
+-- /gf debug [ping|announce|gallery]: the diagnostics, the channel check, a test listing, or the widget gallery (the last two in
+-- development builds only).
 function AGF:OnDebugCommand(input)
 	local sub = tostring(input or ""):lower():match("^%s*%S+%s+(%S+)")
 	if sub == "ping" then
 		if ns.Ping then return ns.Ping:Command() end
+		return self:Print(L["COMING_SOON"])
+	end
+	if sub == "gallery" then
+		if ns.Gallery then return ns.Gallery:Open() end
 		return self:Print(L["COMING_SOON"])
 	end
 	if sub == "announce" then
@@ -67,8 +73,24 @@ function AGF:OnDebugCommand(input)
 	self:PrintDebug()
 end
 
+-- Opens or closes the main window (UI/Main.lua): the same call serves /gf, the key binding, the Addon Compartment
+-- and the minimap button.
 function AGF:Toggle()
+	if ns.Main then return ns.Main:Toggle() end
 	self:Print(L["COMING_SOON"])
+end
+
+function AGF:ResetWindow()
+	if not ns.Main then return self:Print(L["COMING_SOON"]) end
+	ns.Main:ResetPosition()
+	self:Print(L["RESET_DONE"])
+end
+
+-- /gf scale [60-140]
+function AGF:OnScaleCommand(input)
+	if not ns.Main then return self:Print(L["COMING_SOON"]) end
+	local _, value = self:GetArgs(input or "", 2)
+	ns.Main:ScaleCommand(value)
 end
 
 function AGF:PrintHelp()
@@ -107,6 +129,7 @@ end
 
 function AGF:OnEnable()
 	if ns.Compat then ns.Compat:Probe() end   -- PLAYER_LOGIN: the capability table for /gf debug and later modules
+	if ns.Entry then ns.Entry:Register() end  -- the minimap button
 end
 
 -- Key binding and AddOn Compartment entry points (globals named in the TOC and Bindings.xml).
@@ -124,7 +147,11 @@ end
 function AzerothGuildFinder_OnAddonCompartmentEnter(_, menuButtonFrame)
 	if not GameTooltip then return end
 	GameTooltip:SetOwner(menuButtonFrame or UIParent, "ANCHOR_LEFT")
-	GameTooltip:SetText(L["ADDON_TITLE"])
+	if ns.Entry then
+		ns.Entry.FillTooltip(GameTooltip)
+	else
+		GameTooltip:SetText(L["ADDON_TITLE"])
+	end
 	GameTooltip:Show()
 end
 

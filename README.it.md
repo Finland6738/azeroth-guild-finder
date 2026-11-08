@@ -56,7 +56,8 @@ Non c'è un server. Ogni installazione conserva gli annunci che ha visto e li co
 |---|---|
 | `/gf` | Apre o chiude Guild Finder (anche dal pulsante sulla minimappa o con un tasto) |
 | `/gf notify` | Mostra o nasconde l'icona di notifica delle candidature (Guild Master e ufficiali) |
-| `/gf reset` | Ripristina la posizione delle finestre |
+| `/gf reset` | Ripristina la posizione della finestra |
+| `/gf scale 60` … `/gf scale 140` | Imposta la dimensione della finestra (dal 60 % al 140 %) |
 | `/gf debug` | Diagnostica: cosa il client permette all'addon |
 
 ## Privacy

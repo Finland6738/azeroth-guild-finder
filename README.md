@@ -91,7 +91,8 @@ Step-by-step guide: [the wiki](https://github.com/Finland6738/azeroth-guild-find
 |---|---|
 | `/gf` | Opens or closes Guild Finder (also with the minimap button or a key binding) |
 | `/gf notify` | Shows or hides the applications notification icon (Guild Masters and officers) |
-| `/gf reset` | Resets window positions |
+| `/gf reset` | Resets the window position |
+| `/gf scale 60` to `/gf scale 140` | Sets the window size (60 % to 140 %) |
 | `/gf debug` | Diagnostics: what your client allows the addon to do |
 
 ## Privacy and data

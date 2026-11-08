@@ -1,0 +1,749 @@
+-- M2.4: the main window (UI/Main.lua) and its entry points (UI/Entry.lua, Core/Init.lua) on the mock client:
+-- the four ways to open it, the tabs of each role, pages and Back, scale and saved position, the minimap button.
+
+local function main() return AzerothGuildFinder.Main end
+local function tabIds()
+	local ids = {}
+	for _, b in ipairs(main().tabButtons) do if b.id and b:IsShown() then ids[#ids + 1] = b.id end end
+	return ids
+end
+local function tabLabels()
+	local labels = {}
+	for _, b in ipairs(main().tabButtons) do if b.id and b:IsShown() then labels[#labels + 1] = b.label:GetText() end end
+	return labels
+end
+local function minimapButton() return _G["LibDBIcon10_AzerothGuildFinder"] end
+local function click(f, button) Mock.RunScript(f, "OnClick", button or "LeftButton") end
+local function setRole(role)
+	if role == "none" then Mock.guild.Leave()
+	else Mock.guild.Set{ name = "Test Guild", myRank = (role == "gm" and 0) or (role == "officer" and 1) or 3 } end
+end
+
+describe("the window is not built until it is needed", function()
+	it("does nothing at login", function()
+		isNil(main().frame)
+		isNil(_G[main().NAME])
+		falsy(main():IsShown())
+	end)
+
+	it("is built at the first opening, at 1116 x 768, hidden until shown", function()
+		main():Show()
+		local f = main().frame
+		eq(f:GetName(), "AzerothGuildFinderMainFrame")
+		eq(f:GetWidth(), 1116)
+		eq(f:GetHeight(), 768)
+		truthy(f:IsShown())
+		eq(#Mock.errors, 0)
+	end)
+end)
+
+describe("entry points", function()
+	it("/gf opens and closes the window", function()
+		truthy(Mock.Slash("/gf"))
+		truthy(main():IsShown())
+		Mock.Slash("/gf")
+		falsy(main():IsShown())
+	end)
+
+	it("/guildfinder does the same", function()
+		Mock.Slash("/guildfinder")
+		truthy(main():IsShown())
+	end)
+
+	it("the key binding opens and closes it", function()
+		AzerothGuildFinder_ToggleBinding()
+		truthy(main():IsShown())
+		AzerothGuildFinder_ToggleBinding()
+		falsy(main():IsShown())
+	end)
+
+	it("the binding is declared in Bindings.xml and has a name", function()
+		eq(BINDING_NAME_AZGUILDFINDER_TOGGLE, "Toggle Guild Finder")
+		eq(BINDING_HEADER_AZGUILDFINDER, "Azeroth Guild Finder")
+	end)
+
+	it("the Addon Compartment click opens it, its tooltip lists the clicks", function()
+		AzerothGuildFinder_OnAddonCompartmentClick()
+		truthy(main():IsShown())
+		AzerothGuildFinder_OnAddonCompartmentEnter("AzerothGuildFinder", UIParent)
+		eq(GameTooltip._lines[1], "Azeroth Guild Finder")
+		truthy(GameTooltip:IsShown())
+		AzerothGuildFinder_OnAddonCompartmentLeave()
+		falsy(GameTooltip:IsShown())
+	end)
+
+	it("the TOC names the Compartment functions and they exist", function()
+		eq(AzerothGuildFinder.IsForever ~= nil, true)
+		for _, field in ipairs({ "AddonCompartmentFunc", "AddonCompartmentFuncOnEnter", "AddonCompartmentFuncOnLeave" }) do
+			local name = GetAddOnMetadata("AzerothGuildFinder", field)
+			truthy(name and type(_G[name]) == "function", field)
+		end
+	end)
+
+	it("the minimap button is registered through LibDBIcon and opens the window with a left click", function()
+		local b = minimapButton()
+		notNil(b)
+		click(b, "LeftButton")
+		truthy(main():IsShown())
+		click(b, "LeftButton")
+		falsy(main():IsShown())
+	end)
+
+	it("a right click on the minimap button opens Settings", function()
+		click(minimapButton(), "RightButton")
+		truthy(main():IsShown())
+		eq(main():CurrentTab(), "Settings")
+	end)
+
+	it("the minimap tooltip lists the clicks", function()
+		local tip = CreateFrame("GameTooltip", nil, UIParent)
+		tip:SetOwner(UIParent, "ANCHOR_LEFT")
+		AzerothGuildFinder.Entry.FillTooltip(tip)
+		eq(tip:NumLines(), 3)
+	end)
+
+	it("for the Guild Master and officers the tooltip adds the pending applications", function()
+		setRole("gm")
+		AzerothGuildFinder.Main.pendingProvider = function() return 3 end
+		local tip = CreateFrame("GameTooltip", nil, UIParent)
+		tip:SetOwner(UIParent, "ANCHOR_LEFT")
+		AzerothGuildFinder.Entry.FillTooltip(tip)
+		eq(tip:NumLines(), 4)
+		eq(tip._lines[4], "3 pending applications")
+		setRole("member")
+		local tip2 = CreateFrame("GameTooltip", nil, UIParent)
+		tip2:SetOwner(UIParent, "ANCHOR_LEFT")
+		AzerothGuildFinder.Entry.FillTooltip(tip2)
+		eq(tip2:NumLines(), 3, "a plain member never sees applications")
+	end)
+
+	it("a failing pendingProvider does not break the tooltip", function()
+		main().pendingProvider = function() error("boom") end
+		eq(main():GetPendingCount(), 0)
+		main().pendingProvider = function() return "many" end
+		eq(main():GetPendingCount(), 0)
+	end)
+
+	it("the minimap button can be hidden and the choice is saved", function()
+		truthy(minimapButton():IsShown())
+		AzerothGuildFinder.Entry:SetMinimapShown(false)
+		falsy(minimapButton():IsShown())
+		eq(AzerothGuildFinder.Config:Get("account.settings.minimapButton"), false)
+		eq(AzerothGuildFinder.Config:Get("char.minimap.hide"), true)
+		AzerothGuildFinder.Entry:SetMinimapShown(true)
+		truthy(minimapButton():IsShown())
+		truthy(AzerothGuildFinder.Entry:IsMinimapShown())
+	end)
+
+	it("a saved choice to hide the button is honoured at the next login", function()
+		AzerothGuildFinder.Entry:SetMinimapShown(false)
+		Mock.Reload()
+		isNil(minimapButton(), "LibDBIcon does not even build the button")
+		truthy(AzerothGuildFinder.Entry.icon:IsRegistered("AzerothGuildFinder"))
+		AzerothGuildFinder.Entry:SetMinimapShown(true)
+		truthy(minimapButton():IsShown())
+	end)
+
+	it("without LibDBIcon there is no minimap button and no error", function()
+		AzerothGuildFinder.Entry.registered = false
+		local lib = LibStub.libs["LibDBIcon-1.0"]
+		LibStub.libs["LibDBIcon-1.0"] = nil
+		falsy(AzerothGuildFinder.Entry:Register())
+		LibStub.libs["LibDBIcon-1.0"] = lib
+	end)
+end)
+
+describe("close", function()
+	it("Esc is wired through UISpecialFrames", function()
+		main():Show()
+		local found = 0
+		for _, name in ipairs(UISpecialFrames) do if name == "AzerothGuildFinderMainFrame" then found = found + 1 end end
+		eq(found, 1)
+		main():Hide()
+		main():Show()
+		found = 0
+		for _, name in ipairs(UISpecialFrames) do if name == "AzerothGuildFinderMainFrame" then found = found + 1 end end
+		eq(found, 1, "registered once")
+	end)
+
+	it("the gold button closes the window", function()
+		main():Show()
+		click(main().closeButton)
+		falsy(main():IsShown())
+	end)
+
+	it("the close button sits at the top right corner, sticking out", function()
+		main():Show()
+		local point, rel, relPoint, x, y = main().closeButton:GetPoint(1)
+		eq(point, "TOPRIGHT"); eq(relPoint, "TOPRIGHT")
+		eq(rel, main().frame)
+		eq(x, 12); eq(y, 12)
+	end)
+end)
+
+describe("the tabs of the role", function()
+	it("a player without a guild: Settings, Find a Guild, My Application", function()
+		main():Show()
+		deepEq(tabIds(), { "Settings", "FindGuild", "MyApplication" })
+		deepEq(tabLabels(), { "Settings", "Find a Guild", "My Application" })
+		eq(main():CurrentTab(), "FindGuild")
+	end)
+
+	it("a member: Settings and My Guild", function()
+		setRole("member")
+		main():Show()
+		deepEq(tabIds(), { "Settings", "MyGuild" })
+		eq(main():CurrentTab(), "MyGuild")
+	end)
+
+	it("an officer without a listing: Settings and My Guild", function()
+		setRole("officer")
+		main():Show()
+		deepEq(tabIds(), { "Settings", "MyGuild" })
+	end)
+
+	it("a Guild Master without a listing: Settings and Create Listing", function()
+		setRole("gm")
+		main():Show()
+		deepEq(tabIds(), { "Settings", "CreateListing" })
+		deepEq(tabLabels(), { "Settings", "Create Listing" })
+		eq(main():CurrentTab(), "CreateListing")
+	end)
+
+	it("a Guild Master with a listing: Settings, My Guild and Applications", function()
+		setRole("gm")
+		AzerothGuildFinder.Main.HasListing = function() return true end
+		main():Show()
+		deepEq(tabIds(), { "Settings", "MyGuild", "Applications" })
+	end)
+
+	it("Settings is always first, at the top of the rail, with the others right under it and no gaps", function()
+		main():Show()
+		local previousBottom
+		for i, b in ipairs(main().tabButtons) do
+			if b:IsShown() then
+				local _, rel, _, x, y = b:GetPoint(1)
+				eq(rel, main().rail)
+				eq(x, 0)
+				if i == 1 then
+					eq(b.id, "Settings")
+					eq(y, 0)
+				else
+					eq(y, previousBottom - 14, "one regular step under the tab before")
+				end
+				previousBottom = y - 76
+			end
+		end
+	end)
+
+	it("the rail has as many visible buttons as the role has tabs, whatever the role was before", function()
+		setRole("none")
+		main():Show()
+		eq(#tabIds(), 3)
+		setRole("member")
+		eq(#tabIds(), 2)
+		local shown = 0
+		for _, b in ipairs(main().tabButtons) do if b:IsShown() then shown = shown + 1 end end
+		eq(shown, 2)
+	end)
+
+	it("the active tab is wider and its glow shows", function()
+		main():Show()
+		local active, other
+		for _, b in ipairs(main().tabButtons) do
+			if b.id == main():CurrentTab() then active = b elseif b:IsShown() then other = b end
+		end
+		truthy(active.active)
+		falsy(other.active)
+		truthy(active:GetWidth() > other:GetWidth())
+		eq(active:GetWidth(), 92)
+		eq(other:GetWidth(), 84)
+	end)
+
+	it("clicking a tab selects it", function()
+		main():Show()
+		click(main().tabButtons[3])
+		eq(main():CurrentTab(), "MyApplication")
+		click(main().tabButtons[1])
+		eq(main():CurrentTab(), "Settings")
+	end)
+
+	it("selecting a tab the role does not have changes nothing", function()
+		main():Show()
+		falsy(main():Select("Applications"))
+		eq(main():CurrentTab(), "FindGuild")
+	end)
+
+	it("a tab can carry a badge", function()
+		setRole("officer")
+		main():Show()
+		AzerothGuildFinder.Main:SetBadge("MyGuild", 4)
+		local guildButton = main().tabButtons[2]
+		truthy(guildButton.badge:IsShown())
+		eq(guildButton.badge.text:GetText(), "4")
+		AzerothGuildFinder.Main:SetBadge("MyGuild", 0)
+		falsy(guildButton.badge:IsShown())
+	end)
+end)
+
+describe("a change of role while the window is open", function()
+	it("rebuilds the tabs and goes back to the first tab of the new role", function()
+		main():Show()
+		main():Select("MyApplication")
+		main():Push("Something")
+		Mock.guild.Set{ name = "New Guild", myRank = 3 }
+		deepEq(tabIds(), { "Settings", "MyGuild" })
+		eq(main():CurrentTab(), "MyGuild")
+		eq(main():CurrentPage(), "MyGuild")
+		truthy(main():IsShown(), "the window stays open")
+	end)
+
+	it("also works when the window is closed: the next opening shows the new role", function()
+		main():Show()
+		main():Hide()
+		setRole("gm")
+		main():Show()
+		deepEq(tabIds(), { "Settings", "CreateListing" })
+	end)
+
+	it("a listing appearing adds the tabs without leaving the page the player is on", function()
+		setRole("gm")
+		local listed = false
+		AzerothGuildFinder.Main.HasListing = function() return listed end
+		main():Show()
+		eq(main():CurrentTab(), "CreateListing")
+		main():Select("Settings")
+		listed = true
+		AzerothGuildFinder.Bus:Emit("CATALOG_UPDATED", "k", "added")
+		deepEq(tabIds(), { "Settings", "MyGuild", "Applications" })
+	end)
+
+	it("moving to another guild with the same role also starts again", function()
+		setRole("member")
+		main():Show()
+		main():Push("Page")
+		Mock.guild.Set{ name = "Other Guild", myRank = 3 }
+		eq(main():CurrentPage(), "MyGuild")
+	end)
+end)
+
+describe("pages", function()
+	local log
+	local function register(id, extra)
+		log = log or {}
+		local def = {
+			Build = function(host) log[#log + 1] = "build " .. id; host.mark = id end,
+			OnShow = function(host, params) log[#log + 1] = "show " .. id .. " " .. tostring(params and params.k) end,
+			OnHide = function(host, entry) log[#log + 1] = "hide " .. id; entry.state.seen = true end,
+		}
+		for k, v in pairs(extra or {}) do def[k] = v end
+		main():RegisterPage(id, def)
+	end
+	before_boot(function() log = nil end)
+
+	it("builds a page once, the first time it is shown, and calls OnShow every time", function()
+		register("FindGuild")
+		main():Show()
+		deepEq(log, { "build FindGuild", "show FindGuild nil" })
+		main():Hide()
+		main():Show()
+		deepEq(log, { "build FindGuild", "show FindGuild nil", "hide FindGuild", "show FindGuild nil" })
+	end)
+
+	it("gives each page its own left, header and content frames, shown only while it is the page", function()
+		register("FindGuild"); register("MyApplication")
+		main():Show()
+		local a = main().hosts.FindGuild
+		truthy(a.left:IsShown() and a.header:IsShown() and a.content:IsShown())
+		eq(a.left:GetParent(), main().leftArea)
+		eq(a.header:GetParent(), main().headerArea)
+		eq(a.content:GetParent(), main().contentArea)
+		main():Select("MyApplication")
+		local b = main().hosts.MyApplication
+		falsy(a.left:IsShown() or a.header:IsShown() or a.content:IsShown())
+		truthy(b.left:IsShown() and b.content:IsShown())
+		eq(b.mark, "MyApplication")
+	end)
+
+	it("hides the page when the window closes and shows it again when it opens", function()
+		register("FindGuild")
+		main():Show()
+		main():Hide()
+		falsy(main().hosts.FindGuild.content:IsShown())
+		eq(log[#log], "hide FindGuild")
+		main():Show()
+		truthy(main().hosts.FindGuild.content:IsShown())
+	end)
+
+	it("Push opens a page with parameters; Back returns to the page below", function()
+		register("FindGuild"); register("GuildPage")
+		main():Show()
+		main():Push("GuildPage", { k = "g1" })
+		eq(main():CurrentPage(), "GuildPage")
+		eq(log[#log], "show GuildPage g1")
+		truthy(main().backButton:IsShown())
+		truthy(main():Back())
+		eq(main():CurrentPage(), "FindGuild")
+		falsy(main().backButton:IsShown())
+		falsy(main():Back(), "nothing to go back to at the root")
+	end)
+
+	it("the Back button goes back", function()
+		register("FindGuild"); register("GuildPage")
+		main():Show()
+		main():Push("GuildPage")
+		click(main().backButton)
+		eq(main():CurrentPage(), "FindGuild")
+	end)
+
+	it("Backspace goes back and is kept from the game; other keys pass through", function()
+		register("FindGuild"); register("GuildPage")
+		main():Show()
+		main():Push("GuildPage")
+		Mock.RunScript(main().frame, "OnKeyDown", "A")
+		eq(main():CurrentPage(), "GuildPage")
+		truthy(main().frame._propagate)
+		Mock.RunScript(main().frame, "OnKeyDown", "BACKSPACE")
+		eq(main():CurrentPage(), "FindGuild")
+		falsy(main().frame._propagate, "Backspace was used")
+		Mock.RunScript(main().frame, "OnKeyDown", "BACKSPACE")
+		truthy(main().frame._propagate, "at the root Backspace is not ours")
+	end)
+
+	it("remembers the state of the page that was left", function()
+		register("FindGuild"); register("GuildPage")
+		main():Show()
+		main():Push("GuildPage")
+		local entry = main().book:Stack():Root()
+		truthy(entry.state.seen, "OnHide of the page below ran with its own entry")
+		main():Back()
+		eq(main().hosts.FindGuild.entry, entry)
+		truthy(main().hosts.FindGuild.entry.state.seen)
+	end)
+
+	it("a page pushed with other parameters is shown again with the new ones", function()
+		register("FindGuild"); register("GuildPage")
+		main():Show()
+		main():Push("GuildPage", { k = "one" })
+		main():Back()
+		main():Push("GuildPage", { k = "two" })
+		eq(log[#log], "show GuildPage two")
+		eq(main().hosts.GuildPage.params.k, "two")
+	end)
+
+	it("the title is the tab's name, or the page's own", function()
+		register("FindGuild")
+		register("GuildPage", { title = function(params) return "Guild " .. tostring(params and params.k) end })
+		main():Show()
+		eq(main().title:GetText(), "Find a Guild")
+		main():Push("GuildPage", { k = "Zed" })
+		eq(main().title:GetText(), "Guild Zed")
+		main():SetTitle("Guild Zed - loading")
+		eq(main().title:GetText(), "Guild Zed - loading")
+		register("Static", { title = "Fixed title" })
+		main():Push("Static")
+		eq(main().title:GetText(), "Fixed title")
+	end)
+
+	it("a tab nobody registered shows a short 'coming soon' page", function()
+		main():Show()
+		local host = main().hosts.FindGuild
+		truthy(host.content:IsShown())
+		eq(host.card.title:GetText(), "Find a Guild")
+		contains(host.text:GetText(), "later version")
+		eq(host.plate.text:GetText(), "Find a Guild")
+	end)
+
+	it("a page that fails to build is reported and the window carries on", function()
+		register("FindGuild", { Build = function() error("broken page") end })
+		main():Show()
+		eq(#Mock.errors, 1)
+		contains(Mock.errors[1].message, "broken page")
+		Mock.ClearErrors()
+		truthy(main():IsShown())
+		main():Select("Settings")
+		truthy(main().hosts.Settings.content:IsShown())
+	end)
+
+	it("RegisterPage refuses bad arguments", function()
+		falsy(main():RegisterPage(nil, {}))
+		falsy(main():RegisterPage("X", "no"))
+		truthy(main():RegisterPage("X", {}))
+	end)
+
+	it("the status bar shows a text and a coloured dot, or no dot", function()
+		main():Show()
+		main():SetStatus("142 guilds · synced 3 min ago", "ok")
+		eq(main().statusText:GetText(), "142 guilds · synced 3 min ago")
+		truthy(main().statusDot:IsShown())
+		main():SetStatus("Read-only", "warn")
+		eq(main().statusLevel, "warn")
+		main():SetStatus("", nil)
+		falsy(main().statusDot:IsShown())
+	end)
+end)
+
+describe("scale", function()
+	-- a big screen: 140 % of the book does not fit a 1080 line screen in UIParent units, see the fit test below
+	before_boot(function() UIParent:SetSize(3840, 2160) end)
+
+	it("starts at 100 %", function()
+		main():Show()
+		eq(main().frame:GetScale(), 1)
+		eq(main():GetScale(), 1)
+	end)
+
+	it("SetScale clamps to 60 %..140 %, saves and applies", function()
+		main():Show()
+		eq(main():SetScale(0.8), 0.8)
+		eq(main().frame:GetScale(), 0.8)
+		eq(AzerothGuildFinder.Config:Get("account.settings.uiScale"), 0.8)
+		eq(main():SetScale(0.1), 0.6)
+		eq(main().frame:GetScale(), 0.6)
+		eq(main():SetScale(5), 1.4)
+		eq(main().frame:GetScale(), 1.4)
+	end)
+
+	it("the scale survives /reload", function()
+		main():Show()
+		main():SetScale(1.2)
+		Mock.Reload()
+		main():Show()
+		eq(main().frame:GetScale(), 1.2)
+	end)
+
+	it("a saved scale that is out of range is clamped", function()
+		AzerothGuildFinderDB = { settings = { uiScale = 1.9 } }
+		Mock.Reload()
+		UIParent:SetSize(3840, 2160)
+		main():Show()
+		eq(main().frame:GetScale(), 1.4)
+	end)
+
+	it("a scale too big for a small screen is reduced to fit; the chosen value is kept", function()
+		main():Show()
+		UIParent:SetSize(1280, 720)
+		main():SetScale(1.4)
+		local used = main().frame:GetScale()
+		truthy(used < 1.4 and used >= 0.25, used)
+		truthy((1116 + 92 + 12) * used <= 1280 and (768 + 12) * used <= 720, "everything fits")
+		eq(main():GetScale(), 1.4)
+		eq(AzerothGuildFinder.Config:Get("account.settings.uiScale"), 1.4)
+	end)
+
+	it("follows a change of the screen or of the game's UI scale", function()
+		main():Show()
+		main():SetScale(1.4)
+		eq(main().frame:GetScale(), 1.4)
+		UIParent:SetSize(1280, 720)
+		Mock.Fire("UI_SCALE_CHANGED")
+		truthy(main().frame:GetScale() < 1.4)
+		UIParent:SetSize(3840, 2160)
+		Mock.Fire("DISPLAY_SIZE_CHANGED")
+		eq(main().frame:GetScale(), 1.4)
+	end)
+
+	it("/gf scale sets the size, answers with the current one, and refuses nonsense", function()
+		main():Show()
+		Mock.Slash("/gf scale 80")
+		eq(main().frame:GetScale(), 0.8)
+		contains(table.concat(Mock.PlainOutput(), "\n"), "Window size set to 80%.")
+		Mock.ClearOutput()
+		Mock.Slash("/gf scale")
+		contains(table.concat(Mock.PlainOutput(), "\n"), "Window size is 80%.")
+		Mock.ClearOutput()
+		Mock.Slash("/gf scale 300")
+		contains(table.concat(Mock.PlainOutput(), "\n"), "'300' is not a size")
+		eq(main().frame:GetScale(), 0.8)
+		Mock.Slash("/gf scale 140%")
+		eq(main().frame:GetScale(), 1.4)
+	end)
+
+	it("/gf scale works before the window was ever opened", function()
+		Mock.Slash("/gf scale 70")
+		isNil(main().frame)
+		main():Show()
+		eq(main().frame:GetScale(), 0.7)
+	end)
+
+	it("the Settings page has a size control that changes the scale and follows /gf scale", function()
+		main():Show()
+		main():Select("Settings")
+		local control = main().scaleControl
+		eq(control:GetSelected(), 1)
+		click(control.segments[0.8])
+		eq(main().frame:GetScale(), 0.8)
+		Mock.Slash("/gf scale 140")
+		eq(control:GetSelected(), 1.4)
+	end)
+
+	it("the Settings size control has the five sizes 60, 80, 100, 120 and 140 %", function()
+		main():Show()
+		main():Select("Settings")
+		local labels = {}
+		for _, key in ipairs(main().scaleControl.order) do labels[#labels + 1] = main().scaleControl.segments[key].text:GetText() end
+		deepEq(labels, { "60%", "80%", "100%", "120%", "140%" })
+	end)
+end)
+
+describe("position", function()
+	it("opens near the centre, a little to the left, when nothing was saved", function()
+		main():Show()
+		local point, rel, relPoint, x, y = main().frame:GetPoint(1)
+		eq(point, "CENTER"); eq(rel, UIParent); eq(relPoint, "CENTER")
+		eq(x, -46); eq(y, 0)
+	end)
+
+	it("saves the place where the window was left", function()
+		main():Show()
+		main().frame:ClearAllPoints()
+		main().frame:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 100, -50)
+		Mock.RunScript(main().frame, "OnDragStop")
+		local saved = AzerothGuildFinder.Config:Get("char.ui.mainPos")
+		eq(saved.point, "TOPLEFT")
+		eq(saved.x, 100)
+		eq(saved.y, -50)
+	end)
+
+	it("a drag started on the left page or the title bar moves the window and saves too", function()
+		main():Show()
+		Mock.RunScript(main().leftPage, "OnDragStart")
+		Mock.RunScript(main().bar, "OnDragStop")
+		notNil(AzerothGuildFinder.Config:Get("char.ui.mainPos"))
+	end)
+
+	it("opens at the saved place after /reload", function()
+		main():Show()
+		main().frame:ClearAllPoints()
+		main().frame:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", 30, 40)
+		Mock.RunScript(main().frame, "OnDragStop")
+		Mock.Reload()
+		main():Show()
+		local point, _, _, x, y = main().frame:GetPoint(1)
+		eq(point, "BOTTOMLEFT"); eq(x, 30); eq(y, 40)
+	end)
+
+	it("keeps the same place on the screen when the scale changes", function()
+		main():Show()
+		main():SetScale(0.8)
+		main().frame:ClearAllPoints()
+		main().frame:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 100, -100)
+		Mock.RunScript(main().frame, "OnDragStop")
+		local saved = AzerothGuildFinder.Config:Get("char.ui.mainPos")
+		eq(saved.x, 80, "saved in screen units")
+		main():SetScale(1.0)
+		local _, _, _, x, y = main().frame:GetPoint(1)
+		eq(x, 80); eq(y, -80)
+	end)
+
+	it("/gf reset puts the window back at the default place", function()
+		main():Show()
+		main().frame:ClearAllPoints()
+		main().frame:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 5, -5)
+		Mock.RunScript(main().frame, "OnDragStop")
+		Mock.Slash("/gf reset")
+		isNil(AzerothGuildFinder.Config:Get("char.ui.mainPos"))
+		local point, _, _, x = main().frame:GetPoint(1)
+		eq(point, "CENTER"); eq(x, -46)
+		contains(table.concat(Mock.PlainOutput(), "\n"), "Window position reset.")
+	end)
+
+	it("/gf reset before the window exists is harmless", function()
+		Mock.Slash("/gf reset")
+		isNil(main().frame)
+		eq(#Mock.errors, 0)
+	end)
+
+	it("a damaged saved position is replaced by the default one", function()
+		AzerothGuildFinderCharDB = { ui = { mainPos = { point = 7 } } }
+		Mock.Reload()
+		main():Show()
+		local point = main().frame:GetPoint(1)
+		eq(point, "CENTER")
+	end)
+
+	it("the Reset button of the Settings page resets and says so", function()
+		main():Show()
+		main().frame:ClearAllPoints()
+		main().frame:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 5, -5)
+		Mock.RunScript(main().frame, "OnDragStop")
+		main():Select("Settings")
+		click(main().hosts.Settings.resetButton)
+		isNil(AzerothGuildFinder.Config:Get("char.ui.mainPos"))
+		eq(AzerothGuildFinder.Widgets.Snackbar.Current(), "Window position reset.")
+	end)
+end)
+
+describe("diagnostics", function()
+	it("/gf debug has an Interface section", function()
+		main():Show()
+		Mock.Slash("/gf debug")
+		local text = table.concat(Mock.PlainOutput(), "\n")
+		contains(text, "Interface:")
+		contains(text, "Window: open, scale 100%")
+		contains(text, "tabs Settings,FindGuild,MyApplication")
+		contains(text, "Fonts:")
+	end)
+
+	it("says the window is not built before the first opening", function()
+		Mock.Slash("/gf debug")
+		contains(table.concat(Mock.PlainOutput(), "\n"), "Window: not built yet")
+	end)
+
+	it("the help lists the new scale command", function()
+		Mock.Slash("/gf help")
+		contains(table.concat(Mock.PlainOutput(), "\n"), "/gf scale")
+	end)
+end)
+
+describe("the widget gallery (development builds)", function()
+	it("/gf debug gallery opens a page with one of every widget and Back returns", function()
+		truthy(AzerothGuildFinder.Config.DEV, "a checkout is a development build")
+		Mock.Slash("/gf debug gallery")
+		truthy(main():IsShown())
+		eq(main():CurrentPage(), "Gallery")
+		eq(main().title:GetText(), "Widget gallery (development)")
+		local host = main().hosts.Gallery
+		truthy(host.content:IsShown())
+		truthy(host.left:IsShown())
+		notNil(host.group)
+		notNil(host.copy)
+		eq(#Mock.errors, 0)
+		truthy(main():Back())
+		eq(main():CurrentPage(), "FindGuild")
+		falsy(host.content:IsShown())
+	end)
+
+	it("a second /gf debug gallery does not pile pages up", function()
+		Mock.Slash("/gf debug gallery")
+		Mock.Slash("/gf debug gallery")
+		eq(main().book:Stack():Depth(), 2)
+	end)
+
+	it("the gallery is usable: its chip group allows three activities at most", function()
+		Mock.Slash("/gf debug gallery")
+		local group = main().hosts.Gallery.group
+		deepEq(group:GetSelected(), { 1, 2 })
+		click(group.chips[3])
+		click(group.chips[4])
+		deepEq(group:GetSelected(), { 1, 2, 3 })
+	end)
+
+	it("a release build refuses and shows nothing", function()
+		AzerothGuildFinder.Config.DEV = false
+		Mock.Slash("/gf debug gallery")
+		contains(table.concat(Mock.PlainOutput(), "\n"), "only works in development builds")
+		falsy(main():IsShown())
+		isNil(main().hosts.Gallery)
+	end)
+
+	it("every widget of the gallery survives the smallest and the biggest window", function()
+		UIParent:SetSize(3840, 2160)
+		Mock.Slash("/gf debug gallery")
+		Mock.Slash("/gf scale 60")
+		eq(main().frame:GetScale(), 0.6)
+		Mock.Slash("/gf scale 140")
+		eq(main().frame:GetScale(), 1.4)
+		eq(#Mock.errors, 0)
+	end)
+end)
