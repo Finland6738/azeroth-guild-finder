@@ -1,0 +1,157 @@
+-- Enums (M2.1): the closed lists of SPEC-03 §5 and ADR 0012, role masks, class-role validity, faction classes, labels.
+local function E() return AzerothGuildFinder.Enums end
+
+describe("languages", function()
+	it("has nine languages with one bit each", function()
+		eq(E().LANGUAGE_COUNT, 9)
+		eq(E().LANGUAGE_MASK, 511)
+		for i = 1, 9 do eq(E().LanguageBit(i), 2 ^ (i - 1)) end
+	end)
+	it("rejects an invalid language index", function()
+		isNil(E().LanguageBit(0))
+		isNil(E().LanguageBit(10))
+		isNil(E().LanguageBit(1.5))
+		isNil(E().LanguageBit("1"))
+	end)
+end)
+
+describe("activities", function()
+	it("has 13 activities with stable ids 1..13 and Housing flagged verify", function()
+		eq(E().ACTIVITY_COUNT, 13)
+		for i, a in ipairs(E().ACTIVITIES) do eq(a.id, i) end
+		eq(E().ACTIVITIES[13].key, "housing")
+		truthy(E().ACTIVITIES[13].verify)
+		for i = 1, 12 do falsy(E().ACTIVITIES[i].verify) end
+		eq(E().ACTIVITIES[1].key, "raids")
+		eq(E().ACTIVITIES[4].key, "questing")
+	end)
+	it("IsActivity only accepts 1..13 integers", function()
+		for _, v in ipairs({ 1, 7, 13 }) do truthy(E().IsActivity(v)) end
+		for _, v in ipairs({ 0, 14, -1, 2.5 }) do falsy(E().IsActivity(v)) end
+		falsy(E().IsActivity("1"))
+		falsy(E().IsActivity(nil))
+	end)
+	it("allows at most three tags", function() eq(E().MAX_TAGS, 3) end)
+end)
+
+describe("commitment", function()
+	it("has Casual 1, Softcore 2, Hardcore 3", function()
+		eq(E().PACE.CASUAL, 1)
+		eq(E().PACE.SOFTCORE, 2)
+		eq(E().PACE.HARDCORE, 3)
+		truthy(E().IsPace(1) and E().IsPace(3))
+		falsy(E().IsPace(0))
+		falsy(E().IsPace(4))
+		falsy(E().IsPace(2.5))
+	end)
+end)
+
+describe("roles", function()
+	it("uses the bits Tank 1, Healer 2, Melee 4, Ranged 8", function()
+		eq(E().ROLE.TANK, 1)
+		eq(E().ROLE.HEALER, 2)
+		eq(E().ROLE.MELEE, 4)
+		eq(E().ROLE.RANGED, 8)
+		eq(#E().ROLES, 4)
+	end)
+	it("MaskAnd intersects masks", function()
+		eq(E().MaskAnd(15, 5), 5)
+		eq(E().MaskAnd(10, 6), 2)
+		eq(E().MaskAnd(8, 7), 0)
+		eq(E().MaskAnd(0, 15), 0)
+	end)
+	it("HasRole and RoleList", function()
+		truthy(E().HasRole(5, 4))
+		falsy(E().HasRole(5, 2))
+		deepEq(E().RoleList(13), { 1, 4, 8 })
+		deepEq(E().RoleList(0), {})
+	end)
+	it("IsRoleMask accepts 1..15 integers", function()
+		truthy(E().IsRoleMask(1))
+		truthy(E().IsRoleMask(15))
+		falsy(E().IsRoleMask(0))
+		falsy(E().IsRoleMask(16))
+		falsy(E().IsRoleMask(1.5))
+	end)
+end)
+
+describe("class-role validity (SPEC-03 §5)", function()
+	local EXPECTED = {   -- classID = valid roles
+		[1] = { 1, 4 }, [2] = { 1, 2, 4 }, [3] = { 8 }, [4] = { 4 }, [5] = { 2, 8 },
+		[7] = { 2, 4, 8 }, [8] = { 8 }, [9] = { 8 }, [11] = { 1, 2, 4, 8 },
+	}
+	for class, roles in pairs(EXPECTED) do
+		it("class " .. class .. " plays exactly its roles", function()
+			deepEq(E().RoleList(E().ValidRoles(class)), roles)
+		end)
+	end
+	it("FilterRoles drops the impossible roles", function()
+		eq(E().FilterRoles(4, 15), 4)         -- Rogue: melee only
+		eq(E().FilterRoles(3, 1 + 2 + 4), 0)  -- Hunter cannot tank, heal or melee
+		eq(E().FilterRoles(8, 8), 8)
+		eq(E().FilterRoles(5, 15), 10)
+	end)
+	it("class 0 (any class) only limits the mask range", function()
+		eq(E().FilterRoles(0, 15), 15)
+		eq(E().FilterRoles(0, 17), 1)
+	end)
+	it("an unknown class allows every role", function()
+		eq(E().ValidRoles(99), 15)
+		eq(E().FilterRoles(99, 15), 15)
+	end)
+	it("a non-number mask gives 0", function() eq(E().FilterRoles(1, "x"), 0) end)
+end)
+
+describe("classes and factions", function()
+	it("falls back to the static list when the client gives none", function()
+		deepEq(E().ClassIds(), { 1, 2, 3, 4, 5, 7, 8, 9, 11 })
+	end)
+	it("reads the classes from the client through Compat", function()
+		C_CreatureInfo = C_CreatureInfo or {}
+		local names = { [1] = "Krieger", [2] = "Paladin", [8] = "Magier" }
+		C_CreatureInfo.GetClassInfo = function(id)
+			if names[id] then return { className = names[id], classFile = "X" .. id, classID = id } end
+		end
+		GetNumClasses = function() return 8 end
+		deepEq(E().ClassIds(), { 1, 2, 8 })
+		eq(E().ClassLabel(1), "Krieger")
+	end)
+	it("Paladin is Alliance only and Shaman Horde only [verify]", function()
+		truthy(E().ClassInFaction(2, "Alliance"))
+		falsy(E().ClassInFaction(2, "Horde"))
+		truthy(E().ClassInFaction(7, "Horde"))
+		falsy(E().ClassInFaction(7, "Alliance"))
+		truthy(E().ClassInFaction(1, "Horde"))
+		truthy(E().ClassInFaction(2, "Neutral"), "an unknown faction restricts nothing")
+	end)
+	it("ClassesForFaction removes the other faction's class", function()
+		deepEq(E().ClassesForFaction("Alliance"), { 1, 2, 3, 4, 5, 8, 9, 11 })
+		deepEq(E().ClassesForFaction("Horde"), { 1, 3, 4, 5, 7, 8, 9, 11 })
+	end)
+end)
+
+describe("labels", function()
+	it("every enum entry has a label and no key leaks", function()
+		for i = 1, E().ACTIVITY_COUNT do
+			local label = E().ActivityLabel(i)
+			truthy(label)
+			falsy(label:find("ACTIVITY_", 1, true))
+		end
+		eq(E().ActivityLabel(13), "Housing")
+		eq(E().PaceLabel(1), "Casual")
+		eq(E().PaceLabel(3), "Hardcore")
+		contains(E().PaceTip(3), "commitment")
+		eq(E().RoleLabel(4), "Melee DPS")
+		eq(E().RoleLabel(8), "Ranged DPS")
+		eq(E().LanguageLabel(5), "Italian")
+		eq(E().ClassLabel(11), "Druid")
+		for i = 1, 9 do truthy(E().LanguageLabel(i)) end
+	end)
+	it("gives nil for an invalid id", function()
+		isNil(E().ActivityLabel(0))
+		isNil(E().PaceLabel(9))
+		isNil(E().RoleLabel(3))
+		isNil(E().LanguageLabel(10))
+		isNil(E().ClassLabel(99))
+	end)
+end)

@@ -20,6 +20,8 @@ Core\Config.lua
 Core\Bus.lua
 Core\Role.lua
 Core\Normalize.lua
+Data\Enums.lua
+Data\Listing.lua
 Net\Codec.lua
 Net\Transport.lua
 Net\Channel.lua

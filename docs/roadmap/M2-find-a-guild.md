@@ -10,7 +10,7 @@
 - Spec: SPEC-03 §2–§6, ADR 0012
 - Scope: `Data/Enums.lua` (languages, 13 activities, commitment, roles, class-role validity, faction classes), `Data/Listing.lua` (summary and detail records, `Sanitize`, text escaping, Discord code extraction), ordered `tags` (1–3) and `pace`.
 - Done when:
-  - [ ] Every field of SPEC-03 §2–§3 is validated as specified.
+  - [x] Every field of SPEC-03 §2–§3 is validated as specified.
 - Tests: limits, escaping of `|`, UTF-8 lengths, invalid enums, Discord link forms.
 
 ### M2.2 — Catalog store

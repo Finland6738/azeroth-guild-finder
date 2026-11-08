@@ -141,6 +141,9 @@ Testi (`sub`, `desc`, `note`):
 - `|` diventa `||`, così niente codici di colore, link o texture;
 - vengono tolti i caratteri di controllo tranne `\n` (solo in `desc`);
 - la lunghezza si conta in **caratteri UTF-8**, non in byte.
+- `Sanitize` è **idempotente**: una sequenza di `|` viene portata a lunghezza pari (`|` → `||`, `||` resta `||`, `|||` → `||||`), così un record già ripulito non si raddoppia al secondo passaggio; la lunghezza massima si applica al testo già con `||` e non spezza mai una coppia;
+- i campi sconosciuti vengono scartati; un campo non valido viene omesso (i numeri fuori limite, dove il §2 dà un intervallo, vengono riportati nei limiti); `Listing.IsComplete` dice se il riassunto ha lingua principale, 1–3 tipi di attività e `pace`;
+- `k` è valido se ha la forma `reame|Alliance|nome` oppure `reame|Horde|nome` (≤ 80 caratteri, senza `|` nel nome e senza caratteri di controllo).
 
 Il codice Discord deve corrispondere a `^[A-Za-z0-9%-]{2,32}$`. Se il GM incolla un link intero (`https://discord.gg/abc`, `discord.com/invite/abc`), l'editor estrae da solo il codice.
 
