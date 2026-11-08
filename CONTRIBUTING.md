@@ -88,7 +88,10 @@ describe("pings", function()
 end)
 ```
 
-- Options of `Sim.new`: `clients`, `latency` (seconds, or `{ min, max }`), `loss` (probability, or `function(from, to, entry)`), `seed`, `step`, `echo`, `ready`, `guild(i)`, `setup(Mock, i, client)`, `restrict`, `onSend`, `onDeliver`; the full list is at the top of the file.
+- Options of `Sim.new`: `clients`, `latency` (seconds, or `{ min, max }`), `loss` (probability, or `function(from, to, entry)`), `seed`, `step`, `echo`, `ready`, `guild(i)`, `setup(Mock, i, client)`, `restrict`, `sync`, `onSend`, `onDeliver`; the full list is at the top of the file.
+- The catalog sync (`Net/Sync.lua`) starts by itself in every simulated client, as in the game: pass `sync = false` when a test counts the traffic of something else. Single-client tests never sync by themselves (`Sync.AUTO` is off); call `Sync:Request()` when a test needs it.
+- Lua 5.1's `math.random` is the C library's `rand()`: the same seed gives the same run on one system, but Windows and Linux (CI) draw different numbers. Wait for an event (`sim:advanceUntil`) rather than a fixed time when the outcome depends on random delays.
+- Messages from one client to another arrive in the order they were sent, as on the real server (AceComm needs it to put multipart messages back together); the latency is drawn per delivery, but never overtakes an earlier message of the same pair.
 - Per client: `c:slash`, `c:output()`, `c:addon()`, `c:reload()`, `c:restrict{ listenOnly, lockdown, restricted }`, `c:setGuild(name, rank)`, `c:setOnline(false)`, `c:stats()`. Per network: `sim:advance(s)`, `sim:advanceUntil(fn, limit)`, `sim:setLoss`, `sim:setLatency`, `sim:stats()`.
 - Listen to what a client receives with its own Bus: `c:addon().Bus:On("NET_MESSAGE", function(msg, sender, dist) ... end)`. Build the sender of a whisper with `c:fullName()`.
 - Everything is deterministic for a given `seed`. A Lua error inside any client fails the test, like in the single-client tests. Fifty clients boot and run five simulated minutes in about three seconds; use a bigger `step` (0.2) only when a test does not depend on sub-second timing.

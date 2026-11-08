@@ -370,6 +370,7 @@ function Listing.SanitizeSummary(raw, opts)
 	intField(out, raw, "bg", 1, LIM.BG, issues)
 	if raw.st ~= nil then out.st = sanitizeStats(raw.st, issues) end
 	epochField(out, raw, "srev", issues)
+	boolField(out, raw, "test", issues)   -- a development test listing (/gf debug announce); release builds drop it
 	return out, issues
 end
 

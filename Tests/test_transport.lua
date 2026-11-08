@@ -287,6 +287,21 @@ describe("NET-02: CAT and DET replies", function()
 		eq(#W.calls, 3)
 	end)
 
+	it("counts the batches of one reply (the same rateGroup) as one CAT", function()
+		local W = fakeWire()
+		for i = 1, 4 do Tr():Send("WHISPER", cat(), { target = "A", rateGroup = "reply-A" }) end
+		Tr():Send("WHISPER", cat(), { target = "B", rateGroup = "reply-B" })
+		Mock.Advance(5)
+		eq(#W.calls, 4, "the four batches of the reply to A")
+		Mock.Advance(56)
+		eq(#W.calls, 5, "the reply to B a minute later")
+		Tr():Send("WHISPER", cat(), { target = "A", rateGroup = "reply-A" })
+		Tr():Send("WHISPER", cat(), { target = "B", rateGroup = "reply-B" })
+		Mock.Advance(1)
+		eq(#W.calls, 6, "a late batch of the group holding the slot goes; the old group waits again")
+		eq(W.calls[6].target, "B")
+	end)
+
 	it("sends three DET per minute", function()
 		local W = fakeWire()
 		for i = 1, 5 do Tr():Send("WHISPER", det("g" .. i), { target = "P" .. i }) end

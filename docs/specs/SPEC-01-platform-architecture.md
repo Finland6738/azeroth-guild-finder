@@ -135,7 +135,7 @@ Due variabili, con la versione dello schema e le migrazioni a passi come nell'AD
 
 | Variabile | Contenuto |
 |---|---|
-| `AzerothGuildFinderDB` (account) | `schemaVersion`; `accountSecret` (casuale, mai inviato); `catalog[realm][faction]` (riassunti e dettagli in cache, stato, ultimo avvistamento); `settings` globali |
+| `AzerothGuildFinderDB` (account) | `schemaVersion`; `accountSecret` (casuale, mai inviato); `catalog[realm][faction]` (riassunti e dettagli in cache, stato, ultimo avvistamento); `syncAt["realm|faction"]` (ora dell'ultima sincronizzazione completa del catalogo, SPEC-02 §6); `settings` globali |
 | `AzerothGuildFinderCharDB` (personaggio) | `schemaVersion`; `application` (la propria candidatura); `officerInbox[guildKey]` (candidature ricevute, solo GM e ufficiali); `ownListing` (bozza e copia pubblicata, per il GM); `ui` (posizione della finestra, dell'icona di notifica, filtri ricordati); `minimap` |
 
 Limiti: al massimo 500 annunci per reame e fazione, al massimo 200 candidature per gilda nella casella (le più vecchie concluse vengono eliminate per prime), dettagli in cache scartati dopo 60 giorni senza avvistamenti.

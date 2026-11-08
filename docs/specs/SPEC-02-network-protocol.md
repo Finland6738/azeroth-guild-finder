@@ -36,14 +36,14 @@ msg     = { v = PROTO, t = "<TIPO>", ... campi del tipo ... }
 
 | Tipo | Canale | Da → a | Contenuto | Quando |
 |---|---|---|---|---|
-| `ANN` | CHANNEL | membro della gilda → tutti | riassunto dell'annuncio + statistiche + ruolo del mittente (`c=1` se è un contatto: GM o ufficiale) | periodicamente e dopo ogni modifica (§5) |
+| `ANN` | CHANNEL | membro della gilda → tutti | riassunto dell'annuncio + statistiche + ruolo del mittente (`c=1` se è un contatto: GM o ufficiale); `test=true` per l'annuncio di prova di `/gf debug announce` | periodicamente e dopo ogni modifica (§5) |
 | `DEL` | CHANNEL | GM o membro → tutti | ritiro dell'annuncio `{k, rev}` | quando il GM ritira l'annuncio |
-| `CATREQ` | CHANNEL | qualsiasi → tutti | elenco compatto del proprio catalogo `[{h, rev, srev}]` + `nonce` | all'entrata nel canale (§6) |
-| `CATACK` | CHANNEL | chi risponde → tutti | `{to, nonce}`: "rispondo io" | prima di inviare `CAT` |
-| `CAT` | WHISPER | chi risponde → richiedente | riassunti mancanti o più recenti | risposta a `CATREQ` |
-| `DETREQ` | CHANNEL | qualsiasi → tutti | `{k, rev, nonce}` | quando si apre una pagina della gilda senza il dettaglio in cache |
-| `DETACK` | CHANNEL | chi risponde → tutti | `{to, nonce}` | prima di inviare `DET` |
-| `DET` | WHISPER | chi risponde → richiedente | dettaglio dell'annuncio | risposta a `DETREQ` |
+| `CATREQ` | CHANNEL | qualsiasi → tutti | `nonce` + elenco compatto del proprio catalogo `cat = {h1, rev1, srev1, h2, …}`; un catalogo grande va in più parti `p`/`n` con lo stesso `nonce` | all'entrata nel canale (§6) |
+| `CATACK` | CHANNEL | chi risponde → tutti | `{to, nonce, n, w}`: "rispondo io", con `n` riassunti da inviare (0 = "non hai niente di vecchio") e `w` secondi di attesa per NET-02 | prima di inviare `CAT` |
+| `CAT` | WHISPER | chi risponde → richiedente | `{nonce, items, age, i, of, n}`: fino a 10 riassunti mancanti o più recenti, l'età del loro ultimo `ANN`, il numero del gruppo e il totale | risposta a `CATREQ` |
+| `DETREQ` | CHANNEL | qualsiasi → tutti | `{k, rev, d, nonce}`: `rev` del riassunto posseduto, `d` del dettaglio posseduto (0 = nessuno) | quando si apre una pagina della gilda senza il dettaglio in cache |
+| `DETACK` | CHANNEL | chi risponde → tutti | `{to, nonce, r}`: `r` = `rev` del dettaglio che invierà | prima di inviare `DET` |
+| `DET` | WHISPER | chi risponde → richiedente | dettaglio dell'annuncio + `nonce` | risposta a `DETREQ` |
 | `GLIST` | GUILD | GM → membri | annuncio completo (riassunto + dettaglio) | pubblicazione, modifica, ritiro, risposta a `GLREQ` |
 | `GLREQ` | GUILD | membro → gilda | `{rev}` posseduto | al login, se l'annuncio manca o è vecchio |
 | `GTOK` | GUILD | membro → gilda | token anonimo dell'account per quella gilda | al login e ogni 24 h ([SPEC-03 §4](SPEC-03-data-model.md#4-statistiche)) |
@@ -80,6 +80,7 @@ Limiti per client (MUST):
 - **Soppressione**: se nel frattempo è arrivato un `ANN` della stessa gilda con `rev` e `srev` uguali o maggiori, il proprio salta un turno. Così una gilda con 40 membri online produce circa un annuncio ogni 30 minuti, non 40.
 - Il GM invia subito un `ANN` dopo la pubblicazione o una modifica. I membri lo inviano subito dopo aver ricevuto un `GLIST` più recente, ma solo dopo un ritardo casuale di 5–30 s con soppressione.
 - Gli `ANN` dei GM e degli ufficiali (`c=1`) servono anche a far sapere ai candidati **quali contatti sono online** ([SPEC-07](SPEC-07-applications.md)).
+- `Net/Sync.lua` (M2.3) riceve `ANN` e `DEL` solo dal canale e li passa al catalogo con il mittente (INT-04, INT-05). Ricorda **solo in memoria** i contatti (`c=1`) di ogni gilda con l'ora in cui li ha sentiti (al massimo 10 per gilda, per M4) e l'ultimo `ANN` di ogni gilda (`rev`, `srev`, ora): `Sync:Suppressed(k, rev, srev, since)` dice se il proprio `ANN` periodico deve saltare il turno. L'invio periodico arriva con la pubblicazione (M3); `Sync:Announce(riassunto, {contact, test})` mette in coda un `ANN` (BULK, solo l'ultimo per gilda).
 
 ## 6. Sincronizzazione del catalogo (`CATREQ` / `CAT`)
 
@@ -91,6 +92,28 @@ Limiti per client (MUST):
 6. Se in 20 s non arriva niente, il richiedente riprova dopo 60 s, al massimo 3 volte; poi resta in ascolto degli `ANN`.
 
 `DETREQ` / `DETACK` / `DET` seguono lo stesso schema per un singolo dettaglio. Il dettaglio è richiesto solo se manca o se la sua `rev` è inferiore a quella del riassunto.
+
+### 6.1 Come lo fa `Net/Sync.lua` (M2.3)
+
+Dove le regole sopra lasciano margine, l'addon fa così (i numeri sono campi di `Sync` e i test li possono cambiare):
+
+- **Digest**: `cat` è una lista piatta di interi `h, rev, srev` per ogni annuncio conosciuto (anche quelli ritirati, così nessuno li rimanda), in ordine A→Z, a parti di 64 annunci (`p`/`n`, al massimo 16 parti). Chi risponde aspetta tutte le parti; una richiesta incompleta viene dimenticata dopo 60 s. Con 100 gilde il digest è di circa 1,1 KB prima della compressione: due parti.
+- **Elezione**: ogni peer che ha qualcosa calcola `n` (i riassunti da inviare) e programma il `CATACK` nella finestra 0,5–5 s: prima i peer liberi, con un ritardo più breve se `n` è grande (fino a 100) e se la propria sincronizzazione completa è recente; poi (3,5–4,2 s) chi deve aspettare il proprio turno di NET-02, il meno occupato per primo; per ultimi (4,2–5 s) i "niente di nuovo" (`n=0`), solo da chi ha finito una sincronizzazione completa negli ultimi 30 minuti e solo circa 3 di loro. Dentro ogni fascia il ritardo segue una distribuzione esponenziale (Nonnenmacher-Biersack) calcolata su almeno 32 peer, così pochi timer scadono entro la latenza del primo.
+- **Conferma**: chi ha inviato il `CATACK` aspetta 1 s; se nel frattempo vede un `CATACK` migliore per la stessa richiesta si ritira. Migliore = chi può inviare prima (attesa `w` più corta di oltre 5 s), poi chi ha più riassunti, poi l'hash del nome più basso. Il richiedente usa la stessa regola per sapere da chi aspettare i `CAT`. Chi non ha ancora inviato il proprio `CATACK` e ne vede uno lo annulla, a meno che quello dica "niente di nuovo" mentre lui ha qualcosa, o che chi lo ha inviato debba aspettare molto più di lui.
+- **NET-02**: le risposte `CAT` di un client sono in fila, una al minuto (61 s): il `CATACK` dichiara in `w` quanto manca al proprio turno, contando anche le risposte promesse e non ancora inviate, e il richiedente aspetta `1 + w + 10` s il primo gruppo. I gruppi di una risposta contano come una sola risposta nel `Transport` (`rateGroup`).
+- **Turni**: un turno che ha portato qualcosa di nuovo è seguito da un altro `CATREQ` dopo 1–3 s (un altro peer può sapere di più), al massimo 8 turni. La sincronizzazione è completa quando un turno non porta niente di nuovo, quando arriva un `CATACK` con `n=0` e nessuno migliore entro 2 s, o quando due turni successivi al primo restano senza risposta per 20 s (un solo silenzio può essere una perdita). Un turno con un `CATACK` ma senza nessun `CAT` (per 10 s dopo l'ultimo gruppo o dopo l'attesa dichiarata) viene ripetuto, e conta tra i 3 tentativi. L'ora dell'ultima sincronizzazione completa è salvata in `AzerothGuildFinderDB.syncAt["realm|faction"]`.
+- **Solo ascolto**: se il canale rifiuta i messaggi (`InvalidChannel`, M1.7) il `CATREQ` e il `DETREQ` partono in `WHISPER` verso l'ultimo peer sentito nel canale (o un contatto della gilda per il dettaglio); se non ne conosce nessuno aspetta il primo messaggio del canale. Chi riceve una richiesta in `WHISPER` risponde direttamente, senza elezione, con `CATACK` e `CAT` in `WHISPER`. Un client in solo ascolto non partecipa alle elezioni del canale.
+- **Dettagli**: `Sync:RequestDetail(k)` invia `DETREQ` se il dettaglio manca o è più vecchio del riassunto; risponde chi ha un dettaglio con `d < rev ≤ rev del riassunto` del richiedente (prima chi ha esattamente quella `rev`), al massimo tre `DET` al minuto. Dopo 20 s senza dettaglio il Bus riceve `DETAIL_UNAVAILABLE(k)`.
+- **Annuncio di prova**: `/gf debug announce` funziona solo nelle build di sviluppo (`Config.DEV`, vero in una copia del repository: il packager commenta il blocco `--@debug@` nelle build pubblicate). Invia un `ANN` con `test=true` per la gilda *AGF Test &lt;personaggio&gt;* (`ownerId` derivato dal segreto dell'account, `rev` = ora del server) e ne tiene il dettaglio per i `DETREQ`. Le build di rilascio ignorano gli `ANN` e i riassunti `CAT` con `test=true`.
+
+**Misure nel simulatore** (`Tests/test_sync_sim.lua`, latenza 0,05–0,3 s, nessuna perdita salvo dove indicato):
+
+| Scenario | Risultato |
+|---|---|
+| 50 client, 100 gilde: 5 client con il catalogo completo, 45 entrano insieme con un quarto del catalogo e un decimo vecchio, 10 gilde inviano un `ANN` nuovo durante la prova | tutti identici dopo **200 s**; nel minuto peggiore un client invia 14 messaggi nel canale e 2040 byte di richieste e annunci (limite NET-01: 2048); 153 risposte `CAT`, 782 `CATACK` (risposte, fuori dal limite di byte), nessun gruppo `CAT` doppio |
+| Lo stesso senza i 5 client completi (avvio a freddo, ognuno con un terzo sparso; misurato durante lo sviluppo, non è nella suite) | circa **290 s**: il limite è NET-02 (ogni peer risponde una volta al minuto e servono circa cinque turni) |
+| Un client entra dopo 19 client già sincronizzati (100 gilde) | catalogo completo in **15 s** da **un solo** peer (10 gruppi `CAT`), 3 `CATACK` in tutto |
+| 20 client, 60 gilde (2 con il catalogo completo, gli altri con il 30 %), 10 % dei messaggi persi | tutti identici in **275 s** (le richieste perse aspettano i nuovi tentativi) |
 
 ## 7. Sincronizzazione nella gilda
 

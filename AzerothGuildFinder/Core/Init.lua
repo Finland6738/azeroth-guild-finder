@@ -53,11 +53,15 @@ function AGF:PrintDebug()
 	end
 end
 
--- /gf debug [ping]: the diagnostics, or the channel check.
+-- /gf debug [ping|announce]: the diagnostics, the channel check, or a test listing (development builds only).
 function AGF:OnDebugCommand(input)
 	local sub = tostring(input or ""):lower():match("^%s*%S+%s+(%S+)")
 	if sub == "ping" then
 		if ns.Ping then return ns.Ping:Command() end
+		return self:Print(L["COMING_SOON"])
+	end
+	if sub == "announce" then
+		if ns.Sync then return ns.Sync:DebugAnnounce() end
 		return self:Print(L["COMING_SOON"])
 	end
 	self:PrintDebug()

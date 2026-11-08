@@ -16,6 +16,9 @@
 --   CATALOG_UPDATED(k, what)                             Data/Catalog.lua; a listing changed: what is "added", "updated", "stats",
 --                                                        "detail", "delisted" or "removed" (k = guild key), or "cleared" (k is nil).
 --   PING_DONE(result)                                    Net/Ping.lua; /gf debug ping finished: { answers, min, avg, max, error }.
+--   CATALOG_SYNCED(result)                               Net/Sync.lua; a catalog sync ended: { full, why, rounds, received,
+--                                                        changed, took, responders }; full = false when nobody answered.
+--   DETAIL_UNAVAILABLE(k)                                Net/Sync.lua; no peer sent the detail of guild k within 20 s.
 -- Later modules add their events here.
 local ADDON_NAME, ns = ...
 ns = ns or {}

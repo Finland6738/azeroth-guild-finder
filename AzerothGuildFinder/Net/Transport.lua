@@ -1,13 +1,15 @@
 -- Transport: the queue between the codec and the wire (SPEC-02 §1, §3, §4, SPEC-01 §7-§8). Lua 5.1.
 --
 --   Transport:Send(dist, msg, opts)   dist = CHANNEL | WHISPER | GUILD | OFFICER, msg = { t = "ANN", ... fields ... },
---                                     opts = { target, prio = ALERT|NORMAL|BULK, key, reply, ttl, onSent, onFail }
+--                                     opts = { target, prio = ALERT|NORMAL|BULK, key, reply, ttl, rateGroup, onSent,
+--                                              onFail }
 --   Receive: AceComm (prefix AzGF) -> Transport:OnReceive -> Codec:Decode -> Bus NET_MESSAGE(msg, sender, dist).
 --
 -- Rules (SPEC-02 §4, all numbers are fields of Transport and are read on every use):
 --   NET-01  CHANNEL: one message per CHANNEL_GAP and CHANNEL_BUDGET bytes per BUDGET_WINDOW seconds, explicit replies
 --           (CATACK, DETACK, ...) excluded from the byte budget;
---   NET-02  at most one CAT and three DET per minute (Transport.RATE);
+--   NET-02  at most one CAT and three DET per minute (Transport.RATE); messages sent with the same opts.rateGroup
+--           count once (the CAT batches of one reply are one reply);
 --   NET-03  nothing is handed to the client during a chat lockdown or an addon restriction: the messages wait, the
 --           latest one per `key` wins, BULK ones older than BULK_TTL are dropped;
 --   NET-04  a throttle result retries after 4 x CHANNEL_GAP, at most MAX_RETRIES times.
@@ -270,12 +272,22 @@ local function budgetUsed(t)
 	return used
 end
 
-local function rateFits(msgType, t)
-	local rate = Transport.RATE[msgType]
+-- The live entry of `group` in a rate log, if any.
+local function groupEntry(log, group)
+	if not group then return nil end
+	for _, e in ipairs(log) do
+		if e.group == group then return e end
+	end
+	return nil
+end
+
+local function rateFits(item, t)
+	local rate = Transport.RATE[item.t]
 	if not rate then return true end
-	local log = state.typeLog[msgType]
+	local log = state.typeLog[item.t]
 	if not log then return true end
 	prune(log, t, rate[2])
+	if groupEntry(log, item.rateGroup) then return true end   -- the group already paid for its slot
 	return #log < rate[1]
 end
 
@@ -369,6 +381,7 @@ function Transport:Send(dist, msg, opts)
 		size = #payload, prio = prio, rank = RANK[prio], key = type(opts.key) == "string" and opts.key or nil,
 		reply = opts.reply == nil and Transport.REPLY[msg.t] or opts.reply and true or false,
 		bornAt = now(), ttl = tonumber(opts.ttl) or (prio == "BULK" and Transport.BULK_TTL or nil),
+		rateGroup = (type(opts.rateGroup) == "string" or type(opts.rateGroup) == "number") and opts.rateGroup or nil,
 		attempts = 0, notBefore = 0, onSent = opts.onSent, onFail = opts.onFail, probe = probe,
 	}
 
@@ -446,7 +459,7 @@ local function pick(t)
 				end
 			end
 		end
-		if ok and not rateFits(item.t, t) then ok = false end
+		if ok and not rateFits(item, t) then ok = false end
 		if ok then return item end
 	end
 	return nil
@@ -515,10 +528,12 @@ local function dispatch(item, t)
 		end
 	end
 	if Transport.RATE[item.t] then
-		item.typeEntry = { time = t }
 		local log = state.typeLog[item.t]
 		if not log then log = {} state.typeLog[item.t] = log end
-		log[#log + 1] = item.typeEntry
+		if not groupEntry(log, item.rateGroup) then
+			item.typeEntry = { time = t, group = item.rateGroup }
+			log[#log + 1] = item.typeEntry
+		end
 	end
 	state.inflight = state.inflight + 1
 	local answered = false

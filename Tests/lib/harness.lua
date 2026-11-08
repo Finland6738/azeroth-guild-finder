@@ -140,6 +140,11 @@ function H.boot(opts)
 		end
 	end
 
+	-- The catalog sync starts by itself at CHANNEL_READY in the game. Single-client tests switch that off (their
+	-- traffic counts stay exact); the simulator switches it on for its clients (Sim.new option `sync`).
+	local addonObject = E.AzerothGuildFinder
+	if addonObject and addonObject.Sync then addonObject.Sync.AUTO = H.autoSync == true end
+
 	for name, text in pairs(opts.saved or {}) do E[name] = deserialize(text) end
 
 	Mock.Fire("ADDON_LOADED", cfg.addonName)

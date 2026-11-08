@@ -28,7 +28,8 @@
 - Spec: SPEC-02 §3, §5, §6
 - Scope: `Net/Sync.lua`: receive `ANN`/`DEL`; `CATREQ` with digest, `CATACK` suppression, `CAT` by whisper in batches of 10; `DETREQ`/`DETACK`/`DET`; retries and back-off; a dev-only `/gf debug announce` that sends a **test** listing ignored by release builds.
 - Done when:
-  - [ ] Simulator: 50 clients and 100 guilds converge in < 5 simulated minutes without exceeding NET-01.
+  - [x] Simulator: 50 clients and 100 guilds converge in < 5 simulated minutes without exceeding NET-01.
+  - [ ] In game: a test listing announced by one client appears in another ([checklist](../checklists/M2.md)).
 - Tests: the simulator scenario, message loss, listen-only clients.
 - Real client: the exit check of the milestone.
 

@@ -24,6 +24,8 @@
 --   guild     function(i) -> name | { name =, rank =, officerRanks = } | nil: the guild of client i (default: none)
 --   setup     function(Mock, i, client) called after the mock client is built, before the addon loads
 --   restrict  { [i] = { listenOnly =, lockdown =, restricted = } } restrictions from the start (see Client:restrict)
+--   sync      the catalog sync starts by itself at CHANNEL_READY, as in the game (default true; false for tests that
+--             count the traffic of something else)
 --   onSend    function(client, entry) called for every message a client sends (before it is routed)
 --   onDeliver function(client, entry) called for every message handed to a client
 -- Time starts at 0 when the clients exist; sim:resetStats() starts a fresh measurement (after the clients settle).
@@ -144,9 +146,16 @@ local function lostDelivery(sim, from, to, entry)
 	return loss > 0 and draw(sim) < loss
 end
 
+-- Messages from one client to another arrive in the order they were sent (the server keeps a sender's stream in
+-- order; the chunks of an AceComm multipart message depend on it): a delivery is never due before the previous one
+-- of the same pair.
 local function schedule(sim, to, entry, from, info)
 	local due = sim.time + latencyOf(sim)
 	local slot = math.max(math.ceil(due / sim.step - 1e-9), sim.slot + 1)
+	local pair = from.index .. ">" .. to.index
+	local previous = sim.lastSlot[pair]
+	if previous and previous > slot then slot = previous end
+	sim.lastSlot[pair] = slot
 	local bucket = sim.inflight[slot]
 	if not bucket then bucket = {} sim.inflight[slot] = bucket end
 	bucket[#bucket + 1] = { to = to, from = from, entry = entry, info = info }
@@ -305,6 +314,7 @@ end
 local function bootClient(sim, i, opts)
 	local world = H.newWorld()
 	H.worlds[#H.worlds + 1] = world
+	world.autoSync = sim.sync
 	local c = setmetatable({
 		sim = sim, index = i, world = world, E = world.E, Mock = world.Mock, name = Sim.nameOf(i), realmKey = sim.realmKey,
 		online = true, cursor = 0,
@@ -330,9 +340,9 @@ function Sim.new(opts)
 	opts = opts or {}
 	local sim = setmetatable({
 		time = 0, slot = 0, step = opts.step or 0.1, latency = opts.latency or 0.1, loss = opts.loss or 0,
-		echo = opts.echo ~= false, realm = opts.realm or "Test Realm", clients = {}, inflight = {},
+		echo = opts.echo ~= false, realm = opts.realm or "Test Realm", clients = {}, inflight = {}, lastSlot = {},
 		rngState = (opts.seed or 1) % 2147483648, statsFrom = 0, delivered = 0, lost = 0,
-		onSend = opts.onSend, onDeliver = opts.onDeliver,
+		onSend = opts.onSend, onDeliver = opts.onDeliver, sync = opts.sync ~= false,
 	}, Sim)
 	sim.realmKey = sim.realm:gsub("[%s%-']", "")
 	math.randomseed(opts.seed or 1)

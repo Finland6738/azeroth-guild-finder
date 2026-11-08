@@ -129,7 +129,7 @@ end)
 
 describe("Loss", function()
 	it("a client that loses everything on its way in does not answer", function()
-		local sim = Sim.new{ clients = 5 }
+		local sim = Sim.new{ clients = 5, sync = false }
 		sim:setLoss(function(_, to) return to.index == 3 end)
 		sim:client(1):slash("/gf debug ping")
 		sim:advance(8)
@@ -282,7 +282,7 @@ end)
 
 describe("Traffic statistics", function()
 	it("counts the messages and bytes each client sent, per distribution", function()
-		local sim = Sim.new{ clients = 4 }
+		local sim = Sim.new{ clients = 4, sync = false }
 		sim:client(1):slash("/gf debug ping")
 		sim:advance(8)
 		local st = sim:stats()
@@ -299,7 +299,7 @@ describe("Traffic statistics", function()
 	end)
 
 	it("gives per-minute figures and the busiest channel minute", function()
-		local sim = Sim.new{ clients = 2 }
+		local sim = Sim.new{ clients = 2, sync = false }
 		local a = sim:client(1):addon().Transport
 		for i = 1, 3 do a:Send("CHANNEL", { t = "DEL", k = "g" .. i, rev = 1 }) end
 		sim:advance(30)
@@ -337,7 +337,7 @@ describe("Traffic statistics", function()
 	end)
 
 	it("50 clients stay far below the channel budget when only a few of them talk", function()
-		local sim = Sim.new{ clients = 50 }
+		local sim = Sim.new{ clients = 50, sync = false }
 		for i = 1, 5 do
 			sim:client(i):addon().Transport:Send("CHANNEL", { t = "DEL", k = "g" .. i, rev = 1 })
 		end
