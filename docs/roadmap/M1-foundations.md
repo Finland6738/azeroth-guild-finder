@@ -66,8 +66,9 @@
 - Spec: SPEC-02 §2, ADR 0003
 - Scope: `Net/Codec.lua`: envelope `{v, t, ...}`, CBOR (`C_EncodingUtil`), compression above 120 bytes with a flag byte, Base64, 8 KB decompressed limit, unknown fields ignored, newer `v` detected.
 - Done when:
-  - [ ] Round trip of every message type; malformed input returns an error, never raises.
+  - [x] Round trip of every message type; malformed input returns an error, never raises.
 - Tests: round trips, corrupted and oversized payloads, future version.
+  - [x] `Tests/test_codec.lua`: all 16 types, raw and compressed paths, bad size/Base64/flag/compression/CBOR/version/type/fields, garbage, newer version (one-shot flag), unknown fields preserved, deterministic output.
 
 ### M1.7 — Transport
 - Branch: `step/m1-7-transport`
