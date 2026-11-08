@@ -34,7 +34,7 @@ Issues, pull requests, commit messages and public documentation are in **English
 - Every visible string goes through AceLocale (`L["KEY"]`).
 - Saved data changes need a schema migration ([ADR 0011](docs/adr/0011-savedvariables-and-schema-versions.md)).
 - Never call game textures by copying files: reference them by fileID ([ADR 0007](docs/adr/0007-emblems-from-tabard-pieces.md)).
-- The addon lives in `AzerothGuildFinder/` (Lua 5.1 only). Libraries are never committed: they are pinned in `.pkgmeta`; run `python -I -X utf8 tools/fetch_libs.py` to download them and `python -I -X utf8 tools/install_addon.py` to copy the addon into your AddOns folder (path in the git-ignored `tools/local.ini`).
+- The addon lives in `AzerothGuildFinder/` (Lua 5.1 only). Libraries are never committed: they are pinned in `.pkgmeta`; run `python -I -X utf8 tools/fetch_libs.py` to download them and `python -I -X utf8 tools/install_addon.py` to copy the addon into your AddOns folder (path in the git-ignored `tools/local.ini`). The textures in `AzerothGuildFinder/Media/` are drawn by `python -X utf8 tools/make_media.py` (needs Pillow): change the script, not the files.
 - Mockups: edit `docs/specs/mockups/html/`, then run `bash docs/specs/mockups/render.sh` (Chrome and Python with Pillow).
 
 ## 4. Checks and tests

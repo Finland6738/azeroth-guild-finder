@@ -39,11 +39,12 @@
 - Spec: SPEC-04, ADR 0008, mockup [00](../specs/mockups/img/clean/00-design-system.webp)
 - Scope: `UI/Main.lua` (book layout, side rail with Settings first and role tabs, gold close button, Esc, drag, scale 60–140 %, saved position, page stack with Back), `UI/Widgets/` (pill buttons, chips, switches, segmented, fields, copy field, cards, tags, badges, role badges, class icons with class-colour ring, tooltip, snackbar), `Media/` nine-slice textures, Roboto and Roboto Mono font objects; minimap button (LibDBIcon), Addon Compartment, key binding, `/gf`.
 - Done when:
-  - [ ] The window opens from all four entry points and shows the tabs of the current role.
-  - [ ] Widgets match the design system at 100 % and stay readable at 64 % and 140 %.
+  - [x] Offline: the role → tabs mapping, the page stacks, the scale and the position are tested; in the mock client all four entry points open the window and it shows the tabs of the current role.
+  - [ ] In game: the window opens from all four entry points and shows the tabs of the current role ([checklist](../checklists/M2.md)).
+  - [ ] In game: widgets match the design system at 100 % and stay readable at 60 % and 140 % ([checklist](../checklists/M2.md)).
 - Tests: role → tabs mapping; page stack.
 - Docs: wiki Interface Tour, Commands and Settings.
-- Real client: look and feel, fonts, scaling.
+- Real client: look and feel, fonts (Roboto files are not bundled yet, see ADR 0020), scaling.
 
 ### M2.5 — Find a Guild list
 - Branch: `step/m2-5-list`

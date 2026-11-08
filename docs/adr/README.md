@@ -27,3 +27,4 @@ They record *why* the project is built a certain way. A decision that changes is
 | [0017](0017-license-gpl-3.md) | Licence: GNU GPL v3.0 | accepted |
 | [0018](0018-mockups-html-rendered-to-webp.md) | Mockups as HTML and CSS, rendered to WebP | accepted |
 | [0019](0019-offline-tests-with-lupa-and-a-mock-client.md) | Offline tests with lupa and a mock client | accepted |
+| [0020](0020-original-media-own-nine-slice-and-font-fallback.md) | Interface construction: generated original media, our own nine-slice, fonts with a fallback | accepted |
