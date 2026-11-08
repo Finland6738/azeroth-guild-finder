@@ -67,7 +67,9 @@ describe("/reload", function()
 		AzerothGuildFinderDB = { counter = 1, nested = { "a", "b" } }
 		AzerothGuildFinderCharDB = { seen = true }
 		Mock.Reload()
-		deepEq(AzerothGuildFinderDB, { counter = 1, nested = { "a", "b" } })
+		-- Config merges its defaults around the test values; the values themselves are kept
+		eq(AzerothGuildFinderDB.counter, 1)
+		deepEq(AzerothGuildFinderDB.nested, { "a", "b" })
 		eq(AzerothGuildFinderCharDB.seen, true)
 		AzerothGuildFinderDB.counter = AzerothGuildFinderDB.counter + 1
 		Mock.Reload()

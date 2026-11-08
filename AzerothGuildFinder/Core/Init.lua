@@ -83,6 +83,7 @@ function AGF:OnSlashCommand(input)
 end
 
 function AGF:OnInitialize()
+	if ns.Config then ns.Config:Load() end   -- ADDON_LOADED: SavedVariables are available now
 	self:RegisterChatCommand("gf", "OnSlashCommand")
 	self:RegisterChatCommand("guildfinder", "OnSlashCommand")
 	if not self:IsForever() then
