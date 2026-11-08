@@ -20,3 +20,4 @@ Core\Config.lua
 Core\Bus.lua
 Core\Role.lua
 Core\Normalize.lua
+Net\Codec.lua
