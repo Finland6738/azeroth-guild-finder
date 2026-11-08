@@ -71,6 +71,8 @@ Non c'è un server. Ogni installazione conserva gli annunci che ha visto e li co
 ```
 python -I -X utf8 tools/fetch_libs.py      # scarica in AzerothGuildFinder/Libs/ le librerie fissate in .pkgmeta
 python -I -X utf8 tools/install_addon.py   # copia l'addon nella cartella AddOns indicata in tools/local.ini
+python -m pip install lupa==2.8            # una volta sola
+python -X utf8 Tests/run_tests.py          # test offline: Lua 5.1 su un client WoW finto, con Ace3 vero
 ```
 
 In gioco: `/reload`, poi `/gf help`. Configurazione di `tools/local.ini`: [tools/local.example.ini](tools/local.example.ini). Controlli e test: [CONTRIBUTING](CONTRIBUTING.md#4-checks-and-tests).

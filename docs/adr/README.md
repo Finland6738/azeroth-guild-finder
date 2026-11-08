@@ -26,3 +26,4 @@ They record *why* the project is built a certain way. A decision that changes is
 | [0016](0016-english-first-ui-and-documentation-languages.md) | English first in the interface; documentation languages | accepted |
 | [0017](0017-license-gpl-3.md) | Licence: GNU GPL v3.0 | accepted |
 | [0018](0018-mockups-html-rendered-to-webp.md) | Mockups as HTML and CSS, rendered to WebP | accepted |
+| [0019](0019-offline-tests-with-lupa-and-a-mock-client.md) | Offline tests with lupa and a mock client | accepted |

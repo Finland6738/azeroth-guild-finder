@@ -47,7 +47,9 @@ def local_checks(dry):
     run([sys.executable, "-I", "-X", "utf8", "tools/check_docs.py"], capture=False, dry=dry)
     tests = os.path.join(ROOT, "Tests", "run_tests.py")
     if os.path.isfile(tests):
-        run([sys.executable, "-I", "-X", "utf8", tests], capture=False, dry=dry)
+        # No -I here: lupa may live in the user's site-packages, which isolated mode ignores (CI installs it system-wide
+        # and does use -I). The tests fetch the libraries themselves when they are missing.
+        run([sys.executable, "-X", "utf8", tests], capture=False, dry=dry)
 
 
 def open_pr(branch, title, body_file, dry):
