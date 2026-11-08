@@ -322,6 +322,26 @@ function Compat.ServerTime()
 	return time()
 end
 
+-- Monotonic seconds with sub-second precision (GetTime); the wall clock when the client function is missing.
+function Compat.Now()
+	local v = first("GetTime")
+	if type(v) == "number" then return v end
+	return time()
+end
+
+-- C_Timer wrappers. After(seconds, fn) -> true when scheduled. NewTicker(seconds, fn) -> handle with :Cancel(), or nil
+-- when timers are not available (the caller must cope: no timer, no sending).
+function Compat.After(seconds, fn)
+	local state = Compat.Call("C_Timer.After", seconds, fn)
+	return state == AVAILABLE
+end
+
+function Compat.NewTicker(seconds, fn)
+	local state, handle = Compat.Call("C_Timer.NewTicker", seconds, fn)
+	if state == AVAILABLE and type(handle) == "table" then return handle end
+	return nil
+end
+
 local function enum(name, key)
 	local t = Resolve("Enum." .. name)
 	return type(t) == "table" and t[key] or nil
@@ -410,6 +430,9 @@ local CAPS = {
 	{ "channel.GetChannelName", "channel", "GetChannelName", note = "[verify] legacy global" },
 	{ "channel.LeaveChannelByName", "channel", "LeaveChannelByName", note = "[verify] legacy global" },
 	{ "time.GetServerTime", "time", "GetServerTime", call = true },
+	{ "time.GetTime", "time", "GetTime", call = true },
+	{ "time.NewTicker", "time", "C_Timer.NewTicker" },
+	{ "time.After", "time", "C_Timer.After" },
 	{ "secret.issecretvalue", "secret", "issecretvalue" },
 	{ "secret.canaccessvalue", "secret", "canaccessvalue" },
 	{ "restriction.GetAddOnRestrictionState", "restriction", "C_RestrictedActions.GetAddOnRestrictionState" },

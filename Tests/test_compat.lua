@@ -231,6 +231,33 @@ describe("time, encoding, channels", function()
 		eq(type(compat().ServerTime()), "number")
 	end)
 
+	it("Now follows the client clock and falls back to the wall clock", function()
+		local C = compat()
+		eq(C.Now(), GetTime())
+		local before = C.Now()
+		Mock.Advance(2)
+		near(C.Now() - before, 2, 0.001)
+		GetTime = nil
+		eq(type(C.Now()), "number")
+	end)
+
+	it("After and NewTicker wrap C_Timer and degrade to nothing", function()
+		local C = compat()
+		local fired, ticks = 0, 0
+		truthy(C.After(1, function() fired = fired + 1 end))
+		local ticker = C.NewTicker(0.5, function() ticks = ticks + 1 end)
+		truthy(ticker)
+		Mock.Advance(2.05)
+		eq(fired, 1)
+		eq(ticks, 4)
+		ticker:Cancel()
+		Mock.Advance(2)
+		eq(ticks, 4)
+		C_Timer = nil
+		falsy(C.After(1, function() end))
+		eq(C.NewTicker(1, function() end), nil)
+	end)
+
 	it("encoding round trip through the wrappers", function()
 		local C = compat()
 		local cbor = C.CBOR.Encode({ a = 1, b = "x" })

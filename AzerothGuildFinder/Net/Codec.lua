@@ -76,6 +76,7 @@ function Codec:Encode(t, fields)
 	if not ok then return nil, reason end
 	local cbor, err = C.CBOR.Encode(msg)
 	if not cbor then return nil, "cbor: " .. tostring(err) end
+	if #cbor > Codec.MAX_DECODED then return nil, "size" end   -- a receiver would reject it
 	local flag, body = Codec.FLAG_RAW, cbor
 	if #cbor > Codec.COMPRESS_OVER then
 		local packed = C.Compress.Deflate(cbor)
