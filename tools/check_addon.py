@@ -66,6 +66,24 @@ def check_media(problems):
                     problems.append(f"{os.path.relpath(path, ROOT)}: Media/{name}.tga is used but missing")
 
 
+def check_fonts(problems):
+    """Every family and weight of the type scale in UI/Skin.lua must have its file and the OFL text of its family."""
+    skin = os.path.join(ADDON, "UI", "Skin.lua")
+    if not os.path.isfile(skin):
+        return
+    with open(skin, encoding="utf-8") as f:
+        text = f.read()
+    fonts = os.path.join(ADDON, "Media", "Fonts")
+    families = set()
+    for family, weight in re.findall(r'family = "(\w+)", weight = "(\w+)"', text):
+        families.add(family)
+        if not os.path.isfile(os.path.join(fonts, f"{family}-{weight}.ttf")):
+            problems.append(f"Media/Fonts/{family}-{weight}.ttf is used by UI/Skin.lua but missing")
+    for family in sorted(families):
+        if not os.path.isfile(os.path.join(fonts, f"OFL-{family}.txt")):
+            problems.append(f"Media/Fonts/OFL-{family}.txt (the licence of the font) is missing")
+
+
 def check_locale(problems):
     locale = os.path.join(ADDON, "Locale", "enUS.lua")
     if not os.path.isfile(locale):
@@ -110,6 +128,7 @@ def check(problems):
         problems.append("AzerothGuildFinder/Bindings.xml is missing")
     check_media(problems)
     check_locale(problems)
+    check_fonts(problems)
 
 
 def main():

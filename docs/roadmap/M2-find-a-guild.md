@@ -44,7 +44,7 @@
   - [ ] In game: widgets match the design system at 100 % and stay readable at 60 % and 140 % ([checklist](../checklists/M2.md)).
 - Tests: role → tabs mapping; page stack.
 - Docs: wiki Interface Tour, Commands and Settings.
-- Real client: look and feel, fonts (Roboto files are not bundled yet, see ADR 0020), scaling.
+- Real client: look and feel, fonts (Roboto and Roboto Mono are bundled, see ADR 0020: check that the client loads them), scaling.
 
 ### M2.5 — Find a Guild list
 - Branch: `step/m2-5-list`

@@ -144,6 +144,6 @@ If you like the project you can support it on [Ko-fi](https://ko-fi.com/finland6
 
 ## License
 
-[GNU General Public License v3.0](LICENSE). Included libraries and fonts keep their own licences.
+[GNU General Public License v3.0](LICENSE). Included libraries and fonts keep their own licences: Ace3 and LibDBIcon (see their folders in `AzerothGuildFinder/Libs/`), and **Roboto** and **Roboto Mono** by The Roboto Project Authors and The Roboto Mono Project Authors, under the [SIL Open Font License 1.1](AzerothGuildFinder/Media/Fonts/OFL-Roboto.txt).
 
 *Azeroth Guild Finder is a fan-made addon, not affiliated with or endorsed by Blizzard Entertainment. World of Warcraft and Warcraft are trademarks of Blizzard Entertainment, Inc.*

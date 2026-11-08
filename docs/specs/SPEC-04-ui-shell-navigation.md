@@ -74,7 +74,7 @@ Corrispondenze principali: navigation rail → schede metalliche **con etichetta
 
 - **Roboto** per tutta l'interfaccia (Regular 400, Medium 500, Bold 700, Black 900 per il titolo della finestra).
 - **Roboto Mono** solo dove serve allineare o distinguere caratteri: link e codici Discord, orari (`20:00–23:30`), comandi (`/gf notify`), diagnostica.
-- Inclusi nell'addon in `Media/Fonts/` (licenza aperta: Apache 2.0 / SIL OFL, da allegare `LICENSE` nella cartella) e registrati come `FontObject` dell'addon (`CreateFont` + `SetFont`). Non si cambiano i font del resto del gioco. Finché i file non sono nell'addon (decisione del proprietario, [ADR 0020](../adr/0020-original-media-own-nine-slice-and-font-fallback.md)) ogni stile usa il font del client con le stesse dimensioni; `/gf debug` elenca gli stili in ripiego.
+- Inclusi nell'addon in `Media/Fonts/` con la licenza **SIL Open Font License 1.1** (`OFL-Roboto.txt`, `OFL-RobotoMono.txt`: i font restano sotto la OFL, il resto dell'addon è GPL-3.0) e registrati come `FontObject` dell'addon (`CreateFont` + `SetFont`). Non si cambiano i font del resto del gioco. Se il client non riesce a caricare un file ([ADR 0020](../adr/0020-original-media-own-nine-slice-and-font-fallback.md)) quello stile usa il font del client con le stesse dimensioni; `/gf debug` elenca gli stili in ripiego.
 - **Copertura dei caratteri**: Roboto copre latino, latino esteso, greco e cirillico. Per nomi con caratteri non coperti si ripiega sul font del client: `FontFamily` con i fallback per alfabeto [verificare].
 - Scala tipografica (px a scala 100 %): headline 24/700 · title-l 20/700 · title-m 16/500 · body 13,5/400 · label 12,5/500 · caption 12/400 · mono 12–13. **Minimo 12 px.**
 
