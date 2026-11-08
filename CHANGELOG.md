@@ -21,6 +21,7 @@ All notable changes to this project are documented here. The format follows [Kee
 - M0.1: throwaway probe addon `AzGF_Probe` in `tools/probe/` (`/agfp list|run|export|reset`, check registry, results in `AzGF_ProbeDB`; checks S1–S11 are stubs), `tools/install_probe.py` with `tools/local.example.ini`, and `docs/spike/README.md`. Never distributed; not yet run in the real client.
 - Probe M0.2: checks S1 (Club Finder), S7 (guild APIs, async roster) and S11 (chat lockdown snapshots, `/agfp snapshot <label>`) in `tools/probe/AzGF_Probe/Checks_Environment.lua`; owner instructions in `docs/spike/README.md`.
 - Probe M0.3: checks S2 (exchange in the test channel `AzGFProbe` with prefix `AzGFP`: `/agfp join|leave|ping|pong`), S3 (level, play time and trial-account flags recorded with every send) and S6 (`/agfp burst <n> <gap>`: throttle result codes and messages received by the peer) in `tools/probe/AzGF_Probe/Checks_Channel.lua`; two-client instructions in `docs/spike/README.md`.
+- Probe M0.4: checks S4 (`/agfp whisper <name>`: addon whisper result code, reply, round trip, sender level and trial flags; the name is never stored) and S5 (`/agfp officer`, `/agfp guild`: result codes, sender guild role, distribution each message arrived on, plain-member reception) in `tools/probe/AzGF_Probe/Checks_Whisper.lua`; in-game instructions in `docs/spike/README.md`.
 
 ### Project
 

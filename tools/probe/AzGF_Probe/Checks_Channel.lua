@@ -464,6 +464,9 @@ local function onAddonMessage(prefix, text, distribution, sender, _, _, localId,
         fields[#fields + 1] = part
     end
     local kind = fields[1]
+    if Probe.foreignKinds[kind] then
+        return
+    end
     local entry = { time = now(), kind = kind or "?", peer = peer, dist = tostring(distribution), len = #text,
         channel = inChannel and "AzGFProbe" or "other", level = info.level }
     if peer ~= "<self>" then
@@ -803,6 +806,15 @@ Probe.commands.channel = function()
         out(string.format("burst %s from %s: got %d/%d, missing [%s]", e.key, e.peer, e.got, e.n, tostring(e.missing or "")))
     end
 end
+
+-- Shared with Checks_Whisper.lua (M0.4): same prefix, result codes, character info and anonymous peer labels.
+Probe.Channel = {
+    PREFIX = PREFIX, codeText = codeText, isSuccess = isSuccess, charInfo = charInfo, levelKey = levelKey,
+    peerLabel = peerLabel, now = now, push = push, getTime = getTime, serverTime = serverTime, registerPrefix = registerPrefix,
+    enumText = enumText, lockdownText = lockdownText, sid = function() return S.sid end,
+}
+-- message kinds handled by other check files: this file's receive handler ignores them
+Probe.foreignKinds = Probe.foreignKinds or {}
 
 -- Events -------------------------------------------------------------------------------------------------------------------
 local function register(ev)
