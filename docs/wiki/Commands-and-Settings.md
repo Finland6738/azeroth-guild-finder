@@ -5,7 +5,7 @@
 | `/gf` | Opens or closes Guild Finder |
 | `/gf notify` | Shows or hides the applications notification icon |
 | `/gf reset` | Resets window positions |
-| `/gf debug` | Diagnostics |
+| `/gf debug` | Diagnostics: addon version, client build and project id, and every game feature the addon needs as `available`, `missing`, `restricted` or `error` (no character or guild names) |
 | `/gf help` | The list of commands |
 
 Also: the minimap button (left click opens, right click settings) and a key binding under *Key Bindings → AddOns*.
