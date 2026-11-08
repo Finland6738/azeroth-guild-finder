@@ -30,6 +30,8 @@ python -I -X utf8 tools/install_probe.py
 | `/agfp whisper <name>` | Sends one addon whisper to the named character and records the result code; the name is never stored (logged as `<target>`) (S4) |
 | `/agfp officer` | Sends one test message on the `OFFICER` distribution and records the result code and your guild role (S5) |
 | `/agfp guild` | Same on `GUILD`, the fallback (S5) |
+| `/agfp invite <name>` | Opens a small window with an **Invite <name>** button that calls `C_GuildInfo.Invite` (S10); the name is never stored |
+| `/agfp invite-timer <name>` | Calls `C_GuildInfo.Invite` from a 1 second timer, without a hardware event (S10) |
 | `/agfp channel` | Prints the channel status, the counters and the bursts seen by this client |
 | `/agfp tabard [slow\|stop\|status\|info]` | Dumps the tabard info (S8) and cycles a hidden `TabardModel` over every variation to build the catalogue of emblems, borders, backgrounds and colours; `slow` does one step per frame, `stop` aborts, `info` only repeats the info dump (S8) |
 | `/agfp gallery` | Opens the movable texture gallery: banner, parchment, class icon, role icon and emblem candidates (S9) |
@@ -40,7 +42,7 @@ python -I -X utf8 tools/install_probe.py
 | `/agfp export` | Opens a movable frame with all results as plain text, already selected: press Ctrl+C |
 | `/agfp reset` | Clears the stored results |
 
-Results are saved in `AzGF_ProbeDB.results[id]` as `{id, result, details, build, time}` where `result` is `pass`, `fail`, `info` or `todo`. Checks not yet implemented record "not implemented yet"; S1, S7 and S11 are implemented in M0.2 (`Checks_Environment.lua`), S2, S3 and S6 in M0.3 (`Checks_Channel.lua`), S4 and S5 in M0.4 (`Checks_Whisper.lua`), S8 in M0.5 (`Checks_Tabard.lua`) and S9 in M0.5 (`Checks_Textures.lua`), the last one follows in M0.6. Snapshots are stored in `AzGF_ProbeDB.snapshots` and included in `/agfp export`.
+Results are saved in `AzGF_ProbeDB.results[id]` as `{id, result, details, build, time}` where `result` is `pass`, `fail`, `info` or `todo`. Checks not yet implemented record "not implemented yet"; S1, S7 and S11 are implemented in M0.2 (`Checks_Environment.lua`), S2, S3 and S6 in M0.3 (`Checks_Channel.lua`), S4 and S5 in M0.4 (`Checks_Whisper.lua`), S8 in M0.5 (`Checks_Tabard.lua`) and S9 in M0.5 (`Checks_Textures.lua`), S10 in M0.6 (`Checks_Invite.lua`). Snapshots are stored in `AzGF_ProbeDB.snapshots` and included in `/agfp export`.
 
 ## M0.2: what to do in game (S1, S7, S11)
 
@@ -145,6 +147,15 @@ Nothing here sends anything to other players: both checks are local. The probe n
 4. Mark with the **OK** and **Bad** buttons, or `/agfp mark <n> ok|bad` (`clear` removes a mark). Aim for **12 to 16 banners** and at least one parchment marked ok, plus the class icons and role icons that work (texture file or atlas: note which of the two exists for the classes).
 5. Any extra idea (a path or fileID you know, a loading screen of your favourite zone): `/agfp tex <path|fileID>` or `/agfp tex atlas:<name>`; it prints the API result, adds the candidate at the end of the gallery and selects it, so you can look and mark it. Paths use backslashes, for example `/agfp tex Interface\Glues\LoadingScreens\SomeName`.
 6. `/agfp run S9` refreshes the API result of every candidate and records the summary (`pass` when at least 12 banners and one parchment are marked ok, otherwise `info`, `todo` if nothing is marked). `/agfp export gallery` opens a frame with one line per candidate (`n | group | kind | value | API result | mark`) and the list of the ones marked ok with their fileIDs; send it in the report. Marks are kept in `AzGF_ProbeDB.textures.marks` across sessions.
+
+## M0.6: what to do in game (S10)
+
+Needs a character that **can invite**: the Guild Master or a rank with the invite right (**A**), and a **target** (**B**): an online character **without a guild**, ideally on a second account. An offline target gives an error, which is also useful to see once. `/reload` first. The probe never stores or prints the target name (`<target>` in results and export); only the button label shows it on screen.
+
+1. A: `/agfp invite <B name>`. A small window opens with the button **Invite <B name>**. Click it: this is a real hardware event and B receives a real guild invitation (decline it on B, or accept; either is fine).
+2. A: `/agfp invite-timer <B name>`. One second later the probe calls the same API from a timer, with no hardware event, to see whether the call is protected. B gets another invitation.
+3. For about 5 seconds after each attempt the probe records the `pcall` result and error text, any `ADDON_ACTION_BLOCKED` / `ADDON_ACTION_FORBIDDEN` event for this addon, and the system messages that follow (`<target>` replaces the name).
+4. `/agfp run S10`, then `/agfp export`: the `S10 attempt` lines. S10 is `pass` if the button path ran without a blocked-action event, `fail` if it was blocked: then SPEC-07 section 5 needs the fallback, `/ginvite <name>` pre-filled in the chat box. Also try once with a character that cannot invite and note the message. Send the export of A.
 
 ## Reporting results
 

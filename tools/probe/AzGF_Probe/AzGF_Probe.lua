@@ -186,7 +186,7 @@ end
 
 -- Checks S1-S11: stubs in M0.1; M0.2-M0.6 replace them by calling Probe:Register with the same id
 -- (S1, S7, S11 live in Checks_Environment.lua and S2, S3, S6 in Checks_Channel.lua, S4, S5 in Checks_Whisper.lua, S8 in
--- Checks_Tabard.lua and S9 in Checks_Textures.lua, loaded after this file;
+-- Checks_Tabard.lua and S9 in Checks_Textures.lua and S10 in Checks_Invite.lua, loaded after this file;
 -- those files also add slash commands with Probe.commands[name] = function(arg, rest)).
 local STUBS = {
     { "S2", "Join the test channel and exchange addon messages between two clients" },
@@ -196,7 +196,6 @@ local STUBS = {
     { "S6", "Real channel throttle (messages per second before throttling)" },
     { "S8", "Tabard info and TabardModel CycleVariation catalogue" },
     { "S9", "Texture gallery: banners, parchment, class and role icons" },
-    { "S10", "C_GuildInfo.Invite from an addon button" },
 }
 for _, stub in ipairs(STUBS) do
     Probe:Register(stub[1], stub[2], function()
@@ -204,7 +203,7 @@ for _, stub in ipairs(STUBS) do
     end)
 end
 
-local USAGE = "/agfp [list] | run <id> | snapshot <label> | join | leave | ping | pong | burst <n> <gap> | channel | whisper <name> | officer | guild | tabard [slow|stop|status|info] | gallery | tex <path|fileID|atlas:name> | mark <n> ok|bad|clear | export [tabard|gallery] | reset"
+local USAGE = "/agfp [list] | run <id> | snapshot <label> | join | leave | ping | pong | burst <n> <gap> | channel | whisper <name> | officer | guild | invite <name> | invite-timer <name> | tabard [slow|stop|status|info] | gallery | tex <path|fileID|atlas:name> | mark <n> ok|bad|clear | export [tabard|gallery] | reset"
 
 SLASH_AZGFPROBE1 = "/agfp"
 SlashCmdList["AZGFPROBE"] = function(msg)
