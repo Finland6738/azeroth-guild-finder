@@ -66,6 +66,15 @@ Non c'è un server. Ogni installazione conserva gli annunci che ha visto e li co
 - Una candidatura arriva solo al Guild Master e agli ufficiali della gilda.
 - Nessun server esterno, nessuna telemetria, nessuna connessione a internet.
 
+## Sviluppo
+
+```
+python -I -X utf8 tools/fetch_libs.py      # scarica in AzerothGuildFinder/Libs/ le librerie fissate in .pkgmeta
+python -I -X utf8 tools/install_addon.py   # copia l'addon nella cartella AddOns indicata in tools/local.ini
+```
+
+In gioco: `/reload`, poi `/gf help`. Configurazione di `tools/local.ini`: [tools/local.example.ini](tools/local.example.ini). Controlli e test: [CONTRIBUTING](CONTRIBUTING.md#4-checks-and-tests).
+
 ## Documentazione
 
 - [Manuale (wiki)](https://github.com/Finland6738/azeroth-guild-finder/wiki), generato da [`docs/wiki/`](docs/wiki/Home.md).

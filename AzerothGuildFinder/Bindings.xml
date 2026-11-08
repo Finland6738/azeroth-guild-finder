@@ -1,0 +1,5 @@
+<Bindings>
+	<Binding name="AZGUILDFINDER_TOGGLE" header="AZGUILDFINDER" category="ADDONS">
+		AzerothGuildFinder_ToggleBinding()
+	</Binding>
+</Bindings>

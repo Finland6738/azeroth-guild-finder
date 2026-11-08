@@ -1,0 +1,28 @@
+package-as: AzerothGuildFinder
+
+# One source of truth for library versions: tools/fetch_libs.py reads this block for local development and CI;
+# the BigWigs packager reads it for releases. Each entry is a whole repository at a tag.
+externals:
+  AzerothGuildFinder/Libs/Ace3:
+    url: https://github.com/WoWUIDev/Ace3
+    tag: Release-r1403
+  AzerothGuildFinder/Libs/LibDataBroker-1.1:
+    url: https://github.com/tekkub/libdatabroker-1-1
+    tag: v1.1.4
+  AzerothGuildFinder/Libs/LibDBIcon-1.0:
+    url: https://github.com/wowace-clone/LibDBIcon-1.0
+    tag: v8.0.4
+
+# The addon lives in a subfolder of the repository: the packager moves it to the top level of the package.
+move-folders:
+  AzerothGuildFinder/AzerothGuildFinder: AzerothGuildFinder
+
+ignore:
+  - Tests
+  - docs
+  - tools
+  - .github
+  - .gitignore
+  - .luarc.json
+  - "*.md"
+  - LICENSE

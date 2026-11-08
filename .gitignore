@@ -20,3 +20,6 @@ tools/local.ini
 
 # Raw screenshots before the WebP conversion
 docs/specs/mockups/img/**/*.png
+
+# Libraries are fetched from .pkgmeta by tools/fetch_libs.py
+AzerothGuildFinder/Libs/
