@@ -247,7 +247,12 @@ describe("A late joiner", function()
 		local sim = Sim.new{ clients = 3, seed = 4 }
 		for i = 1, 2 do veteran(sim:client(i), 20) end
 		local c = sim:client(3)
-		sim:advance(60)
+		local result
+		c:addon().Bus:On("CATALOG_SYNCED", function(r) result = r end)
+		-- (math.random is the platform's rand(): the exact timing differs between systems, so wait for the event)
+		sim:advanceUntil(function() return result ~= nil end, 180)
+		notNil(result)
+		truthy(result.full)
 		eq(catalogOf(c):Count(), 20)
 		truthy(syncOf(c).state.stats.requestsSent >= 1)
 		c:reload()
