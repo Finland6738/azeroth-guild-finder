@@ -19,7 +19,7 @@
 - Spec: SPEC-02 §8, SPEC-03 §1, SPEC-05 §1
 - Scope: `Data/Catalog.lua`: per realm and faction, merge rules INT-01…INT-05, staleness (14 days "may be inactive", hidden at 30, purged at 60), 500-listing limit, search and filter index, `CATALOG_UPDATED`.
 - Done when:
-  - [ ] Conflicting and late updates converge to the same listing on every client.
+  - [x] Conflicting and late updates converge to the same listing on every client.
 - Tests: ordering, ownerId conflicts, one-guild-per-sender rule, delist and re-announce, expiry.
 
 ### M2.3 — Catalog sync
