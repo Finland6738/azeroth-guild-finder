@@ -52,4 +52,16 @@ function Assets.ClassIcon(file)
 	return { path = entry.path }
 end
 
+-- Banners: the art behind a guild card (SPEC-08 §3). A listing's `bg` is an index into this list; each entry is the
+-- fileID of an image the client already has (loading screens, achievement and guild window backgrounds), never a path
+-- into this addon and never a copy. The list is empty until the fileIDs are read in the real client (the M2 checklist
+-- records them here, each with `verify` removed once seen): a card whose banner is unknown is drawn without one.
+Assets.BANNERS = {}   -- [index] = { file = <fileID>, verify = true }
+
+-- The fileID of banner `index`, or nil when it is not in the list.
+function Assets.Banner(index)
+	local entry = type(index) == "number" and Assets.BANNERS[index]
+	return type(entry) == "table" and type(entry.file) == "number" and entry.file or nil
+end
+
 if ns.addon then ns.addon.Assets = Assets end

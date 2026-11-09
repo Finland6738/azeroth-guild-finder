@@ -11,6 +11,6 @@ The textures of the addon's own windows. **All of them are original**: `tools/ma
 | `disc`, `disc_ring`, `disc_shiny` | round buttons, the close button, knobs, dots |
 | `glyph_*` | white icons of the side rail and buttons (tinted) |
 | `role_tank`, `role_healer`, `role_melee`, `role_ranged` | the four role badges, in colour |
-| `parchment`, `shade_h`, `solid` | page grain, page-edge shading, a plain white pixel |
+| `parchment`, `shade_h`, `fade_h`, `solid` | page grain, page-edge shading, the fade of a guild card's banner into the parchment, a plain white pixel |
 
 The art of the game itself (class icons, later banners and emblem pieces) is **not** here: it is referenced by path or atlas from `Data/Assets.lua`. Fonts: see [Fonts/README.md](Fonts/README.md).

@@ -54,8 +54,8 @@ function AGF:PrintDebug()
 	end
 end
 
--- /gf debug [ping|announce|gallery]: the diagnostics, the channel check, a test listing, or the widget gallery (the last two in
--- development builds only).
+-- /gf debug [ping|announce|gallery|seed]: the diagnostics, the channel check, a test listing, the widget gallery, or fake
+-- listings for the list (the last three in development builds only).
 function AGF:OnDebugCommand(input)
 	local sub = tostring(input or ""):lower():match("^%s*%S+%s+(%S+)")
 	if sub == "ping" then
@@ -64,6 +64,11 @@ function AGF:OnDebugCommand(input)
 	end
 	if sub == "gallery" then
 		if ns.Gallery then return ns.Gallery:Open() end
+		return self:Print(L["COMING_SOON"])
+	end
+	if sub == "seed" then
+		local argument = tostring(input or ""):match("^%s*%S+%s+%S+%s+(%S+)")
+		if ns.Seed then return ns.Seed:Command(argument) end
 		return self:Print(L["COMING_SOON"])
 	end
 	if sub == "announce" then

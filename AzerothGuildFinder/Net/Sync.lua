@@ -167,6 +167,16 @@ function Sync:PeerCount()
 	return max(n, 1)
 end
 
+-- The distinct peers heard in the last PEER_WINDOW seconds, 0 when nobody (PeerCount never says less than 1: it is
+-- an estimate for spreading timers; the list uses this to tell "nobody is around").
+function Sync:HeardPeers()
+	local t, n = now(), 0
+	for _, at in pairs(state.peers) do
+		if t - at <= Sync.PEER_WINDOW then n = n + 1 end
+	end
+	return n
+end
+
 -- A peer to whisper a request to (listen-only): the most recent channel sender, or a contact of guild k.
 local function whisperTarget(k)
 	if k and state.contacts[k] then

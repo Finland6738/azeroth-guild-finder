@@ -156,6 +156,11 @@ end
 
 -- Mouse and widget behaviour used by tests.
 function Widget:EnableMouse(v) self._mouse = v end
+function Widget:EnableMouseWheel(v) self._wheel = v and true or false end   -- dump: SimpleScriptRegionAPI.EnableMouseWheel
+function Widget:IsMouseWheelEnabled() return self._wheel == true end
+-- Slider thumb (dump: SimpleSliderAPI.SetThumbTexture / GetThumbTexture): a texture the slider owns.
+function Widget:SetThumbTexture(t) self._thumbTexture = self._thumbTexture or newWidget("Texture", nil, self); self._thumbTexture._texture = t end
+function Widget:GetThumbTexture() self._thumbTexture = self._thumbTexture or newWidget("Texture", nil, self); return self._thumbTexture end
 function Widget:IsMouseEnabled() return self._mouse == true end
 function Widget:Click(button)
 	if self._enabled then runScript(self, "OnClick", button or "LeftButton", false) end

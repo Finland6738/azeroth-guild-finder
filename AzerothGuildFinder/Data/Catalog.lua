@@ -10,11 +10,14 @@
 --   own          the ownerId known for the guild (INT-03)
 --   firstSeenAt  when this client first heard of the listing; annAt = last time it was announced (staleness clock)
 --   state        "listed" | "delisted" (a DEL tombstone: delRev = highest revision withdrawn, delAt = when)
+--   localOnly    true for listings put in with meta.localOnly (the development seed, /gf debug seed): kept and shown
+--                here, never offered to other clients (not in the digest, not in CAT answers)
 -- Who announced what (INT-04, INT-05) lives in memory only and is NEVER saved: sender names stay out of the file.
 --
 -- meta (all optional) describes where a record came from:
 --   meta.sender   who sent it (Name-Realm), memory only      meta.dist    "CHANNEL" | "WHISPER" | "GUILD" | ...
 --   meta.now      override the clock (tests)                 meta.annAt   when a peer last heard an ANN (CAT replies)
+--   meta.localOnly  the listing is never shared with other clients (new entries only)
 -- INT-04 and INT-05 apply to announcements that arrive in the channel (meta.dist == "CHANNEL"): there the sender
 -- is required. A record without meta (local use) or from another distribution skips those two rules.
 --
@@ -279,6 +282,7 @@ local function validateEntry(k, entry, realm, faction)
 	else
 		entry.state, entry.delRev, entry.delAt = "listed", nil, nil
 	end
+	if entry.localOnly ~= true then entry.localOnly = nil end
 	if entry.det ~= nil then
 		local det = Listing().SanitizeDetail(entry.det)
 		if det and det.k == k then
@@ -409,7 +413,8 @@ function Catalog:PutSummary(rec, meta)
 		elseif not makeRoom(bucket, at) then
 			return false, "limit"
 		end
-		bucket[sum.k] = { sum = sum, own = sum.own, firstSeenAt = t, annAt = at, state = "listed" }
+		bucket[sum.k] = { sum = sum, own = sum.own, firstSeenAt = t, annAt = at, state = "listed",
+			localOnly = meta.localOnly and true or nil }
 		if channel then rememberAnnouncer(sum.k, meta.sender, t) end
 		emit(sum.k, takeover and "updated" or "added")
 		return true, takeover and "takeover" or "added"
@@ -521,6 +526,19 @@ function Catalog:Housekeeping(t)
 	return purged, details
 end
 
+-- Removes the listings that were put in as local only (the development seed). Returns how many.
+function Catalog:RemoveLocal()
+	local bucket = playerBucket(false)
+	local n = 0
+	if bucket then
+		for k, entry in pairs(bucket) do
+			if entry.localOnly then drop(bucket, k) n = n + 1 end
+		end
+	end
+	if n > 0 then emit(nil, "cleared") end
+	return n
+end
+
 -- Forgets everything: all saved listings (every realm) and what was learned about senders (for `/gf reset` and tests).
 function Catalog:Clear()
 	local cat = root()
@@ -597,20 +615,21 @@ function Catalog:Count(all)
 	return n
 end
 
--- For CATREQ: one { h, rev, srev } per stored listing (withdrawn ones too, so nobody sends them back), A -> Z.
+-- For CATREQ: one { h, rev, srev } per stored listing (withdrawn ones too, so nobody sends them back), A -> Z. Local
+-- only listings are left out: they are not ours to share.
 function Catalog:Digest()
 	local bucket = playerBucket(false)
 	local out = {}
 	if not bucket then return out end
 	for _, k in ipairs(sortedKeys(bucket)) do
 		local sum = bucket[k].sum
-		out[#out + 1] = { h = Normalize().Hash32(k), rev = sum.rev, srev = sum.srev or 0 }
+		if not bucket[k].localOnly then out[#out + 1] = { h = Normalize().Hash32(k), rev = sum.rev, srev = sum.srev or 0 } end
 	end
 	return out
 end
 
 -- For answering a CATREQ: the summaries the requester lacks or has an older revision (or statistics) of, A -> Z.
--- Hidden and withdrawn listings are never offered.
+-- Hidden, withdrawn and local only listings are never offered.
 function Catalog:Newer(remote)
 	local bucket = playerBucket(false)
 	local out = {}
@@ -623,7 +642,7 @@ function Catalog:Newer(remote)
 	for _, k in ipairs(sortedKeys(bucket)) do
 		local entry = bucket[k]
 		local status = statusOf(entry, t)
-		if status == "listed" or status == "inactive" then
+		if (status == "listed" or status == "inactive") and not entry.localOnly then
 			local r = have[Normalize().Hash32(k)]
 			local sum = entry.sum
 			if not r or (tonumber(r.rev) or 0) < sum.rev

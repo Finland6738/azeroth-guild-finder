@@ -447,11 +447,12 @@ describe("pages", function()
 
 	it("a tab nobody registered shows a short 'coming soon' page", function()
 		main():Show()
-		local host = main().hosts.FindGuild
+		main():Select("MyApplication")   -- (Find a Guild has its page since M2.5)
+		local host = main().hosts.MyApplication
 		truthy(host.content:IsShown())
-		eq(host.card.title:GetText(), "Find a Guild")
+		eq(host.card.title:GetText(), "My Application")
 		contains(host.text:GetText(), "later version")
-		eq(host.plate.text:GetText(), "Find a Guild")
+		eq(host.plate.text:GetText(), "My Application")
 	end)
 
 	it("a page that fails to build is reported and the window carries on", function()

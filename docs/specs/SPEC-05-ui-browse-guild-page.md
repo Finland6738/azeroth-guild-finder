@@ -22,6 +22,8 @@ Visibile solo a chi **non ha gilda** ([SPEC-00 §5](SPEC-00-vision-scope.md#5-ru
 - Passando sopra la riga: un tooltip con la descrizione abbreviata e i requisiti.
 - Un annuncio senza `ANN` da più di 14 giorni mostra "May be inactive"; dopo 30 giorni sparisce dalla lista (resta in cache fino a 60).
 
+> **Nota di realizzazione (M2.5).** Roboto non contiene le frecce né il segno di spunta: l'addon scrive "Sorted A-Z" (con il trattino) e usa piccole icone per i segni ✓/✗ dei requisiti. Il tag in alto sulla scheda è uno solo: "Requirements not met" se un requisito noto non è soddisfatto, altrimenti "Looking for your class". I pulsanti **Discord** e **Apply** della scheda arrivano con la pagina della gilda (M2.7) e le candidature (M4). Giorni e orari sono convertiti dal fuso UTC a quello del computer del giocatore (`BrowseModel.ToLocal`); un banner di cui non è ancora noto il fileID non viene disegnato.
+
 ### Stati della lista
 
 | Stato | Messaggio |

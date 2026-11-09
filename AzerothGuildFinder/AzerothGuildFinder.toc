@@ -24,6 +24,7 @@ Data\Enums.lua
 Data\Listing.lua
 Data\Catalog.lua
 Data\Assets.lua
+Data\Seed.lua
 Net\Codec.lua
 Net\Transport.lua
 Net\Channel.lua
@@ -36,6 +37,8 @@ UI\Widgets\Overlay.lua
 UI\Widgets\Buttons.lua
 UI\Widgets\Inputs.lua
 UI\Widgets\Display.lua
+UI\BrowseModel.lua
 UI\Main.lua
+UI\Browse.lua
 UI\Gallery.lua
 UI\Entry.lua

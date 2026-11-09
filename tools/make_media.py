@@ -286,6 +286,16 @@ def shade_h():
     return img
 
 
+def fade_h():
+    """Horizontal fade 64 x 4: a white pixel row that is opaque at the left edge and clear at the right (the banner of a
+    guild card melts into the parchment; the addon tints it with the card colour)."""
+    img = Image.new("RGBA", (64, 4), WHITE + (0,))
+    a = Image.new("L", (64, 4))
+    a.putdata([int(255 * (1 - x / 63.0) ** 1.3) for _ in range(4) for x in range(64)])
+    img.putalpha(a)
+    return img
+
+
 def solid():
     return Image.new("RGBA", (8, 8), WHITE + (255,))
 
@@ -302,7 +312,7 @@ TEXTURES = {
     "glyph_copy": lambda: glyph(g_copy),
     "role_tank": lambda: role_badge("tank"), "role_healer": lambda: role_badge("healer"),
     "role_melee": lambda: role_badge("melee"), "role_ranged": lambda: role_badge("ranged"),
-    "parchment": parchment_grain, "shade_h": shade_h, "solid": solid,
+    "parchment": parchment_grain, "shade_h": shade_h, "fade_h": fade_h, "solid": solid,
 }
 
 
