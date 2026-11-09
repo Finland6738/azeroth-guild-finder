@@ -8,17 +8,17 @@ Un cercagilde per **World of Warcraft: Forever**: cerca le gilde per lingua, att
 [![CI](https://github.com/Finland6738/azeroth-guild-finder/actions/workflows/ci.yml/badge.svg)](https://github.com/Finland6738/azeroth-guild-finder/actions/workflows/ci.yml)
 [![License: GPL v3](https://img.shields.io/badge/license-GPL--3.0-blue.svg)](LICENSE)
 ![WoW Forever](https://img.shields.io/badge/WoW%20Forever-Interface%2016001-8b5a2b)
-![Stato](https://img.shields.io/badge/stato-progettazione-orange)
+![Stato](https://img.shields.io/badge/stato-in%20sviluppo-orange)
 
 > 🇬🇧 [English version](README.md)
 
 ![Trova gilda: lista con ricerca e filtri (bozzetto)](docs/specs/mockups/img/clean/01-browse.webp)
 
-*Bozzetto di progetto, non una schermata del gioco: l'addon è ancora in progettazione.*
+*Bozzetto di progetto, non una schermata del gioco: l'addon non è ancora stato provato nel gioco.*
 
 </div>
 
-> **Stato: progettazione.** Specifiche, decisioni e bozzetti sono pronti; lo sviluppo parte con la tappa M0 (verifiche nel client reale). Non c'è ancora niente da scaricare. Segui la [roadmap](ROADMAP.md) e gli [Annunci](https://github.com/Finland6738/azeroth-guild-finder/discussions/categories/announcements).
+> **Stato: in sviluppo, non ancora provato nel gioco.** Specifiche, decisioni e bozzetti sono pronti, e le tappe M1 e M2 (sincronizzazione del catalogo, finestra principale, Trova gilda con ricerca e filtri, pagina della gilda) sono scritte e collaudate offline su un client simulato e un simulatore di rete; nessuno le ha ancora eseguite in WoW Forever, quindi nulla è confermato in gioco. Le verifiche M0 e quelle in gioco aspettano il proprietario ([elenco](docs/checklists/M2.md), in inglese). Non c'è ancora niente da scaricare. Segui la [roadmap](ROADMAP.md) e gli [Annunci](https://github.com/Finland6738/azeroth-guild-finder/discussions/categories/announcements).
 
 ## Funzioni
 

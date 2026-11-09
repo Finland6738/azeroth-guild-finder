@@ -87,6 +87,7 @@
 ### M2.8 — Milestone check and docs
 - Branch: `step/m2-8-check`
 - Depends on: M2.1–M2.7
-- Scope: run the exit checks, record results in `docs/checklists/M2.md`, update README status and wiki screenshots if the real window differs from the mockups.
+- Scope: run the exit checks, record results in `docs/checklists/M2.md`, update README status and wiki screenshots if the real window differs from the mockups. Done without the client: the offline results and an in-game run order are in the checklist, the wiki pages of M2 were reviewed against what was built, and the mockup images stay because the real window has not been seen yet.
 - Done when:
-  - [ ] Exit criterion met and recorded.
+  - [x] Offline: every exit check that does not need the client was run and recorded in [docs/checklists/M2.md](../checklists/M2.md) (2026-11-09: 1004 tests passed, `check_docs` and `check_addon` clean, simulator: 50 clients and 100 guilds converged in 200 simulated seconds inside NET-01).
+  - [ ] In game: the five lists of [docs/checklists/M2.md](../checklists/M2.md) are done and recorded (waiting for the owner); this also closes the in-game boxes of M2.3–M2.7.
