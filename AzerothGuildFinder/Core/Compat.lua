@@ -337,6 +337,14 @@ function Chat.CanSend()
 	return not Chat.InChatLockdown() and not Chat.OutgoingAddonRestricted() and Chat.RestrictionAny() == nil
 end
 
+-- Opens the chat box with "/w Name " typed in (the Whisper button of the guild page; the player writes and sends the
+-- message). false when the name is not a plain character name or the client has no ChatFrame_OpenChat.
+function Chat.OpenWhisper(name)
+	if type(name) ~= "string" or name == "" or name:find("[%s|]") then return false end
+	local _, state = first("ChatFrame_OpenChat", "/w " .. name .. " ")
+	return state == AVAILABLE
+end
+
 ---------------------------------------------------------------------------------------------------------------------
 -- Time, encoding, channels
 ---------------------------------------------------------------------------------------------------------------------
@@ -502,6 +510,7 @@ local CAPS = {
 	{ "chat.AreOutgoingAddonChatMessagesRestricted", "chat", "C_ChatInfo.AreOutgoingAddonChatMessagesRestricted", call = true, restrictedWhenTrue = true },
 	{ "chat.SendAddonMessage", "chat", "C_ChatInfo.SendAddonMessage" },
 	{ "chat.RegisterAddonMessagePrefix", "chat", "C_ChatInfo.RegisterAddonMessagePrefix" },
+	{ "chat.ChatFrame_OpenChat", "chat", "ChatFrame_OpenChat", note = "FrameXML global (guild page: Whisper)" },
 	{ "channel.JoinChannelByName", "channel", "JoinChannelByName", note = "[verify] legacy global" },
 	{ "channel.GetChannelName", "channel", "GetChannelName", note = "[verify] legacy global" },
 	{ "channel.LeaveChannelByName", "channel", "LeaveChannelByName", note = "[verify] legacy global" },

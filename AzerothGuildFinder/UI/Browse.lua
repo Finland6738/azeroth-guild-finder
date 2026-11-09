@@ -3,7 +3,7 @@
 -- What the player sees: on the right page a search box (3 letters, normalized, 250 ms after the last key), the count
 -- "24 of 142 guilds" and the fixed "Sorted A-Z"; under it the guild cards, one every 188 px, scrolled with the mouse wheel
 -- or the bar; a status bar. On the left page the filters (UI/FilterPanel.lua, rules in UI/FilterModel.lua). A click on a
--- card opens its page (M2.7).
+-- card opens its page (UI/GuildPage.lua, M2.7).
 -- All rules (order, search, states, texts of a card, which rows are visible) live in UI/BrowseModel.lua and are tested
 -- without frames; this file creates the frames and copies what the model says into them.
 --
@@ -18,7 +18,7 @@
 --                                                button; resetFn() clears the filters and calls Browse:SetFilter again;
 --                                                prepareFn() runs before each rebuild of the list.
 --   Browse:RefreshNow()   Browse:Selected() -> the listings now shown (A -> Z)    Browse.left = the left page frame
---   Browse:OpenGuild(k)   pushes the guild page of M2.7 ("GuildPage") on the Find a Guild tab
+--   Browse:OpenGuild(k)   pushes the guild page (UI/GuildPage.lua, "GuildPage") on the Find a Guild tab
 -- The list reacts to CATALOG_UPDATED on the Bus, at most once every Model.THROTTLE seconds, and only while it is shown.
 local ADDON_NAME, ns = ...
 ns = ns or {}
@@ -31,7 +31,7 @@ local type, ipairs, pairs = type, ipairs, pairs
 local floor, min, max, sin, cos = math.floor, math.min, math.max, math.sin, math.cos
 
 Browse.PAGE = "FindGuild"            -- the tab id (UI/Nav.lua)
-Browse.GUILD_PAGE = "GuildPage"      -- the page M2.7 registers
+Browse.GUILD_PAGE = "GuildPage"      -- the page UI/GuildPage.lua registers
 Browse.WHEEL_STEP = 64               -- px per notch of the mouse wheel
 Browse.POLL = 5                      -- seconds between two looks at the sync state while the page is shown
 
@@ -82,18 +82,8 @@ local function text(parent, style, color, x, y, width)
 end
 
 local function createEmblemPlaceholder(row)
-	local emb = CreateFrame("Frame", nil, row)
-	emb:SetSize(84, 84)
+	local emb = W.EmblemPlaceholder(row, 84)
 	emb:SetPoint("TOPLEFT", row, "TOPLEFT", 16, -16)
-	emb.shadow = W.NineSlice(emb, "shadow", { corner = 32, outset = 10, layer = "BACKGROUND", sublevel = -1 })
-	emb.shadow:SetColor(0.1, 0.05, 0, 0.35)
-	emb.rim = W.NineSlice(emb, "card", { corner = 16, layer = "BACKGROUND" })
-	emb.rim:SetHex("#9aa4ae")
-	emb.inner = W.NineSlice(emb, "card", { corner = 12, layer = "BACKGROUND", sublevel = 1, outset = -5 })
-	emb.inner:SetHex("#2b3547")
-	emb.glyph = W.Texture(emb, "glyph_shield", "ARTWORK", "gold")
-	emb.glyph:SetSize(46, 46)
-	emb.glyph:SetPoint("CENTER", emb, "CENTER", 0, 0)
 	return emb
 end
 
@@ -525,11 +515,7 @@ function Browse:StopPoll() self.pollGen = (self.pollGen or 0) + 1 end
 -- Opening a guild
 ---------------------------------------------------------------------------------------------------------------------
 function Browse:OpenGuild(k)
-	if Main.pages[Browse.GUILD_PAGE] then
-		Main:Push(Browse.GUILD_PAGE, { k = k })
-	else
-		W.Snackbar.Show(L["BROWSE_GUILD_SOON"], { key = "guildsoon" })
-	end
+	return Main:Push(Browse.GUILD_PAGE, { k = k })
 end
 
 ---------------------------------------------------------------------------------------------------------------------

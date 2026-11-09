@@ -3,6 +3,7 @@
 -- never put in a digest and never sent in an answer to another client, and nothing here talks to the network.
 -- Everything is deterministic: the same count gives the same guilds, so a screenshot or a test can be repeated.
 --   Seed.Make(n [, ctx])   the list of summaries (pure; ctx = { realm, faction, now, classIds })
+--   Seed.MakeDetail(sum, i) the detail of the i-th fake guild for the guild page (nil for every third one)
 --   Seed:Run(n)            puts n of them into the catalog (default 60, at most the catalog limit). Returns how many.
 --   Seed:Clear()           removes every local only listing
 -- The names mix accents, symbols and one-word names on purpose: they exercise the ordering and the search of SPEC-03 §7.
@@ -100,6 +101,23 @@ function Seed.Make(n, ctx)
 	return out
 end
 
+-- Fake details for the guild page: two listings out of three get one (the third stays without, so the "details unavailable"
+-- state can be seen too). Nothing here uses the random generator above, so the summaries do not change.
+local DESCS = {
+	"A friendly guild that plays most evenings. New and returning players are always welcome.\nWe run dungeons on Tuesdays and raids on the weekend.",
+	"Competitive guild focused on small-scale PvP, with a relaxed raid night. We help new players gear up and level.",
+	"Casual guild for people with a job and a life. Play when you can, no pressure, lots of chat.",
+}
+
+-- The detail of the fake listing `sum` at position `i` of the seed; nil for the one in three that has none.
+function Seed.MakeDetail(sum, i)
+	if i % 3 == 0 then return nil end
+	return {
+		k = sum.k, rev = sum.rev, desc = DESCS[i % #DESCS + 1], disc = "seed-" .. i,
+		cont = { "Seedmaster", "Seedofficer" }, note = i % 2 == 0 and "Voice chat required for raids" or nil,
+	}
+end
+
 local function say(text) if ns.addon and ns.addon.Print then ns.addon:Print(text) end end
 
 -- Puts `n` fake guilds in the local catalog. Returns how many were added, or nil, reason ("release" | "nocatalog").
@@ -113,8 +131,12 @@ function Seed:Run(n)
 	if n < 1 then n = 1 elseif n > max then n = max end
 	local now = clock()
 	local added = 0
-	for _, item in ipairs(Seed.Make(n, { realm = realm, faction = faction, now = now })) do
-		if ns.Catalog:PutSummary(item.sum, { annAt = item.annAt, now = now, localOnly = true }) then added = added + 1 end
+	for i, item in ipairs(Seed.Make(n, { realm = realm, faction = faction, now = now })) do
+		if ns.Catalog:PutSummary(item.sum, { annAt = item.annAt, now = now, localOnly = true }) then
+			added = added + 1
+			local det = Seed.MakeDetail(item.sum, i)
+			if det then ns.Catalog:PutDetail(det, { now = now }) end
+		end
 	end
 	return added
 end
