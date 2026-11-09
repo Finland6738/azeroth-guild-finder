@@ -30,6 +30,7 @@ Net\Transport.lua
 Net\Channel.lua
 Net\Ping.lua
 Net\Sync.lua
+Data\OwnListing.lua
 UI\Skin.lua
 UI\Nav.lua
 UI\Widgets\Base.lua

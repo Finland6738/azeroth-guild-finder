@@ -18,7 +18,7 @@ Un cercagilde per **World of Warcraft: Forever**: cerca le gilde per lingua, att
 
 </div>
 
-> **Stato: in sviluppo, non ancora provato nel gioco.** Specifiche, decisioni e bozzetti sono pronti, e le tappe M1 e M2 (sincronizzazione del catalogo, finestra principale, Trova gilda con ricerca e filtri, pagina della gilda) sono scritte e collaudate offline su un client simulato e un simulatore di rete; nessuno le ha ancora eseguite in WoW Forever, quindi nulla è confermato in gioco. Le verifiche M0 e quelle in gioco aspettano il proprietario ([elenco](docs/checklists/M2.md), in inglese). Non c'è ancora niente da scaricare. Segui la [roadmap](ROADMAP.md) e gli [Annunci](https://github.com/Finland6738/azeroth-guild-finder/discussions/categories/announcements).
+> **Stato: in sviluppo, non ancora provato nel gioco.** Specifiche, decisioni e bozzetti sono pronti, e le tappe M1 e M2 (sincronizzazione del catalogo, finestra principale, Trova gilda con ricerca e filtri, pagina della gilda) e il primo passo di M3 (l'annuncio del Guild Master e la sua sincronizzazione nella gilda) sono scritte e collaudate offline su un client simulato e un simulatore di rete; nessuno le ha ancora eseguite in WoW Forever, quindi nulla è confermato in gioco. Le verifiche M0 e quelle in gioco aspettano il proprietario (elenchi [M2](docs/checklists/M2.md) e [M3](docs/checklists/M3.md), in inglese). Non c'è ancora niente da scaricare. Segui la [roadmap](ROADMAP.md) e gli [Annunci](https://github.com/Finland6738/azeroth-guild-finder/discussions/categories/announcements).
 
 ## Funzioni
 

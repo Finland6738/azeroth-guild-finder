@@ -209,6 +209,21 @@ function Guild.RosterRow(index)
 	}
 end
 
+-- The name of the Guild Master according to the roster (the member with rank index 0), as the roster gives it
+-- ("Name" or "Name-Realm"), or nil while the roster is not loaded or has no such member. INT-02 (SPEC-02 §7) trusts
+-- this, never what a message says about its sender.
+Guild.MAX_ROSTER = 1000   -- a guild has at most 1000 members
+function Guild.LeaderName()
+	if not Guild.InGuild() then return nil end
+	local total = Guild.RosterCount()
+	total = math.min(tonumber(total) or 0, Guild.MAX_ROSTER)
+	for i = 1, total do
+		local row = Guild.RosterRow(i)
+		if row and row.rankIndex == 0 and type(row.name) == "string" and row.name ~= "" then return row.name end
+	end
+	return nil
+end
+
 ---------------------------------------------------------------------------------------------------------------------
 -- Player
 ---------------------------------------------------------------------------------------------------------------------

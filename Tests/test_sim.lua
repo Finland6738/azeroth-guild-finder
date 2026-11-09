@@ -221,7 +221,8 @@ describe("Routing", function()
 	end)
 
 	it("sends GUILD messages to the members of the guild and OFFICER messages to its officers", function()
-		local sim = Sim.new{ clients = 6, guild = function(i)
+		-- sync = false: the members would send a GLREQ of their own at login (M3.1) and blur the counts
+		local sim = Sim.new{ clients = 6, sync = false, guild = function(i)
 			if i <= 4 then return { name = "Alpha", rank = ({ 0, 1, 3, 3 })[i] } end
 			return { name = "Beta", rank = 0 }
 		end }

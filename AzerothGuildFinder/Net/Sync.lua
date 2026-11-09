@@ -298,6 +298,17 @@ function Sync:Announce(sum, opts)
 	return ns.Transport:Send("CHANNEL", msg, { key = "ANN:" .. sum.k, onFail = opts.onFail })
 end
 
+-- Withdraws guild k up to revision rev: a DEL on the channel (NORMAL, the latest per guild waits in the queue) and
+-- the tombstone in the local catalog. Only Data/OwnListing.lua calls it, for the player's own guild after it checked
+-- the Guild Master itself (the local catalog trusts it, INT-05 applies on the other clients). Returns the Transport
+-- item or nil plus a reason.
+function Sync:Withdraw(k, rev, opts)
+	opts = opts or {}
+	if type(k) ~= "string" or type(rev) ~= "number" then return nil, "shape" end
+	ns.Catalog:Delist(k, rev, { trusted = true })
+	return ns.Transport:Send("CHANNEL", { t = "DEL", k = k, rev = rev }, { key = "DEL:" .. k, onFail = opts.onFail })
+end
+
 ---------------------------------------------------------------------------------------------------------------------
 -- Requester: CATREQ rounds
 ---------------------------------------------------------------------------------------------------------------------
