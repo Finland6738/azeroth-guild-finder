@@ -18,7 +18,7 @@ The **left page** lists the seven steps. Each shows its state: a green check whe
 
 ![Listing editor, Activity step](../specs/mockups/img/clean/08-editor-activity.webp)
 
-> **Not all steps are there yet.** Identity and About are ready. The others arrive with the next versions of the addon (Activity, then Recruitment, Requirements and Contact, then emblems). Until then a step says that it arrives in a later version, and **Publish listing** cannot turn green. Nothing is lost: this page only grows.
+> **Not all steps are there yet.** Identity, About and Activity are ready. The others arrive with the next versions of the addon (Recruitment, Requirements and Contact, then emblems). Until then a step says that it arrives in a later version, and **Publish listing** cannot turn green. Nothing is lost: this page only grows.
 
 ## Step 1: Identity
 
@@ -33,6 +33,12 @@ The **left page** lists the seven steps. Each shows its state: a green check whe
 - **Main language** (required): the language your guild speaks. It is the first one shown on the card.
 - **Also spoken** (optional): any other languages. The menu waits until you pick a main language and never lists it again. If you change the main language, the other ones stay, and a language that becomes the main one leaves this list.
 
+
+## Step 3: Activity
+
+- **Commitment** (required, one choice): **Casual** (play when you can, no fixed commitment), **Softcore** (regular activity and some scheduled events; attendance is welcome, not required) or **Hardcore** (demanding schedule, attendance required, preparation expected). It is the guild's commitment, not permadeath. The line under the buttons explains the one you picked.
+- **Activities** (required, **1 to 3**): click the activities your guild does. The order you click is the order of importance, shown as **1**, **2**, **3** on the chips; number 1 is the main focus. After three, the other chips are greyed out (hover one for the reason): remove one to pick another. Removing one renumbers the rest.
+- **Play days & time** (optional): tick the days and pick a start and an end, every 30 minutes, in **your own local time**. The addon saves them in UTC and the line under the menus shows the UTC window; players see it converted to *their* time zone. A window can run past midnight (for example 22:00–01:00). **All day** means no fixed hours. If your country changes its clocks, the UTC window you saved stays the same until you edit it, so open this step again after the change if you want the same local hours.
 
 ## The live preview and the checklist
 

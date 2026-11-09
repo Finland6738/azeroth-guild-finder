@@ -181,9 +181,9 @@ describe("the stepper", function()
 end)
 
 describe("pluggable steps", function()
-	it("a step that nobody registered says that it arrives in a later version (steps 3 to 6: 1 and 2 have their pages since M3.3)", function()
+	it("a step that nobody registered says that it arrives in a later version (steps 4 to 6: 1 to 3 have their pages since M3.4)", function()
 		open()
-		for i = 3, 6 do
+		for i = 4, 6 do
 			editor():GoTo(i)
 			local page = editor().pages[A().EditorModel.StepId(i)]
 			truthy(page.placeholder)
@@ -219,12 +219,12 @@ describe("pluggable steps", function()
 
 	it("registering after the placeholder was shown replaces it", function()
 		open()
-		editor():GoTo(3)
-		truthy(editor().pages.activity.placeholder)
+		editor():GoTo(4)
+		truthy(editor().pages.recruitment.placeholder)
 		local built = 0
-		editor().RegisterStep("activity", { Build = function() built = built + 1 end })
+		editor().RegisterStep("recruitment", { Build = function() built = built + 1 end })
 		eq(built, 1, "the step on screen is rebuilt at once")
-		falsy(editor().pages.activity.placeholder)
+		falsy(editor().pages.recruitment.placeholder)
 	end)
 
 	it("only the six steps can be registered, with a table", function()

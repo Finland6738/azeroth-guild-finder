@@ -43,8 +43,9 @@
 - Spec: ADR 0012
 - Scope: commitment segmented button (required, explanations), activities chips **max 3** in order with numbers and the "up to 3" hint, days and local time saved as UTC.
 - Done when:
-  - [ ] A fourth activity cannot be picked; order is kept; UTC conversion is correct across DST.
-- Tests: max-3 rule, ordering, time conversion.
+  - [x] Offline: the commitment is required (Casual, Softcore or Hardcore, explained under the button); at most 3 activities, kept in the order picked and numbered, a fourth cannot be picked (the others are greyed out with the reason), removing one renumbers the rest; the play days and a local time window are saved as UTC (`t0`/`t1`, the days move with a start that falls on another UTC day), correct across DST and midnight and a round trip with the visitors' conversion `BrowseModel.ToLocal`; the checklist follows (`Tests/test_editor_activity.lua`).
+  - [ ] In game: the Activity page looks like the mockup, the chips wrap and number, the time menus and the All day switch behave, and the page fits the window ([checklist](../checklists/M3.md)).
+- Tests: max-3 rule, ordering and renumbering, commitment requirement, UTC conversion across DST and midnight (round trip with `BrowseModel.ToLocal`), checklist integration.
 
 ### M3.5 — Recruitment, Requirements and Contact steps
 - Branch: `step/m3-5-recruitment-contact`

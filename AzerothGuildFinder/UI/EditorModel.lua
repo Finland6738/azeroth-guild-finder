@@ -12,6 +12,8 @@
 --   Model.Clamp / TextStats                typed text cut to SPEC-03's limits (subtitle 60, description 500 and 12 lines), the counters
 --   Model.MainLanguage / Secondary / SetMain / SetSecondary   the language fields (`lang1`, the mask `lang`)
 --   Model.Banners()                        the verified banners, for the gallery
+--   Model.Tags / ToggleTag / TagNumber     the activities in the order picked (max 3), toggling one, its number
+--   Model.Schedule / SchedulePatch         days and time window: stored as UTC, edited in the Guild Master's local time
 --   Model.ReadyText / DraftText / FixText  texts
 --
 -- The checklist (SPEC-06 §2, "Before publishing"), in this order, each item with the step that fixes it:
@@ -412,6 +414,94 @@ function Model.Banners()
 		end
 	end
 	table.sort(out, function(a, b) return a.index < b.index end)
+	return out
+end
+
+---------------------------------------------------------------------------------------------------------------------
+-- Activity (M3.4): activities in order, days and time window
+---------------------------------------------------------------------------------------------------------------------
+Model.TIME_STEP = 30   -- minutes between the choices of the time menus
+
+-- The activities of these fields as they will be published: valid, unique, in the order picked, at most three.
+function Model.Tags(fields)
+	local clean = Model.Clean(fields) or {}
+	local out = {}
+	for i, id in ipairs(clean.tags or {}) do out[i] = id end
+	return out
+end
+
+-- The position (1..3) of activity `id` in `tags`, or nil.
+function Model.TagNumber(tags, id)
+	for i, v in ipairs(tags or {}) do if v == id then return i end end
+	return nil
+end
+
+-- Picks or removes activity `id`. Returns the new list and what happened: "added", "removed", "full" (a fourth one cannot be
+-- picked: the list is unchanged) or "invalid" (not an activity: unchanged). Removing one renumbers the rest; the order picked
+-- is the order of importance.
+function Model.ToggleTag(tags, id)
+	local out = {}
+	for i, v in ipairs(tags or {}) do out[i] = v end
+	if not ns.Enums.IsActivity(id) then return out, "invalid" end
+	local at = Model.TagNumber(out, id)
+	if at then
+		table.remove(out, at)
+		return out, "removed"
+	end
+	if #out >= (ns.Enums.MAX_TAGS or Model.MAX_TAGS) then return out, "full" end
+	out[#out + 1] = id
+	return out, "added"
+end
+
+-- The days and the time window of these fields in a zone `offset` minutes from UTC (the stored values are UTC; the
+-- conversion is BrowseModel.ToLocal, the one the visitor's list and filters use).
+-- Returns { days = mask (0 = none), hasTime, allDay, from, to } (from and to are local minutes 0..1439, nil without times).
+function Model.Schedule(fields, offset)
+	local clean = Model.Clean(fields) or {}
+	local out = { days = 0, hasTime = false, allDay = false }
+	if clean.t0 == nil or clean.t1 == nil then
+		out.days = clean.days or 0
+		return out
+	end
+	out.hasTime = true
+	if clean.t0 == clean.t1 then
+		out.allDay, out.days = true, clean.days or 0
+		return out
+	end
+	local days, from, to = ns.BrowseModel.ToLocal(clean.days or 0, clean.t0, clean.t1, offset)
+	out.days, out.from, out.to = days or 0, from, to
+	return out
+end
+
+-- The fields to patch for a local schedule { days, allDay, from, to } in a zone `offset` minutes from UTC: `days` and
+-- `t0`/`t1` in UTC (the days move with the start when it falls on another UTC day); `false` clears a field. A window with
+-- no end or no start stores no times; a window whose start equals its end is the whole day.
+function Model.SchedulePatch(sched, offset)
+	sched = sched or {}
+	local days = tonumber(sched.days) or 0
+	if days < 0 or days > 127 or days ~= floor(days) then days = 0 end
+	local patch = { days = days > 0 and days or false, t0 = false, t1 = false }
+	if sched.allDay then
+		patch.t0, patch.t1 = 0, 0
+	elseif sched.from and sched.to then
+		local from, to = floor(sched.from) % 1440, floor(sched.to) % 1440
+		if from == to then
+			patch.t0, patch.t1 = 0, 0
+		else
+			local d, t0, t1 = ns.BrowseModel.ToLocal(days, from, to, -(tonumber(offset) or 0))
+			patch.days = d > 0 and d or false
+			patch.t0, patch.t1 = t0, t1
+		end
+	end
+	return patch
+end
+
+-- The choices of a time menu: { { key = minutes, text = "20:00" }, ... } every TIME_STEP minutes, optionally without `skip`.
+function Model.TimeChoices(skip)
+	local out = {}
+	for m = 0, 1439, Model.TIME_STEP do
+		if m ~= skip then out[#out + 1] = { key = m, text = ns.BrowseModel.FormatMinutes(m) } end
+	end
 	return out
 end
 

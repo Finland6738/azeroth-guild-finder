@@ -288,7 +288,7 @@ function W.Segmented(parent, items, opts)
 
 	function seg:GetSelected() return self.selected end
 	function seg:SetSelected(key, silent)
-		if not self.segments[key] or key == self.selected then return end
+		if (key ~= nil and not self.segments[key]) or key == self.selected then return end   -- nil clears the choice
 		self.selected = key
 		for k, b in pairs(self.segments) do
 			local on = k == key
