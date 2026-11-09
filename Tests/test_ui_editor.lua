@@ -181,9 +181,9 @@ describe("the stepper", function()
 end)
 
 describe("pluggable steps", function()
-	it("an empty step says that it arrives in a later version", function()
+	it("a step that nobody registered says that it arrives in a later version (steps 3 to 6: 1 and 2 have their pages since M3.3)", function()
 		open()
-		for i = 1, 6 do
+		for i = 3, 6 do
 			editor():GoTo(i)
 			local page = editor().pages[A().EditorModel.StepId(i)]
 			truthy(page.placeholder)

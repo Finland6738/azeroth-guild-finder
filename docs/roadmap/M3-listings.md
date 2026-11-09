@@ -33,7 +33,9 @@
 - Depends on: M3.2
 - Scope: guild name locked from the game, subtitle (60), banner gallery from the verified registry, description (500, 12 lines), main and secondary languages.
 - Done when:
-  - [ ] Limits and counters behave as in SPEC-03.
+  - [x] Offline: the subtitle is cut at 60 characters on one line and the description at 500 characters and 12 lines (counted as `Listing.CleanText` publishes them, UTF-8 characters, a line break counts as a character), both with a counter; the main language is required, the other languages never include it twice, and the checklist follows (`Tests/test_editor_steps.lua`).
+  - [ ] In game: the Identity and About pages look like the mockup, the guild name is locked, the counters move as you type and the multi-line box behaves (Enter, paste, 12 lines) ([checklist](../checklists/M3.md)).
+  - [ ] In game: the banner gallery shows verified pictures: read the fileIDs in game (M0.7 / the M2 gallery check), fill `Assets.BANNERS` and tick here. Until then no banner is offered and `bg` stays empty.
 
 ### M3.4 — Activity step
 - Branch: `step/m3-4-activity`
