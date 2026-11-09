@@ -4,6 +4,9 @@
 --                Assets.BANNERS, by index; "Default" clears the choice). The emblem arrives with M3.6.
 --   2 About      the description (0/500 characters, 0/12 lines), the main language (menu) and the other languages (multiple
 --                choice; the main one is always part of the mask).
+--   3 Activity   the commitment (segmented button, required, explained), up to 3 activities as numbered chips (the order
+--                picked is the order of importance), play days and a time window typed in the Guild Master's local time and
+--                stored as UTC (EditorModel.Schedule / SchedulePatch, on top of BrowseModel.ToLocal, the visitors' conversion).
 -- The pages only read and write fields through the editor (Editor:Get / Set / Patch) and register with Editor.RegisterStep;
 -- every limit and every counter comes from EditorModel (Clamp, TextStats, SetMain, SetSecondary), which the tests run without
 -- frames. Text is cut as it is typed, so what the Guild Master sees is what is published.
@@ -293,6 +296,169 @@ end
 About.OnShow = About.Fill
 About.Refresh = About.Fill
 
-Steps.Identity, Steps.About = Identity, About
+---------------------------------------------------------------------------------------------------------------------
+-- Activity
+---------------------------------------------------------------------------------------------------------------------
+local Activity = {}
+
+-- Minutes of the Guild Master's time zone from UTC now. Tests replace it with Steps.offset.
+function Steps.LocalOffset()
+	if Steps.offset then return Steps.offset() end
+	local at = ns.Compat and ns.Compat.ServerTime and ns.Compat.ServerTime() or nil
+	return ns.BrowseModel.LocalOffset(at)
+end
+
+function Activity.Build(page, editor)
+	local pace = W.Card(page, { kind = "plain", title = L["ED_PACE_LABEL"] .. " " .. L["ED_PACE_REQUIRED"], height = 132 })
+	pace:SetPoint("TOPLEFT", page, "TOPLEFT", 0, 0)
+	pace:SetPoint("TOPRIGHT", page, "TOPRIGHT", 0, 0)
+	local items = {}
+	for v = 1, E.PACE_COUNT do items[v] = { key = v, text = E.PaceLabel(v), tooltip = E.PaceTip(v) } end
+	page.pace = W.Segmented(pace.body, items, { width = INNER_W, onChange = function(key) Activity.OnPace(page, editor, key) end })
+	page.pace:SetPoint("TOPLEFT", pace.body, "TOPLEFT", 0, 0)
+	page.paceNote = caption(pace.body, "", 46, 40)
+
+	local acts = W.Card(page, { kind = "plain", title = L["ED_ACT_LABEL"] .. " " .. L["ED_ACT_RANGE"], height = 100 })
+	acts:SetPoint("TOPLEFT", pace, "BOTTOMLEFT", 0, -GAP)
+	acts:SetPoint("TOPRIGHT", pace, "BOTTOMRIGHT", 0, -GAP)
+	page.actCount = W.Text(acts, "label", "ink2", "RIGHT")
+	page.actCount:SetPoint("TOPRIGHT", acts, "TOPRIGHT", -16, -12)
+	page.chips = {}
+	local x, y, rowH = 0, 0, Skin.METRICS.chipH
+	for _, act in ipairs(E.ACTIVITIES) do
+		local id = act.id
+		local chip = W.Chip(acts.body, { text = E.ActivityLabel(id), onToggle = function() Activity.OnTag(page, editor, id) end })
+		chip.activity, chip.name = id, E.ActivityLabel(id)
+		local w = chip:GetWidth()
+		if x > 0 and x + w > INNER_W then x, y = 0, y + rowH + 6 end
+		chip:SetPoint("TOPLEFT", acts.body, "TOPLEFT", x, -y)
+		x = x + w + 6
+		page.chips[id] = chip
+	end
+	local hintY = y + rowH + 8
+	page.actHint = caption(acts.body, L["ED_ACT_HINT"], hintY, 32)
+	acts:SetHeight(42 + hintY + 34 + 6)
+
+	local when = W.Card(page, { kind = "plain", title = L["ED_WHEN_LABEL"] .. " " .. L["ED_WHEN_ZONE"], height = 148 })
+	when:SetPoint("TOPLEFT", acts, "BOTTOMLEFT", 0, -GAP)
+	when:SetPoint("TOPRIGHT", acts, "BOTTOMRIGHT", 0, -GAP)
+	local letters, names = {}, {}
+	for d = 1, 7 do letters[d], names[d] = L["DAY_LETTER_" .. d], L["DAY_LONG_" .. d] end
+	page.days = W.DayToggles(when.body, { width = INNER_W, labels = letters, names = names,
+		onChange = function(mask) Activity.OnWhen(page, editor, { days = mask }) end })
+	page.days:SetPoint("TOPLEFT", when.body, "TOPLEFT", 0, 0)
+	page.from = W.Select(when.body, { width = 104, items = Model.TimeChoices(), emptyText = L["ED_WHEN_PICK"], maxRows = 8,
+		tooltip = L["ED_WHEN_FROM"], onChange = function(keys) Activity.OnWhen(page, editor, { from = keys[1] }) end })
+	page.from:SetPoint("TOPLEFT", when.body, "TOPLEFT", 0, -42)
+	local dash = W.Text(when.body, "bodyL", "ink2", "CENTER")
+	dash:SetPoint("LEFT", page.from, "RIGHT", 0, 0)
+	dash:SetWidth(24)
+	dash:SetText("–")
+	page.to = W.Select(when.body, { width = 104, items = Model.TimeChoices(), emptyText = L["ED_WHEN_PICK"], maxRows = 8,
+		tooltip = L["ED_WHEN_TO"], onChange = function(keys) Activity.OnWhen(page, editor, { to = keys[1] }) end })
+	page.to:SetPoint("LEFT", dash, "RIGHT", 0, 0)
+	page.allDay = W.Switch(when.body, { label = L["ED_WHEN_ALL_DAY"], width = 130,
+		onChange = function(checked) Activity.OnWhen(page, editor, { allDay = checked }) end })
+	page.allDay:SetPoint("TOPRIGHT", when.body, "TOPRIGHT", 0, -44)
+	page.whenHelp = caption(when.body, "", 84, 32)
+end
+
+function Activity.OnPace(page, editor, key)
+	editor:Set("pace", key)
+	Activity.Fill(page, editor)
+end
+
+-- A chip was clicked: pick or remove the activity. A fourth one is refused (the chips are greyed out, this is the safety net).
+function Activity.OnTag(page, editor, id)
+	if page.filling then return end
+	local tags, result = Model.ToggleTag(Model.Tags(editor:Fields()), id)
+	if result == "full" then
+		W.Snackbar.Show(L["ED_ACT_FULL"], { key = "editor-tags" })
+	elseif result ~= "invalid" then
+		editor:Set("tags", #tags > 0 and tags or false)
+	end
+	Activity.Fill(page, editor)
+end
+
+-- The local schedule shown: what is stored (UTC converted to local time), or the half-picked window not stored yet.
+local function currentSchedule(page, editor)
+	local s = Model.Schedule(editor:Fields(), Steps.LocalOffset())
+	if not s.hasTime then s.from, s.to = page.pendingFrom, page.pendingTo end
+	return s
+end
+
+-- `change` = { days } | { from } | { to } | { allDay }: applied to the local schedule, then stored as UTC.
+function Activity.OnWhen(page, editor, change)
+	if page.filling then return end
+	local s = currentSchedule(page, editor)
+	if change.days ~= nil then s.days = change.days end
+	if change.from ~= nil then s.from, s.allDay = change.from, false end
+	if change.to ~= nil then s.to, s.allDay = change.to, false end
+	if change.allDay ~= nil then s.allDay, s.from, s.to = change.allDay, nil, nil end
+	if s.from == s.to then s.to = nil end   -- the same minute twice would mean "all day": the All day switch says that
+	if s.allDay or (s.from and s.to) then
+		page.pendingFrom, page.pendingTo = nil, nil
+	else
+		page.pendingFrom, page.pendingTo = s.from, s.to
+	end
+	editor:Patch(Model.SchedulePatch(s, Steps.LocalOffset()))
+	Activity.Fill(page, editor)
+end
+
+function Activity.Fill(page, editor)
+	local fields = editor:Fields()
+	local clean = Model.Clean(fields) or {}
+	page.filling = true
+	-- commitment
+	page.pace:SetSelected(clean.pace, true)
+	page.paceNote:SetText(clean.pace and E.PaceTip(clean.pace) or L["ED_PACE_PICK"])
+	-- activities
+	local tags = Model.Tags(fields)
+	local full = #tags >= E.MAX_TAGS
+	for id, chip in pairs(page.chips) do
+		local n = Model.TagNumber(tags, id)
+		chip:SetSelected(n ~= nil, true)
+		chip:SetLabel(n and L["ED_ACT_NUMBERED"]:format(n, chip.name) or chip.name)
+		chip:SetEnabled(n ~= nil or not full, L["ED_ACT_FULL"])
+	end
+	page.actCount:SetText(L["ED_ACT_COUNT"]:format(#tags, E.MAX_TAGS))
+	W.TextColor(page.actCount, full and "warn" or "ink2")
+	page.actHint:SetText(#tags == 0 and L["ED_ACT_NONE"] or L["ED_ACT_HINT"])
+	-- days and time
+	local s = currentSchedule(page, editor)
+	page.days:SetMask(s.days, true)
+	page.allDay:SetChecked(s.allDay, true)
+	page.from:SetItems(Model.TimeChoices(s.to))
+	page.to:SetItems(Model.TimeChoices(s.from))
+	page.from:SetSelected(s.from and { s.from } or {}, true)
+	page.to:SetSelected(s.to and { s.to } or {}, true)
+	page.from:SetEnabled(not s.allDay)
+	page.to:SetEnabled(not s.allDay)
+	if s.allDay then
+		page.whenHelp:SetText(L["ED_WHEN_HELP"])
+		W.TextColor(page.whenHelp, "ink2")
+	elseif s.from and s.to then
+		page.whenHelp:SetText(L["ED_WHEN_HELP_UTC"]:format(
+			ns.BrowseModel.FormatMinutes(clean.t0) .. "–" .. ns.BrowseModel.FormatMinutes(clean.t1)))
+		W.TextColor(page.whenHelp, "ink2")
+	elseif s.from or s.to then
+		page.whenHelp:SetText(L["ED_WHEN_ONE"])
+		W.TextColor(page.whenHelp, "warn")
+	else
+		page.whenHelp:SetText(L["ED_WHEN_HELP"])
+		W.TextColor(page.whenHelp, "ink2")
+	end
+	page.filling = false
+end
+
+function Activity.OnHide(page) page.pendingFrom, page.pendingTo = nil, nil end
+
+Activity.OnShow = Activity.Fill
+Activity.Refresh = Activity.Fill
+
+Steps.Identity, Steps.About, Steps.Activity = Identity, About, Activity
 Editor.RegisterStep("identity", Identity)
 Editor.RegisterStep("about", About)
+Editor.RegisterStep("activity", Activity)
+
+if ns.addon then ns.addon.EditorSteps = Steps end

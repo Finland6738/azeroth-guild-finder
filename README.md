@@ -110,7 +110,7 @@ Step-by-step guide: [the wiki](https://github.com/Finland6738/azeroth-guild-find
 | M0 | Checks in the real client (spike) | ⏳ next |
 | M1 | Addon skeleton, transport, codec, tests | ✅ code and offline tests done; in-game check pending |
 | M2 | Catalog sync, main window, Find a Guild, filters, guild page | ✅ complete offline (1004 tests, simulator converges); in-game check pending ([checklist](docs/checklists/M2.md)) |
-| M3 | Listing editor, guild page, emblems, statistics | 🚧 in progress: M3.1 (own listing and guild sync), M3.2 (editor shell and checklist) and M3.3 (Identity and About steps) done offline; in-game check pending ([checklist](docs/checklists/M3.md)) |
+| M3 | Listing editor, guild page, emblems, statistics | 🚧 in progress: M3.1 (own listing and guild sync), M3.2 (editor shell and checklist), M3.3 (Identity and About steps) and M3.4 (Activity step) done offline; in-game check pending ([checklist](docs/checklists/M3.md)) |
 | M4 | Applications and notifications | planned |
 | M5 | Polish, release checklist, packaging | planned |
 
