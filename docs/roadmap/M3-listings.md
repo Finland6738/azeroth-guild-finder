@@ -51,8 +51,14 @@
 - Branch: `step/m3-5-recruitment-contact`
 - Depends on: M3.2
 - Scope: status, class × role grid (faction classes, impossible pairs disabled, Any class), new player friendly, applications on/off; minimum level, optional item level, note; Discord code with link extraction, up to 3 contacts from the roster.
+- Spec: SPEC-06 §2, SPEC-03 §2-§3 and §5
 - Done when:
-  - [ ] The grid produces the `want` map of SPEC-03; invalid Discord input is explained.
+  - [x] Offline: the class × role grid produces the `want` map of SPEC-03 (Tank 1, Healer 2, Melee 4, Ranged 8, class 0 = any), shows only the classes of the guild's faction, dims and refuses the impossible pairs, and the status (Open to all, Selected classes, Closed) and the two switches are saved (`Tests/test_editor_recruit.lua`).
+  - [x] Offline: the minimum level (1 to the highest level, 1 = none), the optional item level (1 to 999) and the note (120 characters) keep to their limits.
+  - [x] Offline: the Discord box takes a code or a whole link, extracts the code, and explains a bad input (another website, too short, too long, wrong characters); at most 3 contacts, picked from the roster, and a contact who left the guild is flagged; the checklist follows.
+  - [ ] In game: the Recruitment, Requirements and Contact pages look like the mockup, the grid cells, the slider, the suggestion list and the roster behave, and every page fits the window ([checklist](../checklists/M3.md)).
+- Tests: grid → `want` including impossible pairs, Any class and the faction filter; Discord parsing (codes, links, junk); the contacts limit and roster changes; requirement limits; checklist integration.
+- Real client: how the guild roster names members (with or without the realm), the look of the grid and the slider at 60 %, 100 % and 140 %, the suggestion list while the roster loads.
 
 ### M3.6 — Emblems
 - Branch: `step/m3-6-emblems`
