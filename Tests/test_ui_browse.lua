@@ -19,8 +19,11 @@ end
 
 local function put(name, extra) return catalog():PutSummary(listing(name, extra)) end
 
+-- A character that never chose has "Recruiting only" on (SPEC-05 §2); these tests are about the list, so they start with
+-- every filter off. The filters themselves are tested in test_ui_filters.lua and test_filter_model.lua.
 local function open()
 	main():Show()
+	AzerothGuildFinder.FilterPanel.Controller():Reset()
 	return host()
 end
 
@@ -54,11 +57,12 @@ describe("the page", function()
 		eq(#Mock.errors, 0)
 	end)
 
-	it("the left page holds the plate of the filters (M2.6) and says they come later", function()
-		local h = open()
-		eq(h.plate.text:GetText(), "Filters")
-		contains(h.note:GetText(), "later version")
+	it("the left page holds the filters: the plate says how many are on (only 'Recruiting' at the first opening)", function()
+		main():Show()
+		local h = host()
+		eq(h.plate.text:GetText(), "Filters · 1 active")
 		eq(browse().left, h.left)
+		eq(AzerothGuildFinder.FilterPanel.panel.frame, h.left)
 	end)
 
 	it("the search box is a field with the placeholder of the mockup", function()

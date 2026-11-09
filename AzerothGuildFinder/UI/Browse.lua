@@ -2,7 +2,8 @@
 --
 -- What the player sees: on the right page a search box (3 letters, normalized, 250 ms after the last key), the count
 -- "24 of 142 guilds" and the fixed "Sorted A-Z"; under it the guild cards, one every 188 px, scrolled with the mouse wheel
--- or the bar; a status bar. On the left page the filters of M2.6 (not there yet). A click on a card opens its page (M2.7).
+-- or the bar; a status bar. On the left page the filters (UI/FilterPanel.lua, rules in UI/FilterModel.lua). A click on a
+-- card opens its page (M2.7).
 -- All rules (order, search, states, texts of a card, which rows are visible) live in UI/BrowseModel.lua and are tested
 -- without frames; this file creates the frames and copies what the model says into them.
 --
@@ -11,9 +12,11 @@
 -- the view scrolls and rebound only when its guild changes. Nothing is created while scrolling.
 --
 -- What the later steps use:
---   Browse:SetFilter(fn, activeCount, resetFn)   the hook of the filters (M2.6): fn(summary, info) -> true keeps a listing;
+--   Browse:SetFilter(fn, activeCount, resetFn, prepareFn)   the hook of the filters (M2.6, UI/FilterPanel.lua):
+--                                                fn(summary, info) -> true keeps a listing (nil: nothing is filtered);
 --                                                activeCount feeds the "No guild matches your filters" state and its
---                                                button; resetFn() clears the filters and calls Browse:RefreshNow().
+--                                                button; resetFn() clears the filters and calls Browse:SetFilter again;
+--                                                prepareFn() runs before each rebuild of the list.
 --   Browse:RefreshNow()   Browse:Selected() -> the listings now shown (A -> Z)    Browse.left = the left page frame
 --   Browse:OpenGuild(k)   pushes the guild page of M2.7 ("GuildPage") on the Find a Guild tab
 -- The list reacts to CATALOG_UPDATED on the Bus, at most once every Model.THROTTLE seconds, and only while it is shown.
@@ -260,15 +263,8 @@ end
 -- The page
 ---------------------------------------------------------------------------------------------------------------------
 local function buildLeft(host)
-	local plate = W.Plate(host.left, { text = L["BROWSE_FILTERS"], width = 260 })
-	plate:SetPoint("TOPLEFT", host.left, "TOPLEFT", 0, 0)
-	local note = W.Text(host.left, "caption", "ink2")
-	note:SetPoint("TOPLEFT", plate, "BOTTOMLEFT", 2, -12)
-	note:SetWidth(250)
-	note:SetWordWrap(true)
-	note:SetText(L["BROWSE_FILTERS_SOON"])
-	host.plate, host.note = plate, note
 	Browse.left = host.left
+	ns.FilterPanel.Build(host)   -- the filters (M2.6): they call Browse:SetFilter
 end
 
 local function buildHeader(host)
@@ -368,6 +364,7 @@ function Browse:Refresh()
 	local host = self.host
 	if not host or not ns.Catalog then return end
 	self.dirty = false
+	if self.prepareFilter then self.prepareFilter() end
 	local query = Model.Query(self.search)
 	local built = Model.Build(ns.Catalog, query, self.filter)
 	local syncing, peers, lastSync = syncInfo()
@@ -485,8 +482,10 @@ function Browse:ApplySearch(value)
 end
 
 -- The filters of M2.6 plug in here (see the header of this file).
-function Browse:SetFilter(fn, activeCount, resetFn)
-	self.filter, self.filters, self.resetFilters = fn, activeCount or 0, resetFn
+-- `prepareFn` (optional) runs at the start of every rebuild of the list, before `fn` is called for the first listing.
+function Browse:SetFilter(fn, activeCount, resetFn, prepareFn)
+	self.filter, self.filters, self.resetFilters, self.prepareFilter = fn, activeCount or 0, resetFn, prepareFn
+	self.offset = 0   -- a different list: back to its top
 	self:RefreshNow()
 end
 

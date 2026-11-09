@@ -63,10 +63,14 @@
 - Branch: `step/m2-6-filters`
 - Depends on: M2.5
 - Spec: SPEC-05 §2
-- Scope: left-page filters (recruiting, my class, requirements, new players, role, language, commitment, activity, days and local time across midnight, minimum active members), saved per character, active count, reset.
+- Scope: left-page filters (recruiting, my class, requirements, new players, role, language, commitment, activity, days and local time across midnight, minimum active members), saved per character, active count, reset. The rules are a pure module (`UI/FilterModel.lua`); `UI/FilterPanel.lua` only draws the controls.
 - Done when:
-  - [ ] Every filter rule of SPEC-05 §2 is applied.
-- Tests: each filter, combinations, time ranges across midnight and time zones.
+  - [x] Offline: every filter rule of SPEC-05 §2 is applied (each filter, combinations, the active count and the reset, the state saved per character and repaired when damaged, play times across midnight and across time zones), and the controls drive the list on the mock client.
+  - [ ] In game: the filters narrow the list as SPEC-05 §2 says and survive `/reload` and a relog ([checklist](../checklists/M2.md)).
+  - [ ] In game: the left page matches the mockup and every list opens and scrolls correctly at 60 %, 100 % and 140 % ([checklist](../checklists/M2.md)).
+- Tests: each filter, combinations, time ranges across midnight and time zones (`Tests/test_filter_model.lua`); the panel, the count, the reset and the saved state (`Tests/test_ui_filters.lua`); the new widgets (`Tests/test_ui_widgets.lua`).
+- Docs: wiki Finding a Guild.
+- Real client: the look of the left page, the lists (selects) over the other controls, the role icons in the chips, the behaviour of the mouse wheel in a long list, the time zone and daylight saving of the computer.
 
 ### M2.7 — Guild page (visitor)
 - Branch: `step/m2-7-guild-page`

@@ -51,6 +51,16 @@ Visibile solo a chi **non ha gilda** ([SPEC-00 §5](SPEC-00-vision-scope.md#5-ru
 
 I filtri si ricordano per personaggio. Il numero di filtri attivi compare nella targhetta in cima ("Filters · 4 active"), con il pulsante per azzerarli.
 
+> **Nota di realizzazione (M2.6).** Le regole stanno in `UI/FilterModel.lua` (puro Lua, provato senza interfaccia); `UI/FilterPanel.lua` disegna solo i controlli. Dettagli che la tabella non dice:
+>
+> - Un personaggio che non ha mai scelto ha **solo "Recruiting only"** attivo. **Reset** (il pulsante rotondo sulla targhetta e quello dello stato "nessun risultato") spegne **tutti** i filtri, anche "Recruiting only": la lista torna completa. Il contatore conta un filtro per voce, qualunque sia il numero di scelte.
+> - **Role**: i ruoli che la classe del giocatore non può svolgere (SPEC-03 §5) sono attenuati con la ragione nel tooltip e sono scartati se arrivano dai dati salvati. Il ruolo scelto va confrontato con quelli cercati per la **mia classe** e per **qualsiasi classe** (`want[0]`).
+> - **Language**: conta anche `lang1`. **Activity** è un menu a scelta multipla (come nel bozzetto) e non tredici etichette, per stare nei 260 px della pagina sinistra.
+> - **Requirements met**: scarta solo ciò che si sa non soddisfatto (livello o livello medio dell'equipaggiamento noti e troppo bassi); un dato che il client non dà non esclude.
+> - **Play days** e **Play time** si confrontano **nel fuso del computer**: giorni e orari UTC dell'annuncio vengono convertiti con `BrowseModel.ToLocal` (i giorni scorrono insieme all'ora d'inizio). La fascia filtro `da-a` si sovrappone se hanno almeno un minuto in comune; due fasce che si toccano soltanto non si sovrappongono; `da > a` attraversa la mezzanotte; solo `da` va fino a mezzanotte, solo `a` parte da mezzanotte; `da == a` significa tutto il giorno e non filtra; un annuncio con `t0 == t1` ("All day") combacia con ogni fascia. Giorni e fascia sono due condizioni separate, non una coppia giorno-ora.
+> - Un annuncio che non dichiara ciò che il filtro chiede (nessun giorno, nessun orario, nessuna statistica, nessuna lingua, nessuna attività) **non** passa mentre quel filtro è acceso.
+> - Lo stato è salvato in `char.ui.filters` ad ogni modifica come numeri e booleani (maschere: ruoli 0–15, lingue bit *i*−1, impegni bit *pace*−1, attività bit *id*−1, giorni lunedì = bit 0) e viene riparato quando è danneggiato. Ogni modifica riporta la lista in cima.
+
 ## 3. Pagina della gilda (bozzetto [`02-guild-page.webp`](mockups/img/02-guild-page.webp))
 
 La pagina **sostituisce** la lista e usa le due pagine del libro.

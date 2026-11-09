@@ -1,14 +1,24 @@
 -- Widgets, part 4: controls the player operates. Lua 5.1.
 --
---   W.Chip(parent, opts)          filter chip. opts: text, selected, tooltip, onToggle(selected, chip)
+--   W.Chip(parent, opts)          filter chip. opts: text, selected, tooltip, icon (Media name, drawn before the text),
+--                                 onToggle(selected, chip)
 --       chip:SetSelected(bool, silent)  chip:GetSelected()  chip:SetLabel(text)
---   W.ChipGroup(parent, items, opts)   wrapping rows of chips. items: { { key, text, tooltip }, ... }
+--       chip:SetEnabled(bool, reason)   a disabled chip is dimmed, ignores clicks and says `reason` in its tooltip
+--   W.ChipGroup(parent, items, opts)   wrapping rows of chips. items: { { key, text, tooltip, icon }, ... }
 --       opts: width, multi (default true), max (most chips selected at once), onChange(keys), onLimit(max)
 --       group:GetSelected() (keys in item order)  group:SetSelected(keys, silent)  group:Clear(silent)  group.chips[key]
+--       group:SetEnabled(key, bool, reason)
 --   W.Switch(parent, opts)        on/off switch, with a label row when `label` is given. opts: checked, label, width, onChange(checked)
 --       sw:GetChecked()  sw:SetChecked(bool, silent)  sw:Toggle()
 --   W.Segmented(parent, items, opts)   one choice out of a few. items: { { key, text, tooltip }, ... }
 --       opts: selected, width, onChange(key)      seg:GetSelected()  seg:SetSelected(key, silent)  seg.segments[key]
+--   W.DayToggles(parent, opts)    seven small day squares (Monday first). opts: width, labels ({ "M", ... }), names (tooltips),
+--                                 mask, onChange(mask)     days:GetMask()  days:SetMask(mask, silent)  days.buttons[1..7]
+--   W.Select(parent, opts)        a field that opens a list of choices. opts: width, glyph (Media name), items
+--                                 ({ { key, text }, ... }), multi (default false), emptyText (shown when nothing is chosen),
+--                                 summary(keys) -> text (default: the labels, joined), onChange(keys), tooltip
+--       sel:GetSelected() (keys in item order)  sel:SetSelected(keys, silent)  sel:SetItems(items)  sel:Open()  sel:Close()
+--       sel:IsOpen()  sel:SetEnabled(bool)   a single choice closes the list; a multiple choice stays open until a click outside
 --   W.Field(parent, opts)         text field (a pill with an EditBox in it). opts: placeholder, text, glyph, maxLetters,
 --                                 width, onChange(text, userInput), onEnter(text), clearButton (default true)
 --       field.edit (the EditBox)  field:GetText()  field:SetText(text, silent)  field:Clear()  field:SetFocus()
@@ -21,7 +31,7 @@ ns = ns or {}
 local W = ns.Widgets
 local Skin = ns.Skin
 local L = ns.L
-local type, ipairs, pairs = type, ipairs, pairs
+local type, ipairs, pairs, tonumber, tostring = type, ipairs, pairs, tonumber, tostring
 local min, max = math.min, math.max
 
 ---------------------------------------------------------------------------------------------------------------------
@@ -53,14 +63,22 @@ function W.Chip(parent, opts)
 	chip.check:SetVertexColor(1, 0.92, 0.76, 1)
 	chip.check:SetSize(14, 14)
 	chip.check:SetPoint("LEFT", chip, "LEFT", 9, 0)
+	local textX = 27
+	if opts.icon then
+		chip.icon = W.Texture(chip, opts.icon, "OVERLAY", nil)
+		chip.icon:SetSize(18, 18)
+		chip.icon:SetPoint("LEFT", chip, "LEFT", 27, 0)
+		textX = 49
+	end
 	chip.text = W.Text(chip, "label", "ink")
-	chip.text:SetPoint("LEFT", chip, "LEFT", 27, 0)
+	chip.text:SetPoint("LEFT", chip, "LEFT", textX, 0)
 	chip.selected = opts.selected and true or false
+	chip.enabledState = true
 	chip.onToggle = opts.onToggle
 
 	function chip:SetLabel(text)
 		self.text:SetText(text or "")
-		self:SetWidth(27 + W.TextWidth(text or "", "label") + 13)
+		self:SetWidth(textX + W.TextWidth(text or "", "label") + 13)
 	end
 	function chip:GetLabel() return self.text:GetText() end
 	function chip:GetSelected() return self.selected end
@@ -71,10 +89,26 @@ function W.Chip(parent, opts)
 		paintChip(self)
 		if not silent and self.onToggle then self.onToggle(value, self) end
 	end
-	chip:SetScript("OnClick", function(self) self:SetSelected(not self.selected) end)
-	chip:SetScript("OnEnter", function(self) self.hover:Show() end)
+	function chip:SetEnabled(value, reason)
+		self.enabledState = value ~= false
+		self.reason = (not self.enabledState) and reason or nil
+		self:SetAlpha(self.enabledState and 1 or 0.45)
+		if not self.enabledState then self.hover:Hide() end
+	end
+	function chip:IsChipEnabled() return self.enabledState end
+	chip:SetScript("OnClick", function(self) if self.enabledState then self:SetSelected(not self.selected) end end)
+	chip:SetScript("OnEnter", function(self) if self.enabledState then self.hover:Show() end end)
 	chip:SetScript("OnLeave", function(self) self.hover:Hide() end)
-	if opts.tooltip then W.SetTooltip(chip, opts.tooltip) end
+	W.SetTooltip(chip, function()
+		local base = chip.baseTooltip
+		if type(base) == "function" then base = base() end
+		if chip.reason then
+			local title = type(base) == "table" and base.title or base or chip:GetLabel()
+			return { title = title, lines = { { text = chip.reason, color = "gold" } } }
+		end
+		return base
+	end)
+	chip.baseTooltip = opts.tooltip
 	chip:SetLabel(opts.text)
 	paintChip(chip)
 	return chip
@@ -110,7 +144,7 @@ function W.ChipGroup(parent, items, opts)
 
 	local x, y, rowH = 0, 0, Skin.METRICS.chipH
 	for _, item in ipairs(items) do
-		local chip = W.Chip(group, { text = item.text, tooltip = item.tooltip })
+		local chip = W.Chip(group, { text = item.text, tooltip = item.tooltip, icon = item.icon })
 		local w = chip:GetWidth()
 		if x > 0 and x + w > width then x, y = 0, y + rowH + gap end
 		chip:SetPoint("TOPLEFT", group, "TOPLEFT", x, -y)
@@ -143,6 +177,9 @@ function W.ChipGroup(parent, items, opts)
 		if not silent then changed() end
 	end
 	function group:Clear(silent) self:SetSelected({}, silent) end
+	function group:SetEnabled(key, value, reason)
+		if self.chips[key] then self.chips[key]:SetEnabled(value, reason) end
+	end
 	return group
 end
 
@@ -262,6 +299,297 @@ function W.Segmented(parent, items, opts)
 	end
 	if opts.selected then seg:SetSelected(opts.selected, true) end
 	return seg
+end
+
+---------------------------------------------------------------------------------------------------------------------
+-- Day toggles: seven small squares, Monday first
+---------------------------------------------------------------------------------------------------------------------
+function W.DayToggles(parent, opts)
+	opts = opts or {}
+	local size, count = 32, 7
+	local width = opts.width or 260
+	local gap = (width - count * size) / (count - 1)
+	local days = CreateFrame("Frame", nil, parent)
+	days:SetSize(width, size)
+	days.buttons = {}
+	days.mask = 0
+	days.onChange = opts.onChange
+
+	local function paint(button)
+		local c = button.on and CHIP_ON or CHIP_OFF
+		button.bg:SetHex(c.fill, c.fillAlpha)
+		button.edge:SetHex(c.edge, 1)
+		W.TextColor(button.text, c.text)
+	end
+
+	for i = 1, count do
+		local b = CreateFrame("Button", nil, days)
+		b:SetSize(size, size)
+		b:SetPoint("TOPLEFT", days, "TOPLEFT", (i - 1) * (size + gap), 0)
+		b:RegisterForClicks("LeftButtonUp")
+		b.bg = W.NineSlice(b, "card", { corner = 8, layer = "BACKGROUND" })
+		b.edge = W.NineSlice(b, "card_edge", { corner = 8, layer = "BACKGROUND", sublevel = 1 })
+		b.hover = W.NineSlice(b, "card", { corner = 8, layer = "ARTWORK" })
+		b.hover:SetColor(1, 1, 1, 0.2)
+		b.hover:Hide()
+		b.text = W.Text(b, "label", "ink", "CENTER")
+		b.text:SetAllPoints(b)
+		b.text:SetText(opts.labels and opts.labels[i] or tostring(i))
+		b.day, b.on = i, false
+		if opts.names and opts.names[i] then W.SetTooltip(b, opts.names[i]) end
+		b:SetScript("OnEnter", function(self) self.hover:Show() end)
+		b:SetScript("OnLeave", function(self) self.hover:Hide() end)
+		b:SetScript("OnClick", function(self)
+			local mask = days.mask
+			days:SetMask(self.on and mask - 2 ^ (i - 1) or mask + 2 ^ (i - 1))
+		end)
+		days.buttons[i] = b
+		paint(b)
+	end
+
+	function days:GetMask() return self.mask end
+	function days:SetMask(mask, silent)
+		mask = math.floor(tonumber(mask) or 0)
+		if mask < 0 or mask > 127 then mask = 0 end
+		self.mask = mask
+		for i, b in ipairs(self.buttons) do
+			b.on = math.floor(mask / 2 ^ (i - 1)) % 2 == 1
+			paint(b)
+		end
+		if not silent and self.onChange then self.onChange(mask) end
+	end
+	days:SetMask(opts.mask or 0, true)
+	return days
+end
+
+---------------------------------------------------------------------------------------------------------------------
+-- Select: a field that opens a list of choices (the list scrolls with the mouse wheel when it is long)
+---------------------------------------------------------------------------------------------------------------------
+local SELECT_ROW_H, SELECT_PAD = 26, 4
+local selectCatcher   -- one invisible full-screen button that closes the open list on any click outside it
+local openSelect
+
+local function closeOpenSelect() if openSelect then openSelect:Close() end end
+
+local function selectedKeys(sel)
+	local keys = {}
+	for _, item in ipairs(sel.items) do
+		if sel.chosen[item.key] then keys[#keys + 1] = item.key end
+	end
+	return keys
+end
+
+local function selectText(sel)
+	local keys = selectedKeys(sel)
+	local text
+	if sel.summary then
+		text = sel.summary(keys)
+	elseif #keys > 0 then
+		local labels = {}
+		for _, item in ipairs(sel.items) do
+			if sel.chosen[item.key] then labels[#labels + 1] = item.text end
+		end
+		text = table.concat(labels, ", ")
+	end
+	if text == nil or text == "" then
+		sel.text:SetText(sel.emptyText or "")
+		W.TextColor(sel.text, "ink3")
+	else
+		sel.text:SetText(text)
+		W.TextColor(sel.text, "ink")
+	end
+end
+
+local function refreshPopup(sel)
+	local pop = sel.popup
+	if not pop then return end
+	local total = #sel.items
+	local visible = min(total, sel.maxRows)
+	sel.offset = max(0, min(sel.offset, total - visible))
+	local scrolls = total > visible
+	for i = 1, visible do
+		local row = pop.rows[i]
+		if not row then
+			row = CreateFrame("Button", nil, pop)
+			row:SetHeight(SELECT_ROW_H)
+			row:RegisterForClicks("LeftButtonUp")
+			row:SetPoint("TOPLEFT", pop, "TOPLEFT", SELECT_PAD, -(SELECT_PAD + (i - 1) * SELECT_ROW_H))
+			row:SetPoint("TOPRIGHT", pop, "TOPRIGHT", -SELECT_PAD - (scrolls and 8 or 0), -(SELECT_PAD + (i - 1) * SELECT_ROW_H))
+			row.hover = W.Texture(row, "solid", "BACKGROUND", "gold", 0.25)
+			row.hover:SetAllPoints(row)
+			row.hover:Hide()
+			row.check = W.Texture(row, "glyph_check", "OVERLAY", "ink")
+			row.check:SetSize(14, 14)
+			row.check:SetPoint("LEFT", row, "LEFT", 6, 0)
+			row.text = W.Text(row, "body", "ink")
+			row.text:SetPoint("LEFT", row, "LEFT", 26, 0)
+			row.text:SetPoint("RIGHT", row, "RIGHT", -6, 0)
+			row.text:SetWordWrap(false)
+			row:SetScript("OnEnter", function(self) self.hover:Show() end)
+			row:SetScript("OnLeave", function(self) self.hover:Hide() end)
+			row:SetScript("OnClick", function(self) sel:Choose(self.key) end)
+			pop.rows[i] = row
+		end
+		local item = sel.items[sel.offset + i]
+		row.key = item.key
+		row.text:SetText(item.text)
+		row.check:SetShown(sel.chosen[item.key] == true)
+		W.TextColor(row.text, sel.chosen[item.key] and "gold2" or "ink")
+		row:Show()
+	end
+	for i = visible + 1, #pop.rows do pop.rows[i]:Hide() end
+	pop:SetSize(sel:GetWidth(), visible * SELECT_ROW_H + 2 * SELECT_PAD)
+	pop.more:SetShown(scrolls)
+	if scrolls then
+		local room = visible * SELECT_ROW_H
+		local thumb = max(18, room * visible / total)
+		pop.more:SetHeight(thumb)
+		pop.more:ClearAllPoints()
+		pop.more:SetPoint("TOPRIGHT", pop, "TOPRIGHT", -4, -(SELECT_PAD + (room - thumb) * (sel.offset / (total - visible))))
+	end
+end
+
+local function buildPopup(sel)
+	local pop = CreateFrame("Frame", nil, sel)
+	pop:SetFrameStrata("FULLSCREEN_DIALOG")
+	pop:SetFrameLevel(20)
+	pop:EnableMouse(true)
+	pop:EnableMouseWheel(true)
+	pop.shadow = W.NineSlice(pop, "shadow", { corner = 32, outset = 14, layer = "BACKGROUND", sublevel = -2 })
+	pop.shadow:SetColor(0.2, 0.1, 0, 0.45)
+	pop.bg = W.NineSlice(pop, "card", { corner = 10, layer = "BACKGROUND" })
+	pop.bg:SetHex("#fbe9c5", 1)
+	pop.edge = W.NineSlice(pop, "card_edge", { corner = 10, layer = "BACKGROUND", sublevel = 1 })
+	pop.edge:SetHex("#a06e3c", 0.9)
+	pop.more = W.Texture(pop, "pill", "OVERLAY", nil)
+	pop.more:SetVertexColor(Skin.Hex("#8c6844"))
+	pop.more:SetWidth(4)
+	pop.rows = {}
+	pop:SetScript("OnMouseWheel", function(_, delta)
+		sel.offset = sel.offset - delta * 3
+		refreshPopup(sel)
+	end)
+	pop:Hide()
+	return pop
+end
+
+-- The invisible full-screen button behind an open list (nil until a list was opened); tests click it.
+function W.SelectBackdrop() return selectCatcher end
+
+function W.Select(parent, opts)
+	opts = opts or {}
+	local h = opts.height or Skin.METRICS.fieldH
+	local corner = opts.corner or h / 2
+	local sel = CreateFrame("Button", nil, parent)
+	sel:SetSize(opts.width or 240, h)
+	sel:RegisterForClicks("LeftButtonUp")
+	sel.bg = W.NineSlice(sel, "field", { corner = corner, layer = "BACKGROUND" })
+	sel.bg:SetHex("#fff4dd")
+	sel.ring = W.NineSlice(sel, "field_ring", { corner = corner, layer = "BACKGROUND", sublevel = 1 })
+	sel.ring:SetHex("#4a525a")
+	sel.items, sel.chosen, sel.offset = {}, {}, 0
+	sel.multi = opts.multi == true
+	sel.maxRows = opts.maxRows or 8
+	sel.summary, sel.emptyText, sel.onChange = opts.summary, opts.emptyText, opts.onChange
+	sel.enabledState = true
+
+	local left = 14
+	if opts.glyph then
+		sel.icon = W.Texture(sel, opts.glyph, "ARTWORK", "ink2")
+		sel.icon:SetSize(18, 18)
+		sel.icon:SetPoint("LEFT", sel, "LEFT", 14, 0)
+		left = 38
+	end
+	sel.caret = W.Texture(sel, "glyph_back", "ARTWORK", "ink")
+	sel.caret:SetSize(14, 14)
+	sel.caret:SetPoint("RIGHT", sel, "RIGHT", -12, 0)
+	if sel.caret.SetRotation then sel.caret:SetRotation(math.pi / 2) end   -- the arrow of glyph_back points left: now down
+	sel.text = W.Text(sel, "body", "ink")
+	sel.text:SetPoint("LEFT", sel, "LEFT", left, 0)
+	sel.text:SetPoint("RIGHT", sel, "RIGHT", -32, 0)
+	sel.text:SetWordWrap(false)
+
+	function sel:SetItems(items)
+		self.items = items or {}
+		local valid = {}
+		for _, item in ipairs(self.items) do valid[item.key] = true end
+		for key in pairs(self.chosen) do if not valid[key] then self.chosen[key] = nil end end
+		selectText(self)
+		refreshPopup(self)
+	end
+	function sel:GetSelected() return selectedKeys(self) end
+	function sel:SetSelected(keys, silent)
+		if type(keys) ~= "table" then keys = keys ~= nil and { keys } or {} end
+		local valid, chosen = {}, {}
+		for _, item in ipairs(self.items) do valid[item.key] = true end
+		for _, key in ipairs(keys) do
+			if valid[key] then
+				chosen[key] = true
+				if not self.multi then break end
+			end
+		end
+		self.chosen = chosen
+		selectText(self)
+		refreshPopup(self)
+		if not silent and self.onChange then self.onChange(selectedKeys(self)) end
+	end
+	-- A row was clicked: toggles it (multiple choice) or takes it and closes the list.
+	function sel:Choose(key)
+		if self.multi then
+			self.chosen[key] = (not self.chosen[key]) or nil
+		else
+			self.chosen = { [key] = true }
+		end
+		selectText(self)
+		refreshPopup(self)
+		if not self.multi then self:Close() end
+		if self.onChange then self.onChange(selectedKeys(self)) end
+	end
+	function sel:IsOpen() return self.popup ~= nil and self.popup:IsShown() end
+	-- `first`: the 1-based index of the choice the list starts at (a long list opens near the current value).
+	function sel:Open(first)
+		if not self.enabledState or #self.items == 0 then return end
+		closeOpenSelect()
+		if not selectCatcher then
+			selectCatcher = CreateFrame("Button", nil, UIParent)
+			selectCatcher:SetFrameStrata("FULLSCREEN_DIALOG")
+			selectCatcher:SetFrameLevel(1)
+			selectCatcher:SetAllPoints(UIParent)
+			selectCatcher:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+			selectCatcher:SetScript("OnClick", closeOpenSelect)
+			selectCatcher:Hide()
+		end
+		self.popup = self.popup or buildPopup(self)
+		self.offset = max(0, (first or 1) - 1)
+		refreshPopup(self)
+		self.popup:ClearAllPoints()
+		self.popup:SetPoint("TOPLEFT", self, "BOTTOMLEFT", 0, -3)
+		selectCatcher:Show()
+		self.popup:Show()
+		openSelect = self
+		self.ring:SetHex("#b8820f")
+	end
+	function sel:Close()
+		if self.popup then self.popup:Hide() end
+		if openSelect == self then
+			openSelect = nil
+			if selectCatcher then selectCatcher:Hide() end
+		end
+		self.ring:SetHex("#4a525a")
+	end
+	function sel:SetEnabled(value)
+		self.enabledState = value ~= false
+		self:SetAlpha(self.enabledState and 1 or 0.5)
+		if not self.enabledState then self:Close() end
+	end
+	sel:SetScript("OnClick", function(self)
+		if self:IsOpen() then self:Close() else self:Open(self.openAt and self.openAt()) end
+	end)
+	sel:SetScript("OnHide", function(self) self:Close() end)
+	if opts.tooltip then W.SetTooltip(sel, opts.tooltip) end
+	sel.openAt = opts.openAt
+	sel:SetItems(opts.items)
+	return sel
 end
 
 ---------------------------------------------------------------------------------------------------------------------
