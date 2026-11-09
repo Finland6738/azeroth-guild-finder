@@ -78,9 +78,11 @@
 - Spec: SPEC-05 §3, mockup [02](../specs/mockups/img/clean/02-guild-page.webp)
 - Scope: `UI/GuildPage.lua`: left page (emblem, name, tags, Discord copy field with select-all, contacts with Whisper), right page (banner, gold "Looking for" card with role legend and "they need your class", About, Activity, Members, Requirements checked against the player, How applying works), details loading and unavailable states. The Apply button is hidden until M4.
 - Done when:
-  - [ ] The page renders from a summary only and completes when the detail arrives.
-- Tests: requirement checks, local time conversion, missing detail.
+  - [x] Offline: the page renders from a summary only and completes when the detail arrives (or says it is unavailable after 20 s); the requirements are checked against the player, days and times are shown in the player's time zone, the Discord field, the contacts with Whisper, "Looking for" with "they need your class" and the members numbers come from the model, and the page copes with a listing that goes away or has missing fields, on the mock client.
+  - [ ] In game: the page matches the mockup, the detail arrives from another client and completes the page, Whisper opens the chat box, the Discord field copies, the page scrolls ([checklist](../checklists/M2.md)).
+- Tests: requirement checks, local time conversion, "Looking for", members, layout arithmetic (`Tests/test_guild_page_model.lua`); the page on the mock client: summary only, detail arriving, unavailable, late detail, contacts, Whisper, listing gone, scrolling, the development seed (`Tests/test_ui_guild_page.lua`).
 - Docs: wiki Finding a Guild, The Guild Page.
+- Real client: the look of both pages (the wrapped texts and the height of the right page depend on the font), the banner fileIDs (`Assets.BANNERS`, still empty), `ChatFrame_OpenChat` on Forever, the Discord field's select-all, the mouse wheel over the cards, whether a contact heard in the last hour is really online.
 
 ### M2.8 — Milestone check and docs
 - Branch: `step/m2-8-check`

@@ -11,13 +11,16 @@
 --       icon:SetClass(file)
 --   W.Divider(parent, width)   a thin line that fades out at both ends
 --   W.Plate(parent, opts)      the brown "plate" that heads a section of the left page. opts: text, width
+--   W.EmblemPlaceholder(parent, size)  the metal-framed shield that stands in for the guild emblem until M3.6
+--   W.DayBadges(parent, opts)  seven read-only day squares (Monday first). opts: width, labels, names (tooltips), mask
+--       days:SetMask(mask)  days:GetMask()
 -- Colours of tags come from Skin.TAGS; the class colour is the client's RAID_CLASS_COLORS (Assets.ClassColor).
 local ADDON_NAME, ns = ...
 ns = ns or {}
 local W = ns.Widgets
 local Skin = ns.Skin
 local L = ns.L
-local type, tostring = type, tostring
+local type, tostring, tonumber, ipairs = type, tostring, tonumber, ipairs
 local max = math.max
 
 ---------------------------------------------------------------------------------------------------------------------
@@ -213,6 +216,71 @@ function W.Plate(parent, opts)
 	plate.text:SetText(opts.text or "")
 	function plate:SetText(text) self.text:SetText(text or "") end
 	return plate
+end
+
+---------------------------------------------------------------------------------------------------------------------
+-- Emblem placeholder
+---------------------------------------------------------------------------------------------------------------------
+function W.EmblemPlaceholder(parent, size)
+	size = size or 84
+	local k = size / 84
+	local emb = CreateFrame("Frame", nil, parent)
+	emb:SetSize(size, size)
+	emb.shadow = W.NineSlice(emb, "shadow", { corner = 32, outset = 10 * k, layer = "BACKGROUND", sublevel = -1 })
+	emb.shadow:SetColor(0.1, 0.05, 0, 0.35)
+	emb.rim = W.NineSlice(emb, "card", { corner = 16 * k, layer = "BACKGROUND" })
+	emb.rim:SetHex("#9aa4ae")
+	emb.inner = W.NineSlice(emb, "card", { corner = 12 * k, layer = "BACKGROUND", sublevel = 1, outset = -5 * k })
+	emb.inner:SetHex("#2b3547")
+	emb.glyph = W.Texture(emb, "glyph_shield", "ARTWORK", "gold")
+	emb.glyph:SetSize(46 * k, 46 * k)
+	emb.glyph:SetPoint("CENTER", emb, "CENTER", 0, 0)
+	return emb
+end
+
+---------------------------------------------------------------------------------------------------------------------
+-- Day badges: the seven squares of W.DayToggles, for showing and not for choosing
+---------------------------------------------------------------------------------------------------------------------
+local DAY_ON = { fill = "#5a3315", fillAlpha = 1, edge = "#3d210b", text = "#ffeac2" }
+local DAY_OFF = { fill = "#fff5e1", fillAlpha = 0.45, edge = "#b98a53", text = "#a88c6c" }
+
+function W.DayBadges(parent, opts)
+	opts = opts or {}
+	local size, count = 28, 7
+	local gap = 6
+	local days = CreateFrame("Frame", nil, parent)
+	days:SetSize(count * size + (count - 1) * gap, size)
+	days.cells, days.mask = {}, 0
+	for i = 1, count do
+		local c = CreateFrame("Frame", nil, days)
+		c:SetSize(size, size)
+		c:SetPoint("TOPLEFT", days, "TOPLEFT", (i - 1) * (size + gap), 0)
+		c.bg = W.NineSlice(c, "card", { corner = 7, layer = "BACKGROUND" })
+		c.edge = W.NineSlice(c, "card_edge", { corner = 7, layer = "BACKGROUND", sublevel = 1 })
+		c.text = W.Text(c, "label", "ink", "CENTER")
+		c.text:SetAllPoints(c)
+		c.text:SetText(opts.labels and opts.labels[i] or tostring(i))
+		if opts.names and opts.names[i] then
+			c:EnableMouse(true)
+			W.SetTooltip(c, opts.names[i])
+		end
+		days.cells[i] = c
+	end
+	function days:GetMask() return self.mask end
+	function days:SetMask(mask)
+		mask = math.floor(tonumber(mask) or 0)
+		if mask < 0 or mask > 127 then mask = 0 end
+		self.mask = mask
+		for i, c in ipairs(self.cells) do
+			c.on = math.floor(mask / 2 ^ (i - 1)) % 2 == 1
+			local style = c.on and DAY_ON or DAY_OFF
+			c.bg:SetHex(style.fill, style.fillAlpha)
+			c.edge:SetHex(style.edge, c.on and 1 or 0.6)
+			W.TextColor(c.text, style.text)
+		end
+	end
+	days:SetMask(opts.mask)
+	return days
 end
 
 if ns.addon then ns.addon.Widgets = W end

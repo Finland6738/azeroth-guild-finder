@@ -25,11 +25,14 @@ local min, max = math.min, math.max
 -- The path of a Media/ texture.
 function W.Media(name) return Skin.Media(name) end
 
--- A texture of Media/ (tinted with the colour token `color`, alpha `alpha`) on `parent`.
+-- A texture of Media/ (tinted with the colour token or "#rrggbb" `color`, alpha `alpha`) on `parent`.
 function W.Texture(parent, media, layer, color, alpha)
 	local t = parent:CreateTexture(nil, layer or "ARTWORK")
 	t:SetTexture(W.Media(media))
-	if color then t:SetVertexColor(Skin.Color(color, alpha)) end
+	if color then
+		if type(color) == "string" and color:sub(1, 1) == "#" then W.TintHex(t, color, alpha)
+		else t:SetVertexColor(Skin.Color(color, alpha)) end
+	end
 	return t
 end
 
@@ -123,7 +126,7 @@ function W.Text(parent, style, color, justify, layer)
 	local fs = parent:CreateFontString(nil, layer or "OVERLAY")
 	local font = Skin.Font(style or "body")
 	if font then fs:SetFontObject(font) end
-	fs:SetTextColor(Skin.Color(color or "ink"))
+	W.TextColor(fs, color or "ink")
 	fs:SetJustifyH(justify or "LEFT")
 	fs.style = style or "body"
 	return fs

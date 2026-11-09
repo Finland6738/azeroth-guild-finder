@@ -38,9 +38,11 @@ UI\Widgets\Buttons.lua
 UI\Widgets\Inputs.lua
 UI\Widgets\Display.lua
 UI\BrowseModel.lua
+UI\GuildPageModel.lua
 UI\FilterModel.lua
 UI\Main.lua
 UI\FilterPanel.lua
 UI\Browse.lua
+UI\GuildPage.lua
 UI\Gallery.lua
 UI\Entry.lua
