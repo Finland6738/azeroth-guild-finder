@@ -19,6 +19,7 @@
 --                                                prepareFn() runs before each rebuild of the list.
 --   Browse:RefreshNow()   Browse:Selected() -> the listings now shown (A -> Z)    Browse.left = the left page frame
 --   Browse:OpenGuild(k)   pushes the guild page (UI/GuildPage.lua, "GuildPage") on the Find a Guild tab
+--   Browse.CreateCard(parent) / Browse.BindCard(card, display)   one card outside the list (the editor's live preview)
 -- The list reacts to CATALOG_UPDATED on the Bus, at most once every Model.THROTTLE seconds, and only while it is shown.
 local ADDON_NAME, ns = ...
 ns = ns or {}
@@ -248,6 +249,18 @@ local function bindRow(row, card, index)
 	lines[#lines + 1] = { text = card.reqText, color = req.ok == false and "bad" or "white" }
 	row.tooltip = { title = card.name, lines = lines }
 end
+
+-- The card renderer for other pages (the live preview of the listing editor, M3.2): a card made and filled exactly like a
+-- row of the list, but outside the pool and not clickable (a click would open the guild page of the card).
+--   Browse.CreateCard(parent) -> the card frame (CARD_W x CARD_H), Browse.BindCard(card, Model.Card(...))
+function Browse.CreateCard(parent)
+	local row = createRow(parent, 0)
+	Browse.rowsCreated = Browse.rowsCreated - 1
+	row:SetScript("OnMouseUp", nil)
+	return row
+end
+
+function Browse.BindCard(row, card) return bindRow(row, card, 0) end
 
 ---------------------------------------------------------------------------------------------------------------------
 -- The page

@@ -4,7 +4,7 @@ Only the **Guild Master** can publish or edit the guild's listing. Open `/gf`: a
 
 ![Listing editor, Activity step](../specs/mockups/img/clean/08-editor-activity.webp)
 
-The editor has seven steps; the left page shows which ones are ready:
+The editor, the draft and the checklist are described in [[Creating a Listing|Creating-a-Listing]]. In short, it has seven steps; the left page shows which ones are ready:
 
 1. **Identity**: the guild name (taken from the game), subtitle, [[emblem|Emblems]] and banner.
 2. **About**: description and languages.
@@ -12,7 +12,7 @@ The editor has seven steps; the left page shows which ones are ready:
 4. **Recruitment**: status (open to all, selected classes, closed) and the **Looking for** grid of classes and roles (Tank, Healer, Melee, Ranged); new player friendly; accept applications through the addon.
 5. **Requirements**: minimum level, optional item level, a note.
 6. **Contact**: the Discord invite code and up to three contact characters.
-7. **Preview & publish**: the checklist must be all green.
+7. **Preview & publish**: the checklist must be all green. Until the steps arrive in the addon, publishing in a real client is not yet possible.
 
 ![Listing editor, Recruitment step](../specs/mockups/img/clean/03-listing-editor.webp)
 

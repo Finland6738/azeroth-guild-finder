@@ -530,12 +530,12 @@ function OwnListing:Explain(reason, wait)
 	return L[key]
 end
 
--- /gf debug publish | delist (development builds): the Guild Master's listing before the editor exists (M3.2). Publish
+-- /gf debug publish | delist (development builds): the Guild Master's listing without the editor (UI/Editor.lua). Publish
 -- takes the draft, else the guild copy, else SAMPLE, through the normal rules (Guild Master only, 5-minute limit).
 OwnListing.SAMPLE = {
 	sub = "Listing published with /gf debug publish", lang = 1, lang1 = 1, tags = { 11 }, pace = 1, days = 127, t0 = 0,
 	t1 = 0, rec = 1, apps = false, newb = true, minL = 1,
-	desc = "A listing published by a development build to check the guild sync. The editor arrives with M3.2.",
+	desc = "A listing published by a development build to check the guild sync.",
 }
 
 function OwnListing:DebugCommand(sub)
