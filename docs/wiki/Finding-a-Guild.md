@@ -15,9 +15,33 @@ Type in the box at the top of the page. The list narrows about a quarter of a se
 
 ## Filters
 
-The left page will hold the filters: **Recruiting only**, **Looking for my class**, **Requirements met**, **New player friendly**, **My role** (Tank, Healer, Melee, Ranged), **Guild language**, **Commitment** (Casual, Softcore, Hardcore), **Activity**, **Play days and time** (in your time zone) and **Min. active members** (active in the last 7 days). The plate at the top will show how many filters are active, and its round arrow will reset them.
+The **left page** holds the filters. They narrow the same list the search narrows (a guild must pass the search **and** every filter that is on), they are **remembered for each of your characters**, and the list goes back to its top whenever you change one.
 
-> The filters are not in this version yet: the left page says so. Search by name works today.
+| Filter | What it keeps |
+|---|---|
+| **Recruiting only** | guilds that are recruiting, with or without a restriction to some classes or roles. **On the first time**, because a guild that is not recruiting cannot take you in |
+| **Looking for my class** | guilds that name your class, or that take any class. The class is shown in the label, for example *(Mage)* |
+| **Requirements met** | guilds whose minimum level and item level you meet. A requirement the game cannot tell you about (for example the item level) never hides a guild |
+| **New player friendly** | guilds that say they welcome new players |
+| **My role** (Tank, Healer, Melee DPS, Ranged DPS) | guilds that look for at least one of the roles you pick, for your class **or for any class**. Roles your class cannot play are dimmed (hover one to read why) |
+| **Guild language** | guilds that speak at least one of the languages you pick (their main language counts). Click the field to open the list; it stays open while you tick several |
+| **Commitment** (Casual, Softcore, Hardcore) | guilds with one of the commitments you pick. Hover a chip to read what each level means |
+| **Activity** | guilds that list at least one of the activities you pick among their (up to three) activities. The field shows the names, or *3 selected* |
+| **Play days** (seven squares, Monday first) | guilds that play on at least one of the days you pick, **in your time** |
+| **Play time** (from and to, in steps of 30 minutes, in your time) | guilds whose play time overlaps the time you pick, see below |
+| **Min. active members** (Any, 5, 10, 25, 50) | guilds with at least that many characters active in the last 7 days |
+
+Guilds publish their days and times in UTC; the addon converts them to **your computer's time zone** before comparing, so a guild that plays 20:00 to 23:00 UTC matches *21:00 to 23:00* if you are one hour east of Greenwich, and a guild that plays on Monday at 23:30 UTC counts as Tuesday for someone two hours east.
+
+How the play time is read:
+
+- Pick **from** and **to** to ask for a window, for example 20:00 to 23:30. A guild matches when it plays during any part of it. A guild whose window only **touches** yours (it ends at 23:00 and yours starts at 23:00) does not match.
+- A window may **cross midnight**: 22:00 to 02:00 is 22:00 to midnight and midnight to 02:00. A guild that plays across midnight is read the same way.
+- Pick only **from** and the window runs to midnight; pick only **to** and it starts at midnight. Picking the same time twice means the whole day and filters nothing.
+- A guild that plays **All day** matches every window.
+- A guild that did not publish its days, times, languages, statistics or activities is **not** shown while the filter for that thing is on, because nobody can tell that it fits.
+
+The plate at the top reads **Filters · 4 active** (one per filter that is on, however many choices it holds). The round **×** button at its right edge, and the **Reset filters** button of an empty result, turn **every** filter off, including *Recruiting only*, so the list shows all guilds.
 
 ## The list
 
@@ -40,7 +64,7 @@ Only guilds of **your faction and realm** are shown.
 | *No other Guild Finder users online right now. Listings will appear as they come online.* | nobody answered and nobody is around; the list fills by itself as players log in |
 | *No guild has published a listing for your realm and faction yet.* | other players are online but no guild master has published yet |
 | *No guild name contains "..."* | your search matches nothing: change or clear it |
-| *No guild matches your filters* and **Reset filters** | the filters (when they exist) leave nothing: reset them |
+| *No guild matches your filters* and **Reset filters** | the filters leave nothing: reset them (or switch one off) |
 
 ## The status bar
 

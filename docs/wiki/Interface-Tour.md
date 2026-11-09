@@ -43,6 +43,7 @@ Opening a guild from the list replaces the list with the guild's page and shows 
 - **Blue button**: Discord.
 - **Parchment button**: secondary actions. **Grey button**: not available, with the reason written next to it.
 - **Chips**: filters you switch on and off (a check mark shows when on).
+- **Selects**: a field with an arrow that opens a list of choices; some let you tick several (the list stays open until you click outside it), long ones scroll with the mouse wheel. **Day squares**: seven small squares, Monday first, that you switch on and off.
 - **Switches** and **segmented buttons**: settings with two or a few values.
 - **Fields**: the search box and other text fields; a **copy field** (for example a Discord link) selects its whole text when you click it, and you press **Ctrl+C** to copy it.
 - **Role badges**: blue shield Tank, green cross Healer, red swords Melee DPS, purple target Ranged DPS. Hover one to read its name.
