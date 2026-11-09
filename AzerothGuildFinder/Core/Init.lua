@@ -54,9 +54,9 @@ function AGF:PrintDebug()
 	end
 end
 
--- /gf debug [ping|announce|gallery|seed|publish|delist]: the diagnostics, the channel check, a test listing, the widget
--- gallery, fake listings for the list, or the Guild Master's own listing without the editor (all but ping in development
--- builds only).
+-- /gf debug [ping|announce|gallery|seed|publish|delist|editor]: the diagnostics, the channel check, a test listing, the
+-- widget gallery, fake listings for the list, the Guild Master's own listing without the editor, or the editor opened on a
+-- listing that is out (all but ping in development builds only).
 function AGF:OnDebugCommand(input)
 	local sub = tostring(input or ""):lower():match("^%s*%S+%s+(%S+)")
 	if sub == "ping" then
@@ -74,6 +74,10 @@ function AGF:OnDebugCommand(input)
 	end
 	if sub == "publish" or sub == "delist" then
 		if ns.OwnListing then return ns.OwnListing:DebugCommand(sub) end
+		return self:Print(L["COMING_SOON"])
+	end
+	if sub == "editor" then
+		if ns.Editor then return ns.Editor:DebugOpen() end
 		return self:Print(L["COMING_SOON"])
 	end
 	if sub == "announce" then

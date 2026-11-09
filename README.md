@@ -18,7 +18,7 @@ A guild finder for **World of Warcraft: Forever**: browse guilds by language, ac
 
 </div>
 
-> **Status: in development, not yet tried in the game.** The specification, the decisions and the mockups are done, and milestones M1 and M2 (catalog sync, main window, Find a Guild with search and filters, guild page) and the first step of M3 (the Guild Master's listing and its sync inside the guild) are written and tested offline on a mock client and a network simulator; nobody has run them in WoW Forever yet, so nothing is confirmed to work in game. M0 (checks in the real client) and the in-game checks are waiting for the owner. There is no download yet. Follow the [roadmap](ROADMAP.md) and the [Announcements](https://github.com/Finland6738/azeroth-guild-finder/discussions/categories/announcements).
+> **Status: in development, not yet tried in the game.** The specification, the decisions and the mockups are done, and milestones M1 and M2 (catalog sync, main window, Find a Guild with search and filters, guild page) and the first two steps of M3 (the Guild Master's listing and its sync inside the guild, the listing editor's shell with its checklist) are written and tested offline on a mock client and a network simulator; nobody has run them in WoW Forever yet, so nothing is confirmed to work in game. M0 (checks in the real client) and the in-game checks are waiting for the owner. There is no download yet. Follow the [roadmap](ROADMAP.md) and the [Announcements](https://github.com/Finland6738/azeroth-guild-finder/discussions/categories/announcements).
 
 ## Contents
 
@@ -110,7 +110,7 @@ Step-by-step guide: [the wiki](https://github.com/Finland6738/azeroth-guild-find
 | M0 | Checks in the real client (spike) | ⏳ next |
 | M1 | Addon skeleton, transport, codec, tests | ✅ code and offline tests done; in-game check pending |
 | M2 | Catalog sync, main window, Find a Guild, filters, guild page | ✅ complete offline (1004 tests, simulator converges); in-game check pending ([checklist](docs/checklists/M2.md)) |
-| M3 | Listing editor, guild page, emblems, statistics | 🚧 in progress: M3.1 (own listing and guild sync) done offline; in-game check pending ([checklist](docs/checklists/M3.md)) |
+| M3 | Listing editor, guild page, emblems, statistics | 🚧 in progress: M3.1 (own listing and guild sync) and M3.2 (editor shell and checklist) done offline; in-game check pending ([checklist](docs/checklists/M3.md)) |
 | M4 | Applications and notifications | planned |
 | M5 | Polish, release checklist, packaging | planned |
 

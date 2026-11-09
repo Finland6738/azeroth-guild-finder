@@ -21,8 +21,12 @@
 - Spec: SPEC-06 §2, mockups [03](../specs/mockups/img/clean/03-listing-editor.webp) and [08](../specs/mockups/img/clean/08-editor-activity.webp)
 - Scope: `UI/Editor.lua`: 7-step stepper with status, Back/Next, auto-saved draft, live preview card, "Before publishing" checklist linking to steps, Publish / Save changes / Discard / Delist.
 - Done when:
-  - [ ] Publish stays disabled, with the reason, until every required item is green.
-- Tests: checklist rules.
+  - [x] Offline: Publish stays disabled, with the reason written under it, until every required item is green, the character is the Guild Master and the 5-minute limit has passed; Save changes also needs a change; the checklist rules, the stepper, the draft auto-save (also after closing the window and `/reload`), Discard changes, Delist, the live preview and the step registration API are tested on the mock client; anybody but the Guild Master gets a note over the page and no save.
+  - [ ] In game: the Guild Master sees the stepper, the live preview and the checklist as in the mockups, a click on a checklist item goes to its step, and the draft is still there after `/reload` ([checklist](../checklists/M3.md)).
+  - [ ] In game: Publish turns on only when every item is green, shows the reason while it is off, waits out the 5-minute limit, and Delist and Discard changes ask first ([checklist](../checklists/M3.md)).
+- Tests: checklist rules, reasons Publish is off, draft auto-save, stepper navigation, step registration (`Tests/test_editor_model.lua`, `Tests/test_ui_editor.lua`).
+- Docs: wiki Creating a Listing; SPEC-06 §2 (how the shell is built).
+- Real client: look of the stepper, cards and checklist at 60 %, 100 % and 140 %; the Publish button's reason text under the 260 px button; `GUILD_RANKS_UPDATE` while the editor is open.
 
 ### M3.3 — Identity and About steps
 - Branch: `step/m3-3-identity-about`

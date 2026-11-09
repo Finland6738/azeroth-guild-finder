@@ -10,6 +10,7 @@
 - [[Applying|Applying]]
 
 **Guild Masters and officers**
+- [[Creating a Listing|Creating-a-Listing]]
 - [[Publishing a Listing|Publishing-a-Listing]]
 - [[Emblems|Emblems]]
 - [[Managing Applications|Managing-Applications]]
