@@ -8,7 +8,7 @@ This page is the short version and the rules every step follows. **The developme
 |---|---|---|---|
 | **[M0 – Spike](docs/roadmap/M0-spike.md)** | `step/m0-…` | A probe addon (not distributed) answers checks S1–S11 in the real client: Club Finder, channel and whisper messages, minimum level to send, `OFFICER` channel, throttling, guild globals, tabard pieces, textures, invite, chat lockdown | results in `docs/spike/M0-results.md`, ADRs updated |
 | **[M1 – Foundations](docs/roadmap/M1-foundations.md)** | `step/m1-…` | Addon skeleton (TOC 16001, Ace3, `.pkgmeta`), Compat, Config with schema versions, Codec, Transport, Channel, offline tests with a mock client | two clients exchange messages in the simulator |
-| **[M2 – Find a Guild](docs/roadmap/M2-find-a-guild.md)** | `step/m2-…` | Catalog, Sync, name normalization, list, search and filters | the list fills from a simulated network |
+| **[M2 – Find a Guild](docs/roadmap/M2-find-a-guild.md)** | `step/m2-…` | Catalog, Sync, name normalization, list, search and filters | the list fills from a simulated network (done); in game, a test listing announced by one client appears in another (waiting for the owner) |
 | **[M3 – Listings](docs/roadmap/M3-listings.md)** | `step/m3-…` | Listing editor, My Guild, emblems, banners, statistics | a real Guild Master publishes a listing |
 | **[M4 – Applications](docs/roadmap/M4-applications.md)** | `step/m4-…` | Applications, officer inbox and sync, notification icon, My Application | full flow with an officer online and offline |
 | **[M5 – Release](docs/roadmap/M5-release.md)** | `step/m5-…` | Settings, polish, release checklist, packaging for GitHub and CurseForge | `v0.9` beta, then `v1.0.0` |
