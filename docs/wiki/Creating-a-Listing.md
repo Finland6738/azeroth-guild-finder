@@ -18,7 +18,7 @@ The **left page** lists the seven steps. Each shows its state: a green check whe
 
 ![Listing editor, Activity step](../specs/mockups/img/clean/08-editor-activity.webp)
 
-> **Not all steps are there yet.** Identity, About and Activity are ready. The others arrive with the next versions of the addon (Recruitment, Requirements and Contact, then emblems). Until then a step says that it arrives in a later version, and **Publish listing** cannot turn green. Nothing is lost: this page only grows.
+> **Not all steps are there yet.** Identity, About, Activity, Recruitment, Requirements and Contact are ready. The emblem arrives with the next version of the addon: until then **Publish listing** cannot turn green in a release build. Nothing is lost: this page only grows.
 
 ## Step 1: Identity
 
@@ -39,6 +39,24 @@ The **left page** lists the seven steps. Each shows its state: a green check whe
 - **Commitment** (required, one choice): **Casual** (play when you can, no fixed commitment), **Softcore** (regular activity and some scheduled events; attendance is welcome, not required) or **Hardcore** (demanding schedule, attendance required, preparation expected). It is the guild's commitment, not permadeath. The line under the buttons explains the one you picked.
 - **Activities** (required, **1 to 3**): click the activities your guild does. The order you click is the order of importance, shown as **1**, **2**, **3** on the chips; number 1 is the main focus. After three, the other chips are greyed out (hover one for the reason): remove one to pick another. Removing one renumbers the rest.
 - **Play days & time** (optional): tick the days and pick a start and an end, every 30 minutes, in **your own local time**. The addon saves them in UTC and the line under the menus shows the UTC window; players see it converted to *their* time zone. A window can run past midnight (for example 22:00–01:00). **All day** means no fixed hours. If your country changes its clocks, the UTC window you saved stays the same until you edit it, so open this step again after the change if you want the same local hours.
+
+## Step 4: Recruitment
+
+- **Recruitment status**: **Open to all**, **Selected classes** or **Closed**. *Open to all* asks for every class and every role (you can still untick some). *Closed* clears the grid below and greys it out: a closed guild looks for nobody. If you go back to *Selected classes*, the grid you had comes back.
+- **Looking for**: a grid with one row per class and a column per role: **Tank**, **Healer**, **Melee DPS** and **Ranged DPS**. Only the classes **your faction can play** are listed (no Paladin for the Horde, no Shaman for the Alliance). A role a class cannot play is dimmed (hover it for the reason) and cannot be ticked. Click a cell to tick or clear it; click the **class name** to tick or clear every role it can play. The **Any class** row means "whatever the class": use it when you only care about the role. The count at the top right says how many classes you chose. Choosing something in the grid also sets the status to *Selected classes* if you had not picked one. The listing needs at least one class and role, or the status *Closed*.
+- **New player friendly**: shows a tag on your listing so that players who are new to the game know they are welcome.
+- **Accept applications through the addon**: on at first. If you turn it off, players only see your contacts.
+
+## Step 5: Requirements
+
+- **Minimum level**: drag the slider from level 1 to the highest level of the game. **Level 1 means no minimum**, and the listing then shows no level requirement.
+- **Minimum item level** (optional): switch it on and type the average item level (digits only, 1 to 999). Switching it off removes the requirement. Players who are below it see that they do not meet it.
+- **Note** (optional): up to **120 characters**, for example *Voice chat required for raids*. The counter shows how many you used.
+
+## Step 6: Contact
+
+- **Discord** (optional): the invite address starts with the fixed text `https://discord.gg/`; you only write the **code** after it, for example `aurora-it` (letters, digits and hyphens, 2 to 32 characters). You can also **paste a whole invite link** (`https://discord.gg/aurora-it`, `discord.gg/aurora-it` or `https://discord.com/invite/aurora-it`): the addon keeps only the code and shows it in the box. If what you typed cannot be an invite, a red line under the box says why (another website, too short, too long, or a character that is not allowed), and the *Discord code valid* item of the checklist and the step turn red until you fix it or clear the box.
+- **Characters to contact** (optional): up to **3** characters **of your guild** that players can whisper. With the box empty the list offers the members who are online, in the colour of their class; type the first letters of a name (capitals and accents do not matter) to narrow it down, then click a member or press Enter. Only members of your guild can be chosen. The **x** on a row removes it. If a chosen character leaves the guild, its row says so in red; it stays until you remove it. While the guild list is still loading the card says so and nobody is marked as gone.
 
 ## The live preview and the checklist
 

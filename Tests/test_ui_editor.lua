@@ -181,9 +181,10 @@ describe("the stepper", function()
 end)
 
 describe("pluggable steps", function()
-	it("a step that nobody registered says that it arrives in a later version (steps 4 to 6: 1 to 3 have their pages since M3.4)", function()
+	it("a step that nobody registered says that it arrives in a later version (every step has its page since M3.5: the registration is taken away here)", function()
 		open()
 		for i = 4, 6 do
+			editor().defs[A().EditorModel.StepId(i)] = nil
 			editor():GoTo(i)
 			local page = editor().pages[A().EditorModel.StepId(i)]
 			truthy(page.placeholder)
@@ -219,6 +220,7 @@ describe("pluggable steps", function()
 
 	it("registering after the placeholder was shown replaces it", function()
 		open()
+		editor().defs.recruitment = nil
 		editor():GoTo(4)
 		truthy(editor().pages.recruitment.placeholder)
 		local built = 0

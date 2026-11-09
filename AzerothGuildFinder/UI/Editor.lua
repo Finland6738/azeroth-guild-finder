@@ -62,6 +62,11 @@ local function after(seconds, fn) return ns.Compat.After(seconds, fn) end
 local CONTENT = {}
 for _, name in ipairs(Model.CONTENT) do CONTENT[name] = true end
 
+-- `false` clears a field, except `apps` (applications through the addon): there `false` is a real value, "off" (a listing
+-- that says nothing about applications counts as open, GuildPageModel). Editor.CLEAR clears any field, `apps` included.
+local KEEP_FALSE = { apps = true }
+Editor.CLEAR = {}
+
 ---------------------------------------------------------------------------------------------------------------------
 -- Steps
 ---------------------------------------------------------------------------------------------------------------------
@@ -176,17 +181,18 @@ end
 
 -- Sets one field (a name of SPEC-03 §2-§3; nil clears it). Returns false for another name.
 function Editor:Set(name, value)
-	if value == nil then value = false end
+	if value == nil then value = Editor.CLEAR end
 	return self:Patch({ [name] = value })
 end
 
--- Sets several fields at once; one draft save and one redraw. `false` clears a field.
+-- Sets several fields at once; one draft save and one redraw. `false` clears a field (see KEEP_FALSE), Editor.CLEAR always does.
 function Editor:Patch(values)
 	if type(values) ~= "table" then return false end
 	local new = Model.Strip(self.fields)
 	for name, value in pairs(values) do
 		if not CONTENT[name] then return false end
-		if value == false then new[name] = nil else new[name] = Model.Strip({ [name] = value })[name] end
+		if value == Editor.CLEAR or (value == false and not KEEP_FALSE[name]) then new[name] = nil
+		else new[name] = Model.Strip({ [name] = value })[name] end
 	end
 	if self:SameRaw(new) then return true end
 	self.fields = new
