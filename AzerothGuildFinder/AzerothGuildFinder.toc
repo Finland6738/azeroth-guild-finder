@@ -47,5 +47,6 @@ UI\FilterPanel.lua
 UI\Browse.lua
 UI\GuildPage.lua
 UI\Editor.lua
+UI\EditorSteps.lua
 UI\Gallery.lua
 UI\Entry.lua

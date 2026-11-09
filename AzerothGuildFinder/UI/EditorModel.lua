@@ -9,6 +9,9 @@
 --   Model.View(fields, ctx)                the checklist: { items, steps, ready, complete, first, clean }
 --   Model.Action(view, ctx)                the main button: { mode, label, enabled, reason, kind, step }
 --   Model.Preview(fields, key, now, L)     the display fields of the listing card (BrowseModel.Card), for the live preview
+--   Model.Clamp / TextStats                typed text cut to SPEC-03's limits (subtitle 60, description 500 and 12 lines), the counters
+--   Model.MainLanguage / Secondary / SetMain / SetSecondary   the language fields (`lang1`, the mask `lang`)
+--   Model.Banners()                        the verified banners, for the gallery
 --   Model.ReadyText / DraftText / FixText  texts
 --
 -- The checklist (SPEC-06 §2, "Before publishing"), in this order, each item with the step that fixes it:
@@ -297,6 +300,119 @@ function Model.DraftText(ctx, L)
 	if not ctx.savedAt then return L["ED_DRAFT_AUTO"] end
 	local age = (ctx.now or ctx.savedAt) - ctx.savedAt
 	return L["ED_DRAFT_SAVED"]:format(ns.BrowseModel.AgeText(age, L))
+end
+
+---------------------------------------------------------------------------------------------------------------------
+-- Typed text, languages, banners (M3.3: the Identity and About steps)
+---------------------------------------------------------------------------------------------------------------------
+local huge, floor2 = math.huge, math.floor
+
+local function limits() return Listing().LIMITS end
+function Model.SubMax() return limits().SUB end
+function Model.DescMax() return limits().DESC end
+function Model.DescLines() return limits().DESC_LINES end
+
+-- Length of `text` as it will be published (SPEC-03 §6: controls removed, "|" doubled, trimmed), in UTF-8 characters.
+local function cleanLen(text, multi)
+	return utf8Len(Listing().CleanText(text, huge, multi, huge) or "")
+end
+
+-- The text as it is typed, cut to what SPEC-03 allows: `max` characters (counted after the cleaning of §6) and, for a
+-- multi-line field, `maxLines` lines. Nothing is trimmed, so a space typed at the end stays. Returns the text and whether
+-- anything was cut or removed. A single-line field (maxLines nil) also loses its line breaks.
+function Model.Clamp(text, max, maxLines)
+	if type(text) ~= "string" then return "", text ~= nil end
+	local multi = maxLines ~= nil
+	local s = Listing().StripControls(text, multi)
+	if multi then
+		local lines, n = {}, 0
+		for line in (s .. "\n"):gmatch("(.-)\n") do
+			n = n + 1
+			if n > maxLines then break end
+			lines[n] = line
+		end
+		s = table.concat(lines, "\n")
+	end
+	local len = cleanLen(s, multi)
+	while len > max do
+		local keep = utf8Len(s) - (len - max)
+		if keep < 0 then keep = 0 end
+		s = Normalize().Utf8Sub(s, 1, keep)
+		len = cleanLen(s, multi)
+	end
+	return s, s ~= text
+end
+
+-- What the counters show: { chars, lines, max, maxLines, over }. `lines` is 0 for an empty text.
+function Model.TextStats(text, max, maxLines)
+	text = type(text) == "string" and text or ""
+	local multi = maxLines ~= nil
+	local s = Listing().StripControls(text, multi)
+	local lines = 0
+	if s ~= "" then
+		lines = 1
+		for _ in s:gmatch("\n") do lines = lines + 1 end
+		if not multi then lines = 1 end
+	end
+	local chars = cleanLen(text, multi)
+	return { chars = chars, lines = lines, max = max, maxLines = maxLines,
+		over = chars > max or (maxLines ~= nil and lines > maxLines) }
+end
+
+local function hasBit(mask, i) return floor2(mask / ns.Enums.LanguageBit(i)) % 2 == 1 end
+
+local function maskOf(main, others)
+	local E = ns.Enums
+	local mask = E.LanguageBit(main)
+	for _, i in ipairs(others) do
+		if i ~= main and E.LanguageBit(i) and not hasBit(mask, i) then mask = mask + E.LanguageBit(i) end
+	end
+	return mask
+end
+
+-- The main language (an index of Enums.LANGUAGES) of these fields, or nil.
+function Model.MainLanguage(fields)
+	local clean = Model.Clean(fields) or {}
+	return clean.lang1
+end
+
+-- The secondary languages (every language of the mask but the main one), ascending.
+function Model.Secondary(fields)
+	local clean = Model.Clean(fields) or {}
+	local out = {}
+	if clean.lang1 and clean.lang then
+		for i = 1, ns.Enums.LANGUAGE_COUNT do
+			if i ~= clean.lang1 and hasBit(clean.lang, i) then out[#out + 1] = i end
+		end
+	end
+	return out
+end
+
+-- The fields to patch when language i becomes the main one: the secondary ones stay, except i itself. nil for a bad index.
+function Model.SetMain(fields, i)
+	if not ns.Enums.LanguageBit(i) then return nil end
+	return { lang1 = i, lang = maskOf(i, Model.Secondary(fields)) }
+end
+
+-- The fields to patch when the secondary languages become `list` (indexes; the main one, bad and repeated ones are
+-- ignored). nil while there is no main language: a secondary language needs one.
+function Model.SetSecondary(fields, list)
+	local main = Model.MainLanguage(fields)
+	if not main or type(list) ~= "table" then return nil end
+	return { lang1 = main, lang = maskOf(main, list) }
+end
+
+-- The verified banners (Assets.BANNERS) as a list of { index, file }, by index. Empty until the fileIDs are confirmed.
+function Model.Banners()
+	local out = {}
+	local list = ns.Assets and ns.Assets.BANNERS or {}
+	for index, entry in pairs(list) do
+		if type(index) == "number" and type(entry) == "table" and type(entry.file) == "number" then
+			out[#out + 1] = { index = index, file = entry.file }
+		end
+	end
+	table.sort(out, function(a, b) return a.index < b.index end)
+	return out
 end
 
 ---------------------------------------------------------------------------------------------------------------------

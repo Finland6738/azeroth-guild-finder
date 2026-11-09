@@ -70,6 +70,8 @@ local function fixTail(s)
 	return s
 end
 
+Listing.StripControls = stripControls   -- the editor cuts what is typed with the same rule (UI/EditorModel.lua)
+
 function Listing.CleanText(s, max, multiline, maxLines)
 	if type(s) ~= "string" then return nil end
 	s = stripControls(s, multiline)

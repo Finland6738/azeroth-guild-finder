@@ -18,7 +18,21 @@ The **left page** lists the seven steps. Each shows its state: a green check whe
 
 ![Listing editor, Activity step](../specs/mockups/img/clean/08-editor-activity.webp)
 
-> **Not all steps are there yet.** The steps arrive with the next versions of the addon (Identity and About first, then Activity, then Recruitment, Requirements and Contact, then emblems). Until then a step says that it arrives in a later version, and **Publish listing** cannot turn green. Nothing is lost: this page only grows.
+> **Not all steps are there yet.** Identity and About are ready. The others arrive with the next versions of the addon (Activity, then Recruitment, Requirements and Contact, then emblems). Until then a step says that it arrives in a later version, and **Publish listing** cannot turn green. Nothing is lost: this page only grows.
+
+## Step 1: Identity
+
+- **Guild name**: read from your guild in game and locked. To change it, rename the guild in the game.
+- **Subtitle** (required): one line, up to **60 characters**. The counter next to it (*0 / 60*) shows how many you used; what you type past 60 is cut off, and line breaks are not allowed. It is shown under the guild name in the list.
+- **Banner** (optional): the picture behind your guild's card and page. Pick one of the thumbnails, or **Default** for the plain parchment. If no thumbnail is offered, the pictures have not been confirmed for your version of the game yet, and the page says so.
+- The **emblem** is set in a later version of the addon; it is the one item that keeps **Publish listing** grey for now.
+
+## Step 2: About
+
+- **Description** (required, at least **30 characters**): up to **500 characters** and **12 lines**. Two counters (*0 / 500* and *0 / 12 lines*) show what is left; past either limit, what you type is cut off. Pipes (`|`) count double because the game would otherwise read them as colour codes.
+- **Main language** (required): the language your guild speaks. It is the first one shown on the card.
+- **Also spoken** (optional): any other languages. The menu waits until you pick a main language and never lists it again. If you change the main language, the other ones stay, and a language that becomes the main one leaves this list.
+
 
 ## The live preview and the checklist
 
