@@ -18,6 +18,8 @@
 --   meta.sender   who sent it (Name-Realm), memory only      meta.dist    "CHANNEL" | "WHISPER" | "GUILD" | ...
 --   meta.now      override the clock (tests)                 meta.annAt   when a peer last heard an ANN (CAT replies)
 --   meta.localOnly  the listing is never shared with other clients (new entries only)
+--   meta.trusted  the caller checked the source itself (Data/OwnListing.lua: the player's own Guild Master, or a GLIST
+--                 from the Guild Master of the roster, INT-02): Delist skips the INT-05 announcer check
 -- INT-04 and INT-05 apply to announcements that arrive in the channel (meta.dist == "CHANNEL"): there the sender
 -- is required. A record without meta (local use) or from another distribution skips those two rules.
 --
@@ -467,8 +469,9 @@ function Catalog:PutDetail(rec, meta)
 	return true, "detail"
 end
 
--- DEL (INT-05): k, rev. Only a sender that announced this guild in the channel may withdraw it. The tombstone keeps
--- the withdrawn revision, so a late ANN of that revision or older cannot bring the listing back. Returns changed, reason.
+-- DEL (INT-05): k, rev. Only a sender that announced this guild in the channel may withdraw it (meta.trusted: the
+-- caller verified the source, see the header). The tombstone keeps the withdrawn revision, so a late ANN of that
+-- revision or older cannot bring the listing back. Returns changed, reason.
 function Catalog:Delist(k, rev, meta)
 	meta = meta or {}
 	if not Listing().IsValidKey(k) or type(rev) ~= "number" or rev ~= rev or rev < 1 or rev ~= floor(rev) then
@@ -480,9 +483,11 @@ function Catalog:Delist(k, rev, meta)
 	if channelOnly(meta) and meta.sender and senderIgnored(meta.sender, t) then return false, "ignored-sender" end
 	local entry = bucket[k]
 	if not entry then return false, "unknown" end
-	if not meta.sender then return false, "no-sender" end
-	local list = announcers[k]
-	if not list or not list[meta.sender] then return false, "not-announcer" end
+	if not meta.trusted then
+		if not meta.sender then return false, "no-sender" end
+		local list = announcers[k]
+		if not list or not list[meta.sender] then return false, "not-announcer" end
+	end
 	if rev < entry.sum.rev then return false, "older" end
 	if entry.state == "delisted" and rev <= (entry.delRev or 0) then return false, "unchanged" end
 	entry.state, entry.delRev, entry.delAt = "delisted", rev, t

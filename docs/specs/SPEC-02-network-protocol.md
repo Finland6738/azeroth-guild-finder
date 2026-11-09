@@ -44,8 +44,8 @@ msg     = { v = PROTO, t = "<TIPO>", ... campi del tipo ... }
 | `DETREQ` | CHANNEL | qualsiasi → tutti | `{k, rev, d, nonce}`: `rev` del riassunto posseduto, `d` del dettaglio posseduto (0 = nessuno) | quando si apre una pagina della gilda senza il dettaglio in cache |
 | `DETACK` | CHANNEL | chi risponde → tutti | `{to, nonce, r}`: `r` = `rev` del dettaglio che invierà | prima di inviare `DET` |
 | `DET` | WHISPER | chi risponde → richiedente | dettaglio dell'annuncio + `nonce` | risposta a `DETREQ` |
-| `GLIST` | GUILD | GM → membri | annuncio completo (riassunto + dettaglio) | pubblicazione, modifica, ritiro, risposta a `GLREQ` |
-| `GLREQ` | GUILD | membro → gilda | `{rev}` posseduto | al login, se l'annuncio manca o è vecchio |
+| `GLIST` | GUILD | GM → membri | annuncio completo (riassunto + dettaglio); `del=true` se ritirato | pubblicazione, modifica, ritiro, risposta a `GLREQ` |
+| `GLREQ` | GUILD | membro → gilda | `{rev}` posseduto (0 = nessuno) | al login, se l'annuncio manca o è vecchio |
 | `GTOK` | GUILD | membro → gilda | token anonimo dell'account per quella gilda | al login e ogni 24 h ([SPEC-03 §4](SPEC-03-data-model.md#4-statistiche)) |
 | `APPLY` | WHISPER | candidato → contatto | candidatura | clic su Candidati e nuovi tentativi ([SPEC-07](SPEC-07-applications.md)) |
 | `APPACK` | WHISPER | contatto → candidato | `{id, state}` | ricezione di `APPLY` o `APPPING` |
@@ -118,7 +118,17 @@ Dove le regole sopra lasciano margine, l'addon fa così (i numeri sono campi di 
 ## 7. Sincronizzazione nella gilda
 
 - **GLIST**: è il GM l'autore. I membri accettano un `GLIST` solo se arriva sul canale `GUILD`, che il server consegna solo ai membri, **e** se il mittente è il capo della gilda secondo il roster (grado 0, `GetGuildRosterInfo` [verificare]). Questa è l'unica fonte di un annuncio di cui ci si possa fidare davvero.
-- **GLREQ**: chi entra senza annuncio o con una `rev` vecchia lo chiede. Risponde il GM, oppure qualsiasi membro con la `rev` più recente, con la stessa soppressione del §6, perché il GM spesso non è online.
+- **GLREQ**: chi entra senza annuncio o con una `rev` vecchia lo chiede. Risponde **solo il GM** ([ADR 0021](../adr/0021-guild-copy-of-the-listing-from-the-guild-master-only.md)): la risposta di un membro verrebbe comunque rifiutata da INT-02. Se il GM non è online, il membro senza copia vede l'annuncio solo nel catalogo pubblico.
+
+### 7.1 Come lo fa `Data/OwnListing.lua` (M3.1)
+
+Dove le regole sopra lasciano margine ([ADR 0021](../adr/0021-guild-copy-of-the-listing-from-the-guild-master-only.md); i numeri sono campi di `OwnListing` e i test li possono cambiare):
+
+- **Controllo del GM**: il mittente di un `GLIST` deve essere, per nome senza il suffisso del reame, il membro di grado 0 del roster (`Compat.Guild.LeaderName`). Se il roster non è ancora caricato, il `GLIST` più recente aspetta fino a 30 s il `GUILD_ROSTER_UPDATE` (l'addon lo chiede con `C_GuildInfo.GuildRoster`), poi viene controllato o scartato. I propri `GLIST` rimandati dal server vengono ignorati.
+- **Copia della gilda**: ogni personaggio tiene in `ownListing.published` l'ultima copia accettata, ordinata come INT-01 (`rev`, poi `upd`, poi l'hash del contenuto). La copia nuova entra anche nel catalogo locale (riassunto e dettaglio; se ritirata, la lapide del `DEL`).
+- **Ripetizione nel canale**: il membro che accetta una copia più recente invia un `ANN` dopo 5–30 s, a meno che negli ultimi 60 s abbia sentito un `ANN` della stessa `rev` (un ufficiale mette `c=1`). Una copia ritirata viene ripetuta come `DEL` solo da chi ha annunciato la gilda in questa sessione (INT-05).
+- **GLREQ**: al login e quando il catalogo pubblico mostra una `rev` più recente della copia, dopo 3–10 s, a meno che nel frattempo arrivi un `GLIST` o il `GLREQ` di un altro membro con la stessa `rev` o una più vecchia; al massimo uno ogni 5 minuti; un `GLREQ` ancora in coda viene annullato se nel frattempo arriva una di queste due cose. Il GM raccoglie le richieste per 2 s e risponde con un solo `GLIST`, al massimo uno ogni 30 s.
+
 - **APPSYNC** (OFFICER): ogni ufficiale e il GM tengono una copia della casella delle candidature. All'entrata in gioco si scambiano l'elenco compatto e si inviano i record mancanti; per ogni record vince la versione con lo `stateRev` più alto ([SPEC-07 §4](SPEC-07-applications.md#4-sincronizzazione-tra-ufficiali)). Se `OFFICER` non fosse accettato come canale per gli addon [verificare], si userebbe `GUILD` e chi non è ufficiale ignorerebbe i messaggi. È peggio per la riservatezza, quindi va deciso dopo lo spike.
 
 ## 8. Integrità e limiti del modello P2P
@@ -139,6 +149,6 @@ Come le applica `Data/Catalog.lua` (M2.2), dove le regole lasciano margine:
 - **INT-01**: l'ordine riguarda il contenuto; le statistiche (`st`, `srev`) si fondono a parte, vince lo `srev` più recente (a parità, l'hash più basso), anche se arrivano in un riassunto di `rev` più vecchia. Per questo, a parità di aggiornamenti ricevuti, l'ordine di arrivo non cambia l'elenco.
 - **INT-03**: vale il primo `ownerId` conosciuto, quindi due `ownerId` in conflitto non convergono sullo stesso client finché il primo non tace da 30 giorni. Solo un `ANN` accettato (stesso `ownerId`, anche di `rev` più vecchia) rinnova il momento dell'ultimo annuncio.
 - **INT-04**: si applica solo agli `ANN` e ai `DEL` che arrivano nel canale; il divieto dura 24 h dal secondo annuncio e comprende anche i `DEL` e gli `ANN` della prima gilda. Un annuncio rifiutato per `ownerId` conta comunque come annuncio di quella gilda.
-- **INT-05**: chi ha annunciato una gilda si ricorda solo in memoria (mai nel file, per riservatezza): dopo un `/reload` un `DEL` viene accettato di nuovo solo da chi annuncia ancora. Il `DEL` ritira le `rev` fino a quella indicata; l'`ANN` con `rev` maggiore riporta l'annuncio. Gli annunci ritirati non vengono mai offerti agli altri in un `CAT`.
+- **INT-05**: chi ha annunciato una gilda si ricorda solo in memoria (mai nel file, per riservatezza): dopo un `/reload` un `DEL` viene accettato di nuovo solo da chi annuncia ancora. Il `DEL` ritira le `rev` fino a quella indicata; l'`ANN` con `rev` maggiore riporta l'annuncio. Gli annunci ritirati non vengono mai offerti agli altri in un `CAT`. Solo nel catalogo locale, il ritiro della propria gilda (fatto dal GM o arrivato con un `GLIST` del GM del roster, M3.1) non ha bisogno di questa regola (`meta.trusted`).
 
 Rischio residuo, accettato per la V1: un attaccante determinato può falsificare l'annuncio di **una** gilda per personaggio. Se succede davvero, la V2 introdurrà la firma degli annunci (Ed25519 in Lua puro, chiave del GM condivisa con gli ufficiali via `GUILD`) con un nuovo `PROTO`.

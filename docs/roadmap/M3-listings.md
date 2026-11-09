@@ -7,11 +7,13 @@
 ### M3.1 — Own listing and guild sync
 - Branch: `step/m3-1-own-listing`
 - Depends on: M2.3
-- Spec: SPEC-06 §3–§5, SPEC-02 §7, ADR 0004
+- Spec: SPEC-06 §3–§5, SPEC-02 §7, ADR 0004, ADR 0021
 - Scope: `Data/OwnListing.lua`: draft, publish (`rev`, `upd`, `first`, `own`), `GLIST`/`GLREQ` over `GUILD` with the Guild Master check from the roster, delist (`DEL`), Guild Master change, one publish every 5 minutes, `IsGuildLeader()` re-check before saving.
 - Done when:
-  - [ ] Members receive the Guild Master's listing and refuse one from anybody else.
+  - [x] Offline: members accept the Guild Master's listing only over `GUILD` and only from the Guild Master of the roster, and refuse one from anybody else (an officer included); copies are ordered by `rev`, then `upd`; delist, the change of Guild Master, the 5-minute limit (also after `/reload`), the `IsGuildLeader()` re-check, `GLREQ` and the relay on the channel are tested; in the simulator the members of a guild receive the Guild Master's listing, refuse a forged one, and a client without a guild sees it in its catalog.
+  - [ ] In game: members receive the Guild Master's listing over `GUILD` and refuse one from anybody else ([checklist](../checklists/M3.md)).
 - Tests: GM verification, rev ordering, delist, GM change, rate limit.
+- Real client: the roster's rank index 0 and the sender name of a `GUILD` addon message (realm suffix), how soon the roster is there after login, `GUILD_RANKS_UPDATE` after a change of Guild Master.
 
 ### M3.2 — Editor shell and checklist
 - Branch: `step/m3-2-editor-shell`

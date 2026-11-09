@@ -34,6 +34,17 @@ L["ANNOUNCE_DEV_ONLY"] = "'/gf debug announce' only works in development builds.
 L["ANNOUNCE_SENT"] = "Test listing '%s' announced on the channel. Other development builds show it; release builds ignore it."
 L["ANNOUNCE_FAILED"] = "The test listing could not be announced (%s)."
 
+-- Own listing (Data/OwnListing.lua; the editor shows these)
+L["OWN_PUBLISHED"] = "Listing published. It will reach other players over the next minutes."
+L["OWN_DELISTED"] = "Your guild was removed from Guild Finder."
+L["OWN_NOT_LEADER"] = "You are no longer the Guild Master: the change was not saved."
+L["OWN_RATE"] = "You can publish again in %s (one published change every 5 minutes)."
+L["OWN_INCOMPLETE"] = "The listing is not complete yet: check the list before publishing."
+L["OWN_NO_GUILD"] = "You are not in a guild."
+L["OWN_READ_ONLY"] = "Your saved data comes from a newer version of the addon: nothing can be saved."
+L["OWN_NOT_LISTED"] = "Your guild has no listing to remove."
+L["OWN_DEBUG_DEV_ONLY"] = "'/gf debug publish' and '/gf debug delist' only work in development builds."
+
 -- Enums (SPEC-03 §5)
 L["LANG_en"] = "English"
 L["LANG_de"] = "German"

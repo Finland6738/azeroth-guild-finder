@@ -51,7 +51,7 @@ Config.defaults = {
 	char = {
 		schemaVersion = Config.SCHEMA_VERSION,
 		officerInbox = {},             -- [guildKey] = { ... }
-		ownListing = { draft = nil, published = nil },
+		ownListing = { draft = nil, published = nil, pubAt = nil },   -- Data/OwnListing.lua
 		ui = { filters = {} },         -- notifyPos, mainPos: nil until the user moves them
 		minimap = { hide = false },    -- LibDBIcon format
 	},
@@ -80,6 +80,7 @@ Config.rules = {
 	["char.ownListing"] = { type = "table" },
 	["char.ownListing.draft"] = { type = "table", optional = true },
 	["char.ownListing.published"] = { type = "table", optional = true },
+	["char.ownListing.pubAt"] = { type = "timestamp", optional = true },
 	["char.ui"] = { type = "table" },
 	["char.ui.filters"] = { type = "table" },
 	["char.ui.notifyPos"] = posRule(),

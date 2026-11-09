@@ -52,13 +52,21 @@ L'editor salva da solo una **bozza** (`ownListing.draft`) a ogni modifica: chiud
 
 Limite: al massimo 1 salvataggio pubblicato ogni 5 minuti, per contenere il traffico. Le bozze non hanno limiti.
 
+Come lo fa `Data/OwnListing.lua` (M3.1, [ADR 0021](../adr/0021-guild-copy-of-the-listing-from-the-guild-master-only.md)):
+
+- `rev` è la più alta conosciuta per la gilda (copia della gilda, riassunto pubblico, ritiro pubblico) più uno; `first` e `own` vengono dalla copia della gilda, altrimenti dal catalogo pubblico, altrimenti si creano.
+- Il limite dei 5 minuti conta dall'ultima pubblicazione ed è salvato per personaggio (`ownListing.pubAt`): un `/reload` non lo azzera. Il ritiro non ha limiti.
+- Dopo la pubblicazione la bozza viene cancellata: la versione pubblicata è il nuovo punto di partenza. Le statistiche (`st`, `srev`) arrivano con M3.7.
+
 ## 4. Ritiro (Delist)
 
 - Pulsante secondario **Delist** con conferma: "Remove your guild from Guild Finder? Pending applications will be closed."
 - Effetti: `GLIST` con lo stato delisted, `DEL` nel canale, candidature in attesa → declined, con il motivo "Listing removed".
 - Il GM torna a vedere solo l'editor, precompilato con l'ultimo annuncio, per ripubblicare con un clic.
+- Il ritiro è una revisione: `rev + 1` con `del = true` (il contenuto resta) nel `GLIST`, e `DEL {k, rev + 1}` nel canale; la nuova pubblicazione prende `rev + 2` e rimette l'annuncio in lista ovunque (INT-05). Le candidature in attesa → declined arrivano con M4.
 
 ## 5. Cambio di GM
 
 - Il nuovo GM vede "My Guild" con l'annuncio esistente (ricevuto via `GLIST`) e può modificarlo: l'`ownerId` resta lo stesso perché è già nella copia della gilda.
 - Il vecchio GM, se resta in gilda, perde l'editor al successivo `GUILD_RANKS_UPDATE`.
+- I membri seguono il roster: appena il roster indica il nuovo GM, un `GLIST` del vecchio viene rifiutato. Se al nuovo GM non è mai arrivato un `GLIST`, la sua prima pubblicazione parte dal catalogo pubblico, con lo stesso `ownerId` (INT-03); se non c'è nemmeno quello, l'annuncio riparte da capo.

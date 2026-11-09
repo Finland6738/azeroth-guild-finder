@@ -144,6 +144,7 @@ function H.boot(opts)
 	-- traffic counts stay exact); the simulator switches it on for its clients (Sim.new option `sync`).
 	local addonObject = E.AzerothGuildFinder
 	if addonObject and addonObject.Sync then addonObject.Sync.AUTO = H.autoSync == true end
+	if addonObject and addonObject.OwnListing then addonObject.OwnListing.AUTO = H.autoSync == true end
 
 	for name, text in pairs(opts.saved or {}) do E[name] = deserialize(text) end
 
