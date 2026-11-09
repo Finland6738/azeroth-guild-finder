@@ -52,8 +52,12 @@
 - Spec: SPEC-05 §1, mockup [01](../specs/mockups/img/clean/01-browse.webp)
 - Scope: `UI/Browse.lua`: search box (3 letters, normalized), result count and "Sorted A → Z", guild cards (emblem placeholder until M3.6, banner, tags, commitment, info band), virtual scrolling, status bar, empty and loading states; `/gf debug seed` fills the **local** catalog with fake listings (never broadcast).
 - Done when:
-  - [ ] 500 listings scroll smoothly; ordering and search follow SPEC-03 §7.
-- Tests: ordering, search, state messages.
+  - [x] Offline: 500 listings scroll through a pool of six row frames in the mock client; ordering and search follow SPEC-03 §7; the states and their messages are tested.
+  - [ ] In game: 500 listings (`/gf debug seed 500`) scroll smoothly; ordering and search follow SPEC-03 §7 ([checklist](../checklists/M2.md)).
+  - [ ] In game: the cards, states and status bar match the mockup ([checklist](../checklists/M2.md)).
+- Tests: ordering, search, state messages, recycling of the virtual scroll with 500 listings, throttle and debounce.
+- Docs: wiki Finding a Guild, Commands and Settings.
+- Real client: scrolling feel, clipping of the cards, class icons, banner fileIDs (`Assets.BANNERS`), the spinner.
 
 ### M2.6 — Filters
 - Branch: `step/m2-6-filters`

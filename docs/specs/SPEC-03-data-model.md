@@ -11,6 +11,7 @@ guildKey = realm .. "|" .. faction .. "|" .. guildName
 
 - Il nome **non si scrive mai a mano**: l'editor lo legge dal client del GM (D19). Se la gilda viene rinominata (esiste `C_GuildInfo.RequestGuildRename`), il GM ripubblica l'annuncio: la chiave nuova sostituisce la vecchia, e la vecchia diventa un `DEL`.
 - Il client mostra **solo** la propria fazione e il proprio reame (D4, D5): gli annunci di altre fazioni o reami ricevuti per errore vengono scartati.
+- Una voce del catalogo può essere **solo locale** (`localOnly`, usata da `/gf debug seed` nelle build di sviluppo): si vede nella lista ma non entra mai nel digest né nelle risposte `CAT`, quindi non viene condivisa.
 
 ## 2. Annuncio: riassunto (viaggia negli `ANN` e nei `CAT`)
 
