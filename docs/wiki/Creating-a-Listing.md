@@ -18,14 +18,14 @@ The **left page** lists the seven steps. Each shows its state: a green check whe
 
 ![Listing editor, Activity step](../specs/mockups/img/clean/08-editor-activity.webp)
 
-> **Not all steps are there yet.** Identity, About, Activity, Recruitment, Requirements and Contact are ready. The emblem arrives with the next version of the addon: until then **Publish listing** cannot turn green in a release build. Nothing is lost: this page only grows.
+> **Not checked in the game yet.** Every step is there, but none has been tried in WoW Forever yet. Nothing is lost if something is wrong: the draft stays on your computer until you publish.
 
 ## Step 1: Identity
 
 - **Guild name**: read from your guild in game and locked. To change it, rename the guild in the game.
 - **Subtitle** (required): one line, up to **60 characters**. The counter next to it (*0 / 60*) shows how many you used; what you type past 60 is cut off, and line breaks are not allowed. It is shown under the guild name in the list.
 - **Banner** (optional): the picture behind your guild's card and page. Pick one of the thumbnails, or **Default** for the plain parchment. If no thumbnail is offered, the pictures have not been confirmed for your version of the game yet, and the page says so.
-- The **emblem** is set in a later version of the addon; it is the one item that keeps **Publish listing** grey for now.
+- **Emblem** (required): **Guild tabard** copies your guild tabard (chosen for you when the guild has one; *Update emblem* appears when the tabard changed in the game) and **Custom emblem** opens the emblem designer: background, border style and colour, emblem and its colour, Random and Reset. The emblem you design is used only in Guild Finder. See [[Emblems|Emblems]].
 
 ## Step 2: About
 

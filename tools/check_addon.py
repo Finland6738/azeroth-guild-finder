@@ -43,6 +43,7 @@ MEDIA_PATTERNS = (
     r'glyph\s*=\s*"(\w+)"',
     r'SetGlyph\(\s*"(\w+)"',
     r'\w+\s*=\s*"(role_\w+)"',                        # ROLE_MEDIA values
+    r'media\s*=\s*"(\w+)"',                           # media = "emblem_border_0" (Data/TabardParts.lua, Emblems.Layers)
 )
 
 

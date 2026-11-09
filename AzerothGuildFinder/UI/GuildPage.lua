@@ -3,7 +3,7 @@
 -- Opened from a card of Find a Guild (Browse:OpenGuild pushes "GuildPage" with { k = guildKey } on the Find a Guild tab);
 -- Back (the button of the title bar, or Backspace) returns to the list with its filters and its place.
 --
---   Left page   the emblem (a placeholder until M3.6), name, subtitle, tags (languages, faction, commitment); the Discord copy
+--   Left page   the emblem (UI/Emblem.lua, 150 px), name, subtitle, tags (languages, faction, commitment); the Discord copy
 --               field (the fixed prefix https://discord.gg/ plus the code: a click selects it all, Ctrl+C copies); the contact
 --               characters with a Whisper button; "Listed since ... · Updated ..." at the bottom. The Apply button is not
 --               here yet: it arrives with the applications (M4).
@@ -100,7 +100,7 @@ end
 ---------------------------------------------------------------------------------------------------------------------
 local function buildLeft(host)
 	local left = host.left
-	host.emblem = W.EmblemPlaceholder(left, 150)
+	host.emblem = ns.Emblem.Create(left, 150)
 	host.name = W.Text(left, "headline", "#3a200c", "CENTER")
 	host.name:SetWidth(LW)
 	host.name:SetWordWrap(true)
@@ -163,6 +163,7 @@ local function bindLeft(host, view)
 	local function add(frame, h, anchor) items[#items + 1] = { frame = frame, h = h or 0, anchor = anchor or "TOPLEFT" } end
 
 	host.name:SetText(view.name)
+	host.emblem:SetEmblem(view.emb, view.name)
 	local nameH = host.name:GetStringHeight()
 	nameH = (type(nameH) == "number" and nameH > 0) and nameH or 30
 	host.name:SetHeight(nameH)

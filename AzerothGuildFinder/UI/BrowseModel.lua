@@ -313,7 +313,7 @@ local PACE_KINDS = { "casual", "soft", "hard" }
 function Model.Card(sum, info, player, opts)
 	local L, E = opts.L, Enums()
 	local _, _, name = Listing().ParseKey(sum.k)
-	local card = { k = sum.k, name = name or sum.k, sub = sum.sub, inactive = info and info.status == "inactive" or false }
+	local card = { k = sum.k, name = name or sum.k, sub = sum.sub, emb = sum.emb, inactive = info and info.status == "inactive" or false }
 
 	-- languages: the main one first, then the others in list order
 	local langs = {}

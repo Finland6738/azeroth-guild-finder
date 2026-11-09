@@ -159,6 +159,15 @@ function Guild.RequestRoster()
 	return state
 end
 
+-- The guild tabard, C_GuildInfo.GetGuildTabardInfo("player"): the table as the client gives it (colours, emblem style and
+-- file; the exact fields are check S8 [verify]), or nil without a guild, without a tabard or before the client has it
+-- (GUILDTABARD_UPDATE follows). Read only: the tabard is never changed (no Save()).
+function Guild.TabardInfo()
+	local info, state = first("C_GuildInfo.GetGuildTabardInfo", "player")
+	if type(info) == "table" then return info, state end
+	return nil, state
+end
+
 -- total, online. Falls back to the guild club members; online is nil when only the club is known.
 function Guild.RosterCount()
 	local values, count, state = all("GetNumGuildMembers")

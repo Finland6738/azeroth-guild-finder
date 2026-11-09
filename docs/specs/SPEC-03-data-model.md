@@ -35,7 +35,7 @@ guildKey = realm .. "|" .. faction .. "|" .. guildName
 | `newb` | bool | | gilda aperta ai nuovi giocatori |
 | `minL` | int | 1–livello massimo | livello minimo |
 | `minI` | int | 0–999 | livello medio minimo dell'equipaggiamento, 0 = nessuno (facoltativo, D11) |
-| `emb` | table | | stemma ([SPEC-08 §2](SPEC-08-assets-emblems-l10n.md#2-stemma)) |
+| `emb` | table | indici 0–1023, colori 0–0xFFFFFF | stemma: `t` (1 tabarro, 2 composto), indici del catalogo `e`, `b`, `g` e colori RGB `gc`, `bc`, `ec` ([SPEC-08 §2](SPEC-08-assets-emblems-l10n.md#2-stemma)) |
 | `bg` | int | indice | sfondo scelto dal catalogo verificato ([SPEC-08 §3](SPEC-08-assets-emblems-l10n.md#3-sfondi)) |
 | `st` | table | | statistiche (§4) |
 | `srev` | int | epoch UTC | ora del calcolo delle statistiche, arrotondata all'ora |

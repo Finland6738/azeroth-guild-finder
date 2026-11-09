@@ -297,6 +297,7 @@ function Model.View(ctx)
 		return view
 	end
 	local sum, det = entry.sum, entry.det
+	view.emb = sum.emb
 	local B = Browse()
 	local offset = ctx.offset
 	if offset == nil then offset = B.LocalOffset(ctx.now) end

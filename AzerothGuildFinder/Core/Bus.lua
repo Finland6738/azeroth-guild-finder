@@ -21,6 +21,8 @@
 --   DETAIL_UNAVAILABLE(k)                                Net/Sync.lua; no peer sent the detail of guild k within 20 s.
 --   OWN_LISTING_CHANGED(what, k)                         Data/OwnListing.lua; the own guild's listing changed: what is "draft",
 --                                                        "published", "delisted" (by this Guild Master) or "received" (a GLIST).
+--   TABARD_UPDATED()                                     UI/Emblem.lua; GUILDTABARD_UPDATE (or a change of guild): the guild tabard
+--                                                        may read differently now (Emblem.ReadTabard).
 -- Later modules add their events here.
 local ADDON_NAME, ns = ...
 ns = ns or {}

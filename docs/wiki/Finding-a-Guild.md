@@ -47,7 +47,7 @@ The plate at the top reads **Filters · 4 active** (one per filter that is on, h
 
 Guilds are **always in alphabetical order**: nobody can pay or post repeatedly to be first. Even with 500 guilds the list scrolls smoothly with the mouse wheel or the bar on the right. Each card shows:
 
-- the **emblem** (a plain placeholder for now: the real emblems come with the listing editor), the **name**, the subtitle and the **language** tags;
+- the **emblem** (the guild tabard or a designed one, see [[Emblems|Emblems]]), the **name**, the subtitle and the **language** tags;
 - the **commitment** (Casual in green, Softcore in amber, Hardcore in red) and, when it applies to you, one more tag: **Looking for your class** (green) or **Requirements not met** (red; it wins when both are true);
 - **May be inactive** (amber) when the guild has not announced itself for more than 14 days; after 30 days it leaves the list;
 - an information band: active members (*31 active / 149*), the play days and times **in your time zone**, the classes they look for (up to four icons, then *+2*; *Looking for any class* when they take anyone), up to three activities, the requirement checked against your character (*Level 20+* with a check mark, or *Level 40+ (you are 32)* in red) and when the listing was last updated.
