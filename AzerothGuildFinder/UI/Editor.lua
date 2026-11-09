@@ -474,7 +474,7 @@ end
 -- The small card of the right column: the same display fields as a card of the list (BrowseModel.Card).
 local function createMini(parent)
 	local card = W.Card(parent, { kind = "elevated", width = COL_W, height = 122 })
-	card.emblem = W.EmblemPlaceholder(card, 58)
+	card.emblem = ns.Emblem.Create(card, 58)
 	card.emblem:SetPoint("TOPLEFT", card, "TOPLEFT", 12, -12)
 	card.name = W.Text(card, "titleM", "ink")
 	card.name:SetPoint("TOPLEFT", card, "TOPLEFT", 82, -12)
@@ -497,6 +497,7 @@ end
 
 local function bindMini(card, display)
 	card.name:SetText(display.name)
+	card.emblem:SetEmblem(display.emb, display.name)
 	card.sub:SetText(display.sub or "")
 	local specs = {}
 	for i, code in ipairs(display.langs) do

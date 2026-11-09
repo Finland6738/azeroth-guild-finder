@@ -82,8 +82,8 @@ local function text(parent, style, color, x, y, width)
 	return fs
 end
 
-local function createEmblemPlaceholder(row)
-	local emb = W.EmblemPlaceholder(row, 84)
+local function createEmblem(row)
+	local emb = ns.Emblem.Create(row, 84)
 	emb:SetPoint("TOPLEFT", row, "TOPLEFT", 16, -16)
 	return emb
 end
@@ -115,7 +115,7 @@ local function createRow(parent, slot)
 	row.bandLine:SetPoint("TOPRIGHT", row, "TOPRIGHT", -3, -TOP_H)
 	row.bandLine:SetHeight(1)
 
-	row.emblem = createEmblemPlaceholder(row)
+	row.emblem = createEmblem(row)
 	row.name = text(row, "titleL", "ink", TEXT_X, 16, 440)
 	row.sub = text(row, "body", "ink2", TEXT_X, 44, 440)
 	row.sub:SetWordWrap(true)
@@ -175,6 +175,7 @@ local function bindRow(row, card, index)
 	row.index, row.card = index, card
 	row.name:SetText(card.name)
 	row.sub:SetText(card.sub or "")
+	row.emblem:SetEmblem(card.emb, card.name)
 
 	-- tags: languages, commitment, then the one note about the player, then "May be inactive"
 	local specs = {}

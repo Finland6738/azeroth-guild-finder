@@ -1,7 +1,9 @@
 -- EditorSteps: the pages of the first two steps of the listing editor (SPEC-06 §2, mockup 03, M3.3). Lua 5.1.
 --
---   1 Identity   the guild name (read from the game, locked), the subtitle (0/60), the banner gallery (the verified banners of
---                Assets.BANNERS, by index; "Default" clears the choice). The emblem arrives with M3.6.
+--   1 Identity   the guild name (read from the game, locked), the subtitle (0/60), the emblem (M3.6: "Guild tabard" copies the
+--                guild tabard, the default when there is one; "Custom emblem" opens the designer, UI/EmblemDesigner.lua; a tabard
+--                that changed since it was copied, GUILDTABARD_UPDATE, is offered with "Update emblem"), the banner gallery (the
+--                verified banners of Assets.BANNERS, by index; "Default" clears the choice).
 --   2 About      the description (0/500 characters, 0/12 lines), the main language (menu) and the other languages (multiple
 --                choice; the main one is always part of the mask).
 --   3 Activity   the commitment (segmented button, required, explained), up to 3 activities as numbered chips (the order
@@ -122,11 +124,13 @@ function Identity.Build(page, editor)
 	page.subCount:SetPoint("TOPRIGHT", sub.body, "TOPRIGHT", 0, -46)
 	caption(sub.body, L["ED_SUB_HINT"], 46, 32):SetWidth(INNER_W - 70)
 
+	local emblemCard = Identity.BuildEmblem(page, editor, sub)
+
 	local banners = Model.Banners()
 	local rows = math.max(1, math.ceil((#banners + 1) / 3))
 	local card = W.Card(page, { kind = "plain", title = L["ED_BANNER_LABEL"], height = 42 + 8 + rows * 66 + (#banners == 0 and 36 or 30) })
-	card:SetPoint("TOPLEFT", sub, "BOTTOMLEFT", 0, -GAP)
-	card:SetPoint("TOPRIGHT", sub, "BOTTOMRIGHT", 0, -GAP)
+	card:SetPoint("TOPLEFT", emblemCard, "BOTTOMLEFT", 0, -GAP)
+	card:SetPoint("TOPRIGHT", emblemCard, "BOTTOMRIGHT", 0, -GAP)
 	local tw = math.floor((INNER_W - 2 * 8) / 3)
 	page.tiles = {}
 	local list = { false }
@@ -140,11 +144,129 @@ function Identity.Build(page, editor)
 		page.tiles[#page.tiles + 1] = tile
 	end
 	page.bannerNote = caption(card.body, #banners == 0 and L["ED_BANNER_NONE"] or L["ED_BANNER_HINT"], rows * 66 + 2, 32)
-	page.emblemNote = W.Text(page, "caption", "ink3")
-	page.emblemNote:SetPoint("TOPLEFT", card, "BOTTOMLEFT", 4, -GAP)
-	page.emblemNote:SetWidth(PAGE_W - 8)
-	page.emblemNote:SetWordWrap(true)
-	page.emblemNote:SetText(L["ED_EMBLEM_LATER"])
+end
+
+-- The emblem card: the emblem as it will be published (96 px), Guild tabard / Custom emblem, what is going on, one action.
+local EMB_SIZE, EMB_X = 96, 112
+
+function Identity.BuildEmblem(page, editor, anchor)
+	local card = W.Card(page, { kind = "plain", title = L["ED_EMBLEM_LABEL"], height = 42 + EMB_SIZE + 18 })
+	card:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -GAP)
+	card:SetPoint("TOPRIGHT", anchor, "BOTTOMRIGHT", 0, -GAP)
+	page.emblem = ns.Emblem.Create(card.body, EMB_SIZE)
+	page.emblem:SetPoint("TOPLEFT", card.body, "TOPLEFT", 0, 0)
+	page.embMode = W.Segmented(card.body, {
+		{ key = 1, text = L["ED_EMB_TABARD"], tooltip = L["ED_EMB_TABARD_TIP"] },
+		{ key = 2, text = L["ED_EMB_CUSTOM"], tooltip = L["ED_EMB_CUSTOM_TIP"] },
+	}, { width = INNER_W - EMB_X, onChange = function(key) Identity.OnMode(page, editor, key) end })
+	page.embMode:SetPoint("TOPLEFT", card.body, "TOPLEFT", EMB_X, 0)
+	-- "Custom emblem" that is already chosen (a guild without a tabard) still opens the designer
+	page.embMode.segments[2]:HookScript("OnClick", function()
+		if not page.designer:IsShown() then Identity.OnMode(page, editor, 2) end
+	end)
+	page.embStatus = W.Text(card.body, "caption", "ink2")
+	page.embStatus:SetPoint("TOPLEFT", card.body, "TOPLEFT", EMB_X, -42)
+	page.embStatus:SetWidth(INNER_W - EMB_X)
+	page.embStatus:SetHeight(32)
+	page.embStatus:SetWordWrap(true)
+	page.embStatus:SetJustifyV("TOP")
+	page.embAction = W.Button(card.body, { text = L["ED_EMB_DESIGN"], kind = "tonal", size = "sm",
+		onClick = function() Identity.OnAction(page, editor) end })
+	page.embAction:SetPoint("TOPLEFT", card.body, "TOPLEFT", EMB_X, -78)
+	page.designer = ns.EmblemDesigner.Build(page, {
+		onChange = function(emb) Identity.OnDesign(page, editor, emb) end,
+		onClose = function() Identity.Fill(page, editor) end,
+		reset = function() return ns.Emblems.Reset(Identity.Published(), page.tabard) end,
+		name = guildName,
+	})
+	Identity.page, Identity.editor = page, editor
+	return card
+end
+
+-- The emblem of the published version (nil when nothing is published).
+function Identity.Published()
+	local copy = ns.OwnListing and ns.OwnListing:Get()
+	return copy and not copy.del and copy.emb or nil
+end
+
+function Identity.ReadTabard(page)
+	page.tabard, page.tabardState = ns.Emblem.ReadTabard()
+end
+
+-- "Guild tabard": copy the tabard (when the game has it); "Custom emblem": the last design, or a new one, in the designer.
+function Identity.OnMode(page, editor, key)
+	if page.filling then return end
+	Identity.ReadTabard(page)
+	if key == 1 then
+		if page.tabardState == "ok" then
+			editor:Set("emb", page.tabard)
+			page.designer:Hide()
+		end
+		Identity.FillEmblem(page, editor)
+	else
+		local current = editor:Get("emb")
+		local start = page.lastCustom or (current and current.t == 2 and current) or ns.Emblems.Reset(Identity.Published(), page.tabard)
+		editor:Set("emb", ns.Emblems.ToCustom(start))
+		page.designer:Open(editor:Get("emb"))
+		Identity.FillEmblem(page, editor)
+	end
+end
+
+-- The one button under the status: take the tabard again after it changed, or open the designer.
+function Identity.OnAction(page, editor)
+	if page.embActionKind == "update" then
+		Identity.ReadTabard(page)
+		if page.tabardState == "ok" then editor:Set("emb", page.tabard) end
+		Identity.FillEmblem(page, editor)
+	else
+		Identity.OnMode(page, editor, 2)
+	end
+end
+
+function Identity.OnDesign(page, editor, emb)
+	page.lastCustom = emb
+	editor:Set("emb", emb)
+	Identity.FillEmblem(page, editor)
+end
+
+function Identity.FillEmblem(page, editor)
+	Identity.ReadTabard(page)
+	local state, tabard = page.tabardState, page.tabard
+	local current = editor:Get("emb")
+	if current == nil and state == "ok" then   -- the tabard is the default emblem (SPEC-08 2.2)
+		editor:Set("emb", tabard)
+		current = editor:Get("emb")
+	end
+	local mode = current and current.t or (state == "ok" and 1 or 2)
+	page.filling = true
+	page.embMode:SetSelected(mode, true)
+	page.filling = false
+	page.embMode.segments[1]:SetAlpha(state == "ok" and 1 or 0.5)
+	page.emblem:SetEmblem(current, guildName())
+	local text, action
+	if mode == 1 then
+		if state == "ok" and current and not ns.Emblems.Equal(current, tabard) then
+			text, action = L["ED_EMB_TABARD_CHANGED"], "update"
+		elseif state == "ok" then
+			text = L["ED_EMB_TABARD_OK"]
+		elseif state == "pending" then
+			text = L["ED_EMB_TABARD_PENDING"]
+		else
+			text, action = L["ED_EMB_TABARD_GONE"], "design"
+		end
+	else
+		action = "design"
+		if state == "pending" and not current then text = L["ED_EMB_TABARD_PENDING"]
+		elseif state ~= "ok" and not current then text = L["ED_EMB_NO_TABARD"]
+		else text = L["ED_EMB_CUSTOM_NOTE"] end
+	end
+	page.embStatus:SetText(text)
+	page.embActionKind = action
+	page.embAction:SetShown(action ~= nil)
+	if action then page.embAction:SetLabel(action == "update" and L["ED_EMB_UPDATE"] or L["ED_EMB_DESIGN"]) end
+	if page.designer:IsShown() and current and not ns.Emblems.Equal(page.designer:Get(), ns.Emblems.ToCustom(current)) then
+		page.designer:Set(current)
+	end
 end
 
 -- A typed subtitle: cut to 60 characters on one line, saved at once.
@@ -166,6 +288,7 @@ function Identity.Fill(page, editor)
 	local sub = editor:Get("sub") or ""
 	if page.sub:GetText() ~= sub then page.sub:SetText(sub, true) end
 	Identity.Counter(page, editor)
+	Identity.FillEmblem(page, editor)
 	local chosen = editor:Get("bg")
 	for _, tile in ipairs(page.tiles) do
 		local on = (tile.index or false) == (chosen or false)
@@ -1082,6 +1205,13 @@ Contact.Refresh = Contact.Fill
 Steps.Identity, Steps.About, Steps.Activity = Identity, About, Activity
 Steps.Recruitment, Steps.Requirements, Steps.Contact = Recruitment, Requirements, Contact
 Editor.RegisterStep("identity", Identity)
+-- The guild tabard arrived or changed (GUILDTABARD_UPDATE, UI/Emblem.lua): the Identity page says so while it is shown.
+if ns.Bus then
+	ns.Bus:On("TABARD_UPDATED", function()
+		local page = Identity.page
+		if page and page:IsShown() and Identity.editor then Identity.FillEmblem(page, Identity.editor) end
+	end)
+end
 Editor.RegisterStep("about", About)
 Editor.RegisterStep("activity", Activity)
 Editor.RegisterStep("recruitment", Recruitment)

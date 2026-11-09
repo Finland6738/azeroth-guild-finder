@@ -11,7 +11,6 @@
 --       icon:SetClass(file)
 --   W.Divider(parent, width)   a thin line that fades out at both ends
 --   W.Plate(parent, opts)      the brown "plate" that heads a section of the left page. opts: text, width
---   W.EmblemPlaceholder(parent, size)  the metal-framed shield that stands in for the guild emblem until M3.6
 --   W.DayBadges(parent, opts)  seven read-only day squares (Monday first). opts: width, labels, names (tooltips), mask
 --       days:SetMask(mask)  days:GetMask()
 -- Colours of tags come from Skin.TAGS; the class colour is the client's RAID_CLASS_COLORS (Assets.ClassColor).
@@ -216,26 +215,6 @@ function W.Plate(parent, opts)
 	plate.text:SetText(opts.text or "")
 	function plate:SetText(text) self.text:SetText(text or "") end
 	return plate
-end
-
----------------------------------------------------------------------------------------------------------------------
--- Emblem placeholder
----------------------------------------------------------------------------------------------------------------------
-function W.EmblemPlaceholder(parent, size)
-	size = size or 84
-	local k = size / 84
-	local emb = CreateFrame("Frame", nil, parent)
-	emb:SetSize(size, size)
-	emb.shadow = W.NineSlice(emb, "shadow", { corner = 32, outset = 10 * k, layer = "BACKGROUND", sublevel = -1 })
-	emb.shadow:SetColor(0.1, 0.05, 0, 0.35)
-	emb.rim = W.NineSlice(emb, "card", { corner = 16 * k, layer = "BACKGROUND" })
-	emb.rim:SetHex("#9aa4ae")
-	emb.inner = W.NineSlice(emb, "card", { corner = 12 * k, layer = "BACKGROUND", sublevel = 1, outset = -5 * k })
-	emb.inner:SetHex("#2b3547")
-	emb.glyph = W.Texture(emb, "glyph_shield", "ARTWORK", "gold")
-	emb.glyph:SetSize(46 * k, 46 * k)
-	emb.glyph:SetPoint("CENTER", emb, "CENTER", 0, 0)
-	return emb
 end
 
 ---------------------------------------------------------------------------------------------------------------------

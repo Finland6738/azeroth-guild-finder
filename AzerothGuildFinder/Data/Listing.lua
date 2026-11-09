@@ -283,24 +283,8 @@ local function sanitizeLanguages(out, raw, issues)
 	end
 end
 
-local function sanitizeEmblem(v, issues)
-	if type(v) ~= "table" then issue(issues, "emb", "not a table") return nil end
-	if v.t ~= 1 and v.t ~= 2 then issue(issues, "emb", "invalid type") return nil end
-	local out = { t = v.t }
-	local pieces = 0
-	for _, f in ipairs({ "e", "b", "g" }) do   -- texture file ids of emblem, border, background
-		if v[f] ~= nil then
-			if intIn(v[f], 0, 4294967295) then out[f] = v[f] pieces = pieces + 1 else issue(issues, "emb", f .. " invalid") end
-		end
-	end
-	for _, f in ipairs({ "ec", "bc", "gc" }) do   -- 24-bit RGB colours
-		if v[f] ~= nil then
-			if intIn(v[f], 0, 16777215) then out[f] = v[f] else issue(issues, "emb", f .. " invalid") end
-		end
-	end
-	if pieces == 0 then issue(issues, "emb", "no texture piece") return nil end
-	return out
-end
+-- The emblem (SPEC-08 §2): the rules are in Data/Emblems.lua, shared with the renderer and the designer.
+local function sanitizeEmblem(v, issues) return ns.Emblems.Sanitize(v, issues) end
 
 local function sanitizeStats(v, issues)
 	if type(v) ~= "table" then issue(issues, "st", "not a table") return nil end

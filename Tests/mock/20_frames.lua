@@ -188,7 +188,12 @@ function Widget:SetValue(v) self._value = v end
 function Widget:GetValue() return self._value or 0 end
 function Widget:SetMinMaxValues(a, b) self._min, self._max = a, b end
 function Widget:GetMinMaxValues() return self._min or 0, self._max or 1 end
-function Widget:SetTexture(t) self._texture = t end
+-- SetTexture answers false for a file the client cannot load (Mock.missingTextures[path or fileID] = true), true otherwise.
+function Widget:SetTexture(t)
+	if t ~= nil and Mock.missingTextures and Mock.missingTextures[t] then self._texture = nil return false end
+	self._texture = t
+	return true
+end
 function Widget:GetTexture() return self._texture end
 function Widget:SetColorTexture(r, g, b, a) self._texture = { r, g, b, a } end
 function Widget:SetNormalTexture(t) self._normalTexture = t end
@@ -281,6 +286,7 @@ end
 
 -- Fonts: CreateFont(name) gives a font object that remembers SetFont; Mock.missingFonts[path] = true makes SetFont fail.
 Mock.missingFonts = {}
+Mock.missingTextures = {}      -- path or fileID -> true: Texture:SetTexture answers false (a piece the client does not have)
 STANDARD_TEXT_FONT = "Fonts\\FRIZQT__.TTF"
 UISpecialFrames = {}
 function CreateFont(name)

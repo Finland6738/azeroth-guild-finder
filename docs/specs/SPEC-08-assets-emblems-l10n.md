@@ -24,13 +24,21 @@ API presenti nel dump di Forever:
 | `TabardModelBase:CycleVariation(variation, delta)` | scorre le varianti (emblema, colore dell'emblema, bordo, colore del bordo, sfondo) come nel negozio dei tabarri di Blizzard |
 | `TabardModelBase:InitializeTabardColors()`, `IsGuildTabard()` | inizializza il modello dai colori della gilda |
 
-**Catalogo dei pezzi.** Durante lo spike, `/gf debug tabard` crea un `TabardModel` nascosto, lo fa scorrere con `CycleVariation` su tutte le varianti e annota i fileID di emblemi, bordi e sfondi e i colori disponibili. Il risultato diventa `Data/TabardParts.lua`: tabelle di **numeri**, cioè fileID e RGB, senza nessun file grafico. `Save()` non viene **mai** chiamato: l'addon non modifica il tabarro vero e non spende oro.
+**Catalogo dei pezzi.** Durante lo spike, `/agfp tabard` (la sonda di M0.5) crea un `TabardModel` nascosto, lo fa scorrere con `CycleVariation` su tutte le varianti e annota i fileID di emblemi, bordi e sfondi e i colori disponibili. Il risultato diventa `Data/TabardParts.lua`: tabelle di **numeri**, cioè fileID e RGB, senza nessun file grafico. `Save()` non viene **mai** chiamato: l'addon non modifica il tabarro vero e non spende oro.
+
+**Catalogo provvisorio (M3.6).** I risultati della sonda (M0.7) non ci sono ancora, quindi `Data/TabardParts.lua` contiene per ora solo ciò che le specifiche, le note dello spike e la sonda già nominano, segnato come **provvisorio** (`PROVISIONAL = true`) e raccolto in un solo blocco da aggiornare in M0.7:
+
+- **emblemi del gioco**: indice `0..N-1`, lo stesso numero di `emblemStyle` di `GetGuildTabardInfo`; si disegnano dalla cella `i` del foglio `Interface\GuildFrame\GuildEmblemsLG_01` (1024 × 1024, celle di 64 px, 16 per riga, come fa `SetLargeGuildTabardTextures` del gioco) oppure dal loro fileID quando M0.7 lo conosce. `N` (160) è una stima da confermare [verificare];
+- **stili del bordo**: 6 stili disegnati dall'addon (`Media/emblem_border_0..5`: pieno, sottile, doppio, borchiato, spesso, intaccato), finché la sonda non dà i fileID dei bordi del tabarro; un tabarro usa lo stile `TABARD_BORDER` finché non si sa come leggere il suo;
+- **simboli dell'addon**: 8 simboli nostri (`Media/emblem_sym_*`, indici `1000..1007`), sempre disponibili; il designer li offre dopo gli emblemi del gioco, e da soli se il client non carica il foglio degli emblemi;
+- **tavolozze** di sfondo, bordo ed emblema: i colori del bozzetto 07, finché M0.7 non dà quelle del venditore di tabarri.
 
 ### 2.2 Stemma dal tabarro (preferito)
 
-- Al momento della pubblicazione, se la gilda ha un tabarro, l'editor propone "Use guild tabard" (attivo di base) e legge `GetGuildTabardInfo("player")`.
-- Nell'annuncio: `emb = { t = 1, e = emblemFileID, b = borderFileID, g = backgroundFileID, ec = rgb, bc = rgb, gc = rgb }`, con i colori come interi RGB a 24 bit.
-- Si aggiorna con `GUILDTABARD_UPDATE`: l'editor propone "Your tabard changed: update the emblem?".
+- Se la gilda ha un tabarro, il passo Identity dell'editor sceglie "Guild tabard" (attivo di base) e legge `GetGuildTabardInfo("player")`: i tre colori e l'emblema (`emblemStyle`, oppure `emblemFileID` tramite il catalogo).
+- Nell'annuncio: `emb = { t = 1, e = indiceEmblema, b = indiceBordo, g = indiceSfondo, ec = rgb, bc = rgb, gc = rgb }`. `e`, `b` e `g` sono **indici del catalogo** `Data/TabardParts.lua` (0–1023), non fileID, come l'indice `bg` del banner (§3): gli indici non si riusano e un indice che il client non conosce ha un ripiego (§2.4). I colori sono interi RGB a 24 bit e si disegnano così come sono, anche se non sono nella tavolozza. `g` è riservato (lo sfondo è sempre lo scudo dell'addon colorato con `gc`).
+- Subito dopo l'accesso il client può non avere ancora il tabarro: la scheda dice "Reading your guild tabard..." e aspetta `GUILDTABARD_UPDATE`; senza risposta per 10 secondi la gilda conta come senza tabarro.
+- Si aggiorna con `GUILDTABARD_UPDATE`: se il tabarro è cambiato dopo la copia, l'editor propone "Your tabard changed: update the emblem?" con il pulsante "Update emblem"; niente cambia da solo.
 
 ### 2.3 Stemma composto (alternativo, in stile Albion)
 
@@ -41,14 +49,18 @@ Per le gilde senza tabarro, o se il GM preferisce un altro stemma, c'è un edito
 | Background | colori di sfondo del tabarro | tavolozza del catalogo |
 | Border | bordi del tabarro | stile (frecce ◀ ▶) + colore |
 | Emblem | emblemi del tabarro (griglia) | emblema + colore |
-| Random / Reset | | combinazione casuale, ritorno al tabarro o a quella pubblicata |
+| Random / Reset | | combinazione casuale (emblema e bordo sempre leggibili sullo sfondo); ritorno allo stemma composto pubblicato, altrimenti ai pezzi del tabarro, altrimenti allo stemma iniziale |
 
 Formato: lo stesso del §2.2 con `t = 2`, quindi chi lo riceve non deve distinguere i due casi.
 
+L'editor ha una scheda "Emblem" nel passo Identity (scudo a 96 px, "Guild tabard" / "Custom emblem", lo stato e un pulsante); "Custom emblem" apre il designer sopra la pagina del passo (`UI/EmblemDesigner.lua`): sfondo, bordo con frecce di stile e colori, griglia di 16 emblemi per pagina con frecce e colori, anteprima a 150 px, Random, Reset e Done. Ogni scelta va subito nella bozza. Le regole (validazione, pagine, Random, Reset, lettura del tabarro) sono in Lua puro in `Data/Emblems.lua`.
+
 ### 2.4 Rendering e ripieghi
 
-- Lo stemma si compone a strati in una cornice a forma di scudo, una maschera **nostra** in `Media/`: sfondo colorato (`SetVertexColor`), bordo, emblema e infine una cornice metallica nostra in stile Albion. Stesso componente a 48, 64 e 96 px.
-- Un fileID che il client del destinatario non carica viene saltato. Se mancano tutti i pezzi, si mostra uno scudo neutro con l'iniziale della gilda.
+- Lo stemma si compone a strati in una cornice a forma di scudo, una maschera **nostra** in `Media/`: sfondo colorato (`SetVertexColor`), bordo, emblema, una luce e infine una cornice metallica nostra in stile Albion. Stesso componente (`UI/Emblem.lua`) a 48, 64, 96 e 150 px (e a ogni misura intermedia: 84 px nelle schede, 58 nell'anteprima dell'editor); a 48 e 64 px la cornice è più spessa.
+- **Uguale per tutti**: le misure e i colori di ogni strato vengono da `Emblems.Layers(emb, size, nome)`, una funzione pura che dipende solo dallo stemma, dalla misura e dal catalogo (rettangoli in pixel interi, colori `byte / 255`), quindi ogni client disegna lo stesso stemma.
+- **Ripieghi**: un pezzo del gioco che il client del destinatario non carica (`SetTexture` risponde `false`) viene sostituito: il bordo dal disegno dell'addon dello stesso stile, l'emblema dall'iniziale della gilda nel colore dell'emblema. Un indice sconosciuto ha lo stesso ripiego. Uno stemma mancante o non valido diventa uno scudo neutro (blu `#2B3547`) con l'iniziale in oro.
+- **Validazione alla ricezione** (`Emblems.Sanitize`, usata da `Listing`): solo i campi noti, letti con `rawget`; `t` 1 o 2; indici interi 0–1023; colori interi 0–0xFFFFFF; un campo fuori regola si scarta, uno stemma senza nessun pezzo si scarta tutto. Lo stemma più grande occupa meno di 48 byte in CBOR.
 - Lo stemma composto **non** diventa il tabarro della gilda in gioco: vale solo nel Guild Finder.
 
 ## 3. Sfondi

@@ -300,6 +300,216 @@ def solid():
     return Image.new("RGBA", (8, 8), WHITE + (255,))
 
 
+# --------------------------------------------------------------------------------------------------------------------
+# Emblem (SPEC-08 §2.4): the shield the guild emblem is drawn on, its gloss, the metal frame, the addon's own border styles
+# and symbols. The shield is the shape of the mockups (agf.js), in a 100 x 120 box, centred in a 128 px square texture.
+# The game's tabard pieces are NOT here: they are referenced by path or fileID from Data/TabardParts.lua.
+# --------------------------------------------------------------------------------------------------------------------
+EMB = 128
+EMB_SS = 8
+EMB_SCALE = EMB / 120.0
+EMB_OX = (EMB - 100 * EMB_SCALE) / 2.0
+SHIELD = [("M", 12, 10), ("L", 88, 10), ("L", 88, 58), ("Q", 88, 96, 50, 114), ("Q", 12, 96, 12, 58)]
+SHIELD_IN = [("M", 19, 17), ("L", 81, 17), ("L", 81, 58), ("Q", 81, 90, 50, 106), ("Q", 19, 90, 19, 58)]
+METAL_STOPS = [(0.0, (244, 247, 250)), (0.35, (163, 173, 183)), (0.55, (227, 232, 237)), (1.0, (90, 99, 108))]
+
+
+def shield_points(path, scale_about=None, steps=24):
+    """The closed outline of a path (box units), in supersampled texture pixels; `scale_about` = (k, cx, cy)."""
+    pts, cur = [], None
+    for seg in path:
+        if seg[0] in ("M", "L"):
+            cur = (seg[1], seg[2])
+            pts.append(cur)
+        else:
+            _, cx, cy, x, y = seg
+            x0, y0 = cur
+            for i in range(1, steps + 1):
+                t = i / steps
+                pts.append(((1 - t) ** 2 * x0 + 2 * (1 - t) * t * cx + t * t * x,
+                            (1 - t) ** 2 * y0 + 2 * (1 - t) * t * cy + t * t * y))
+            cur = (x, y)
+    if scale_about:
+        k, ax, ay = scale_about
+        pts = [(ax + (x - ax) * k, ay + (y - ay) * k) for x, y in pts]
+    f = EMB_SS * EMB_SCALE
+    return [((x * EMB_SCALE + EMB_OX) * EMB_SS, y * f) for x, y in pts]
+
+
+def emb_canvas():
+    return Image.new("L", (EMB * EMB_SS, EMB * EMB_SS), 0)
+
+
+def emb_fill(path):
+    m = emb_canvas()
+    ImageDraw.Draw(m).polygon(shield_points(path), fill=255)
+    return m
+
+
+def emb_stroke(path, width, scale_about=None):
+    m = emb_canvas()
+    pts = shield_points(path, scale_about)
+    w = int(width * EMB_SCALE * EMB_SS)
+    ImageDraw.Draw(m).line(pts + [pts[0], pts[1]], fill=255, width=w, joint="curve")
+    return m
+
+
+def emb_out(color_img, mask):
+    img = color_img.convert("RGBA")
+    img.putalpha(mask)
+    return img.resize((EMB, EMB), Image.LANCZOS)
+
+
+def emblem_field():
+    """The shield, white at the top to light grey at the point: tinted with the background colour, it keeps a soft shading."""
+    m = emb_fill(SHIELD)
+    px = EMB * EMB_SS
+    g = Image.linear_gradient("L").resize((px, px)).point(lambda v: int(240 - 60 * v / 255.0))
+    return emb_out(Image.merge("RGB", (g, g, g)), m)
+
+
+def emblem_gloss():
+    """Untinted light: a bright spot at the upper left that fades out, darker towards the point; only inside the shield."""
+    px = EMB * EMB_SS
+    small = 128
+    light = Image.new("RGBA", (small, small))
+    pix = light.load()
+    cx, cy, r = small * 0.38, small * 0.28, small * 0.85
+    for y in range(small):
+        for x in range(small):
+            d = math.hypot(x - cx, y - cy) / r
+            if d < 0.6:
+                pix[x, y] = (255, 255, 255, int(72 * (1 - d / 0.6)))
+            else:
+                pix[x, y] = (0, 0, 0, int(min(1.0, (d - 0.6) / 0.4) * 80))
+    light = light.resize((px, px), Image.BILINEAR)
+    a = ImageChops.multiply(light.split()[3], emb_fill(SHIELD))
+    light.putalpha(a)
+    return light.resize((EMB, EMB), Image.LANCZOS)
+
+
+def metal_gradient():
+    px = EMB * EMB_SS
+    small = 64
+    img = Image.new("RGB", (small, small))
+    pix = img.load()
+    for y in range(small):
+        for x in range(small):
+            t = (x + y) / (2.0 * (small - 1))
+            for (t0, c0), (t1, c1) in zip(METAL_STOPS, METAL_STOPS[1:]):
+                if t0 <= t <= t1:
+                    k = (t - t0) / (t1 - t0)
+                    pix[x, y] = tuple(int(c0[i] + (c1[i] - c0[i]) * k) for i in range(3))
+                    break
+    return img.resize((px, px), Image.BILINEAR)
+
+
+def emblem_frame(dark_w=9, metal_w=6):
+    """The steel rim around the shield (colour baked in, untinted): a dark outline, the steel band, a thin inner shadow."""
+    px = EMB * EMB_SS
+    out = Image.new("RGBA", (px, px), (0, 0, 0, 0))
+    out.paste(Image.new("RGBA", (px, px), (29, 33, 38, 255)), (0, 0), emb_stroke(SHIELD, dark_w))
+    metal = metal_gradient().convert("RGBA")
+    out.paste(metal, (0, 0), emb_stroke(SHIELD, metal_w))
+    inner = emb_stroke(SHIELD, 1.2, (1 - (metal_w / 2.0 + 0.8) / 50.0, 50, 60)).point(lambda v: int(v * 0.35))
+    shade = Image.new("RGBA", (px, px), (0, 0, 0, 255))
+    shade.putalpha(inner)
+    out = Image.alpha_composite(out, shade)
+    return out.resize((EMB, EMB), Image.LANCZOS)
+
+
+def dots_along(path, every, radius):
+    """A mask with round dots every `every` box units along the inner shield line."""
+    m = emb_canvas()
+    d = ImageDraw.Draw(m)
+    pts = shield_points(path, steps=200)
+    step, acc, r = every * EMB_SCALE * EMB_SS, 0.0, radius * EMB_SCALE * EMB_SS
+    last = pts[0]
+    d.ellipse([last[0] - r, last[1] - r, last[0] + r, last[1] + r], fill=255)
+    for p in pts[1:] + [pts[0]]:
+        acc += math.hypot(p[0] - last[0], p[1] - last[1])
+        last = p
+        if acc >= step:
+            acc = 0.0
+            d.ellipse([p[0] - r, p[1] - r, p[0] + r, p[1] + r], fill=255)
+    return m
+
+
+def emblem_border(style):
+    """One of the addon's own border styles, white (tinted with the border colour), along the inner edge of the shield."""
+    white = Image.new("RGB", (EMB * EMB_SS, EMB * EMB_SS), WHITE)
+    if style == 0:      # solid
+        m = emb_stroke(SHIELD_IN, 4)
+    elif style == 1:    # thin
+        m = emb_stroke(SHIELD_IN, 2.2)
+    elif style == 2:    # double
+        m = ImageChops.lighter(emb_stroke(SHIELD_IN, 3), emb_stroke(SHIELD_IN, 2, (0.86, 50, 60)))
+    elif style == 3:    # studded: round studs along the edge
+        m = dots_along(SHIELD_IN, 7.0, 2.6)
+    elif style == 4:    # bold
+        m = emb_stroke(SHIELD_IN, 7)
+    else:               # notched: a solid line with notches cut across it
+        m = ImageChops.subtract(emb_stroke(SHIELD_IN, 4.5), dots_along(SHIELD_IN, 9.0, 1.4))
+    return emb_out(white, m)
+
+
+def star_points(cx, cy, r1, r2, n, rot=0.0):
+    pts = []
+    for i in range(n * 2):
+        r = r2 if i % 2 else r1
+        a = math.pi * i / n - math.pi / 2 + rot
+        pts.append((cx + r * math.cos(a), cy + r * math.sin(a)))
+    return pts
+
+
+def sc(ss, pts):
+    return [(x * ss, y * ss) for x, y in pts]
+
+
+def s_star(d, ss):
+    d.polygon(sc(ss, star_points(32, 32, 29, 9, 4)), fill=255)
+    d.polygon(sc(ss, star_points(32, 32, 18, 7, 4, math.pi / 4)), fill=255)
+
+
+def s_star8(d, ss):
+    d.polygon(sc(ss, star_points(32, 32, 28, 11, 8)), fill=255)
+
+
+def s_sun(d, ss):
+    d.polygon(sc(ss, star_points(32, 32, 29, 15, 12)), fill=255)
+    d.ellipse([20 * ss, 20 * ss, 44 * ss, 44 * ss], fill=255)
+
+
+def s_cross(d, ss):
+    d.rectangle([27 * ss, 5 * ss, 37 * ss, 59 * ss], fill=255)
+    d.rectangle([10 * ss, 20 * ss, 54 * ss, 30 * ss], fill=255)
+
+
+def s_crescent(d, ss):
+    d.ellipse([6 * ss, 6 * ss, 58 * ss, 58 * ss], fill=255)
+    d.ellipse([18 * ss, 0, 66 * ss, 52 * ss], fill=0)
+    d.polygon(sc(ss, star_points(46, 34, 8, 3, 4)), fill=255)
+
+
+def s_sword(d, ss):
+    d.polygon(sc(ss, [(32, 3), (37, 12), (37, 42), (27, 42), (27, 12)]), fill=255)
+    d.rounded_rectangle([16 * ss, 42 * ss, 48 * ss, 48 * ss], radius=2 * ss, fill=255)
+    d.rectangle([29 * ss, 48 * ss, 35 * ss, 56 * ss], fill=255)
+    d.ellipse([27 * ss, 54 * ss, 37 * ss, 63 * ss], fill=255)
+
+
+def s_crown(d, ss):
+    d.polygon(sc(ss, [(8, 46), (8, 16), (21, 31), (32, 9), (43, 31), (56, 16), (56, 46)]), fill=255)
+    d.rounded_rectangle([8 * ss, 50 * ss, 56 * ss, 57 * ss], radius=2 * ss, fill=255)
+
+
+def s_tower(d, ss):
+    d.polygon(sc(ss, [(14, 60), (14, 18), (19, 18), (19, 10), (25, 10), (25, 18), (29, 18), (29, 10), (35, 10), (35, 18),
+                      (39, 18), (39, 10), (45, 10), (45, 18), (50, 18), (50, 60)]), fill=255)
+    d.rounded_rectangle([27 * ss, 42 * ss, 37 * ss, 62 * ss], radius=5 * ss, fill=0)
+    d.rectangle([29 * ss, 26 * ss, 35 * ss, 33 * ss], fill=0)
+
+
 TEXTURES = {
     "pill": pill_base, "pill_rim": pill_rim, "pill_gloss": pill_gloss,
     "card": card_fill, "card_edge": card_edge,
@@ -313,6 +523,15 @@ TEXTURES = {
     "role_tank": lambda: role_badge("tank"), "role_healer": lambda: role_badge("healer"),
     "role_melee": lambda: role_badge("melee"), "role_ranged": lambda: role_badge("ranged"),
     "parchment": parchment_grain, "shade_h": shade_h, "fade_h": fade_h, "solid": solid,
+    "emblem_field": emblem_field, "emblem_gloss": emblem_gloss,
+    "emblem_frame": emblem_frame, "emblem_frame_small": lambda: emblem_frame(13, 9),
+    "emblem_border_0": lambda: emblem_border(0), "emblem_border_1": lambda: emblem_border(1),
+    "emblem_border_2": lambda: emblem_border(2), "emblem_border_3": lambda: emblem_border(3),
+    "emblem_border_4": lambda: emblem_border(4), "emblem_border_5": lambda: emblem_border(5),
+    "emblem_sym_star": lambda: glyph(s_star), "emblem_sym_star8": lambda: glyph(s_star8),
+    "emblem_sym_sun": lambda: glyph(s_sun), "emblem_sym_cross": lambda: glyph(s_cross),
+    "emblem_sym_crescent": lambda: glyph(s_crescent), "emblem_sym_sword": lambda: glyph(s_sword),
+    "emblem_sym_crown": lambda: glyph(s_crown), "emblem_sym_tower": lambda: glyph(s_tower),
 }
 
 

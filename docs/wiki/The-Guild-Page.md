@@ -6,7 +6,7 @@ Click a card in [[Finding a Guild|Finding-a-Guild]] to open the page of that gui
 
 ## The left page: who they are
 
-- The **emblem** (a plain shield for now: the real emblems come with the listing editor), the **name**, the subtitle and the tags: the **languages** (the main one first), the **faction** and the **commitment**: *Casual* (green), *Softcore* (amber) or *Hardcore* (red). Hover the commitment to read what it means; it is the guild's commitment, not permadeath. *May be inactive* shows when the guild has not announced itself for more than 14 days.
+- The **emblem** (the guild's tabard or the one its Guild Master designed, see [[Emblems|Emblems]]; a plain shield with the initial when there is none), the **name**, the subtitle and the tags: the **languages** (the main one first), the **faction** and the **commitment**: *Casual* (green), *Softcore* (amber) or *Hardcore* (red). Hover the commitment to read what it means; it is the guild's commitment, not permadeath. *May be inactive* shows when the guild has not announced itself for more than 14 days.
 - **Apply** is not there yet: it arrives with the applications. Until then, contact the guild with Discord or a whisper. A guild that closed applications through the addon says so: *Applications via addon are closed. Use the contacts below.*
 - **Contact**:
   - **Discord**: the invite link, `https://discord.gg/` plus the code the Guild Master gave. The game cannot open web links, so click the field (or its button): the whole link is selected, then press **Ctrl+C** and paste it into your browser.

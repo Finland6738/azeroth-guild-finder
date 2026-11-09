@@ -66,8 +66,14 @@
 - Spec: SPEC-08 §2, ADR 0007, mockup [07](../specs/mockups/img/clean/07-emblem-designer.webp)
 - Scope: `UI/Emblem.lua` renderer (background, border, emblem, metal frame; 48/64/96/150 px; fallback shield with initial), tabard read with `GUILDTABARD_UPDATE` prompt, `Data/TabardParts.lua` from M0, the custom designer (background, border style and colour, emblem pages and colour, Random, Reset).
 - Done when:
-  - [ ] Tabard and custom emblems render identically on every client; unknown fileIDs fall back cleanly.
-- Real client: rendering of tabard pieces.
+  - [x] Offline: the emblem travels as catalogue indices and RGB colours, survives a round trip through the network codec, and the receiver refuses malicious or oversized input; the rendering parameters (layers, pixel rectangles, colours) are the same for the same emblem on every client at 48, 64, 96 and 150 px and do not depend on the palettes; an unknown index, a piece the client cannot load and a listing without an emblem fall back cleanly (the addon's border style, the guild's initial, the neutral shield); Random and Reset; the tabard is read, waited for (`GUILDTABARD_UPDATE`) and offered again after a change; the designer and the emblems on the cards, the guild page and the editor's preview are tested on the mock client (`Tests/test_emblems.lua`, `Tests/test_editor_emblem.lua`).
+  - [x] Offline: `Data/TabardParts.lua` built from what the specification, the spike notes and the probe name, marked provisional, with one block for M0.7 to update.
+  - [ ] In game: tabard and custom emblems render identically on two clients, at every size, in the list, on the guild page and in the editor ([checklist](../checklists/M3.md)).
+  - [ ] In game: the tabard pieces render (the emblem sheet, a tabard's emblem, colours and border), and the provisional fileIDs, counts and border styles of `Data/TabardParts.lua` are confirmed or replaced with the M0.7 export ([checklist](../checklists/M3.md)).
+  - [ ] In game: the Emblem card and the designer look like mockup 07, `GUILDTABARD_UPDATE` updates the page, and the real tabard never changes ([checklist](../checklists/M3.md)).
+- Tests: validation, encode/decode round trip, rendering parameters, fallbacks, Random, Reset, tabard parsing, designer (`Tests/test_emblems.lua`, `Tests/test_editor_emblem.lua`).
+- Docs: wiki Emblems and Creating a Listing; SPEC-08 §2 (indices on the wire, provisional catalogue, fallbacks); ADR 0007 (clarification).
+- Real client: rendering of tabard pieces; whether `Interface\GuildFrame\GuildEmblemsLG_01` exists on Forever; the real fields of `GetGuildTabardInfo` (border style?); when `GUILDTABARD_UPDATE` fires.
 
 ### M3.7 — Statistics and announcements
 - Branch: `step/m3-7-stats-announce`

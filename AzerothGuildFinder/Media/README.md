@@ -12,5 +12,8 @@ The textures of the addon's own windows. **All of them are original**: `tools/ma
 | `glyph_*` | white icons of the side rail and buttons (tinted) |
 | `role_tank`, `role_healer`, `role_melee`, `role_ranged` | the four role badges, in colour |
 | `parchment`, `shade_h`, `fade_h`, `solid` | page grain, page-edge shading, the fade of a guild card's banner into the parchment, a plain white pixel |
+| `emblem_field`, `emblem_gloss`, `emblem_frame`, `emblem_frame_small` | the guild emblem: the shield (tinted with the background colour), its light, the steel frame (thicker for 48 and 64 px) |
+| `emblem_border_0` … `emblem_border_5` | the addon's own border styles (solid, thin, double, studded, bold, notched), tinted with the border colour |
+| `emblem_sym_*` | the addon's own emblem symbols (star, eight-pointed star, sun, cross, crescent, sword, crown, tower), tinted |
 
-The art of the game itself (class icons, later banners and emblem pieces) is **not** here: it is referenced by path or atlas from `Data/Assets.lua`. Fonts: see [Fonts/README.md](Fonts/README.md).
+The art of the game itself (class icons, later banners, the game's tabard emblems) is **not** here: it is referenced by path or atlas from `Data/Assets.lua`. Fonts: see [Fonts/README.md](Fonts/README.md).

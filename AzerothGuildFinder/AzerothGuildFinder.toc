@@ -21,6 +21,8 @@ Core\Bus.lua
 Core\Role.lua
 Core\Normalize.lua
 Data\Enums.lua
+Data\TabardParts.lua
+Data\Emblems.lua
 Data\Listing.lua
 Data\Catalog.lua
 Data\Assets.lua
@@ -38,6 +40,7 @@ UI\Widgets\Overlay.lua
 UI\Widgets\Buttons.lua
 UI\Widgets\Inputs.lua
 UI\Widgets\Display.lua
+UI\Emblem.lua
 UI\BrowseModel.lua
 UI\GuildPageModel.lua
 UI\FilterModel.lua
@@ -47,6 +50,7 @@ UI\FilterPanel.lua
 UI\Browse.lua
 UI\GuildPage.lua
 UI\Editor.lua
+UI\EmblemDesigner.lua
 UI\EditorSteps.lua
 UI\Gallery.lua
 UI\Entry.lua
