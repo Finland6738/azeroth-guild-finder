@@ -7,7 +7,8 @@
 --   Model.Confirm(ctx, L)               -> the confirmation: { title, question, roles = { { bit, key, label } }, rolesHint,
 --        privacy, apply, cancel }   ctx = { name, player = { name, classID, level } }
 --   Model.MyApplication(rec, ctx, L)    -> the My Application tab: the empty state, or the guild, the state and its
---        explanation, the steps, Withdraw and View guild     ctx = { now, listed (the guild still has a listing) }
+--        explanation, the steps, Withdraw and View guild     ctx = { now, listed (the guild still has a listing),
+--        cannotSend (Delivery:CannotSend(): why nothing can go out now, nil when it can) }
 --   Model.ShortDate(stamp, L)           -> "15 Nov"
 local ADDON_NAME, ns = ...
 ns = ns or {}
@@ -152,6 +153,11 @@ function Model.MyApplication(rec, ctx, L)
 	local s = STATUS[key] or STATUS.expired
 	view.statusKey, view.title, view.kind = key, L[s[1]], s[3]
 	view.body = L[s[2]]:format(view.name)
+	-- something still has to go out (the application, or the withdrawal) and the game does not let it (SPEC-01 §8)
+	if ctx.cannotSend and (key == "sent" or key == "withdrawing") then
+		view.cannotSend = ctx.cannotSend
+		view.body = view.body .. " " .. L["MA_CANT_SEND"]
+	end
 	view.appliedText = L["MA_APPLIED"]:format(ns.BrowseModel.AgeText(max(0, now - (rec.at or now)), L))
 	if view.open then
 		local days = max(0, ceil((A.ExpiresAt(rec) - now) / 86400))

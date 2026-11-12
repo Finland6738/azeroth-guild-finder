@@ -1,6 +1,6 @@
 # Applying
 
-> **Status:** applying works in the addon since M4.1, but the application is only **saved on your character** for now: delivering it to the guild's officers arrives with M4.2. Nothing of this has been tried in WoW Forever yet.
+> **Status:** applying works in the addon since M4.1 and, since M4.2, the application **goes by itself to the guild's Guild Master or an officer** when one is online with Guild Finder. The officers' panel to read it arrives with M4.4. Nothing of this has been tried in WoW Forever yet.
 
 ## Apply in three steps
 
@@ -48,10 +48,25 @@ The **My Application** tab shows your application: the guild, when you applied, 
 
 ![My Application](../specs/mockups/img/clean/06-states.webp)
 
+## How your application reaches the guild
+
+There is no server: your game hands the application directly to a **contact** of the guild, the Guild Master or an officer who is online with Guild Finder.
+
+- Every 20 to 40 minutes the addon of a Guild Master or officer who is online says so on the addon's hidden channel. Your addon remembers those contacts for **30 minutes**.
+- When you press **Apply**, or later when a contact of that guild shows up, your addon sends the application to the contact heard most recently, as an addon whisper (invisible in your chat). If no answer comes within 15 seconds it tries the next contact.
+- The contact's addon answers with the status. That is when your application becomes *Received by the guild*.
+- A contact that did not answer is tried again only after a while (1 minute, then 2, 4… up to 30 minutes), so nobody is flooded.
+- Later, when a contact of the guild is online, your addon asks for news. That is how you learn **Accepted** or **Declined**, even days later.
+- **Withdraw** works the same way: the withdrawal goes to the first contact available, before or after an officer received the application. Until then the tab says *Withdrawing...*, but you can already apply elsewhere.
+
+**Stay online.** Your application only travels while you are in the game: if you and the guild's officers are never online at the same time it stays *Waiting for an officer*. The guild page always lists the guild's contacts (Discord and characters) as another way.
+
+**When the game does not let your character send.** Some characters (often new or low-level ones) cannot send addon messages, or the game refuses them for a while. My Application then says so under the status: *Right now the game does not let this character send addon messages, so nothing can go out yet.* The application stays saved and goes out by itself when sending works again; meanwhile use the guild's contacts.
+
 ## Rules
 
 - **One open application per character.** Your other characters can each have their own. To apply elsewhere, withdraw the current one first.
 - An application **expires after 14 days** without a decision.
 - After a **decline** you can apply to the same guild again after **7 days**; other guilds at once.
 - Only a character **without a guild** can apply, and only to a guild that accepts applications through the addon.
-- Your application stays on your computer (in your character's saved data) and, from M4.2, goes only to the Guild Master and the officers of that guild. Closed applications are forgotten after 30 days.
+- Your application stays on your computer (in your character's saved data) and goes only to the Guild Master and the officers of that guild, by whisper: other players never see it. Closed applications are forgotten after 30 days.

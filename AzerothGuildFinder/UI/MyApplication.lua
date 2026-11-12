@@ -159,7 +159,8 @@ function MyApplication:View()
 		local _, status = ns.Catalog:Get(rec.k)
 		listed = status == "listed" or status == "inactive"
 	end
-	return Model.MyApplication(rec, { now = clock(), listed = listed }, L), rec
+	local cannotSend = ns.Delivery and ns.Delivery:CannotSend() or nil
+	return Model.MyApplication(rec, { now = clock(), listed = listed, cannotSend = cannotSend }, L), rec
 end
 
 local function layoutRoles(f, view, y)
@@ -328,6 +329,7 @@ if ns.Bus then
 	end)
 	ns.Bus:On("APPLICATION_SEEN", function() MyApplication:UpdateBadge() end)
 	ns.Bus:On("CATALOG_UPDATED", function() if MyApplication:IsShown() then MyApplication:Refresh() end end)
+	ns.Bus:On("DELIVERY_CHANGED", function() if MyApplication:IsShown() then MyApplication:Refresh() end end)
 	ns.Bus:On("ROLE_CHANGED", function() MyApplication:UpdateBadge() end)
 end
 if ns.addon then ns.addon.MyApplication = MyApplication end

@@ -21,7 +21,9 @@
 - Spec: SPEC-07 §3, SPEC-02 §3
 - Scope: contacts seen in `ANN` with `c=1` (30 minutes), `APPLY`/`APPACK`/`APPPING`/`APPWD` by whisper, retries on each contact appearance, listen-only explanation.
 - Done when:
-  - [ ] Simulator: an application reaches an officer who comes online hours later.
+  - [x] Offline: `Net/Delivery.lua` keeps the contacts heard in an `ANN` with `c=1` for 30 minutes (the contact's periodic turn is skipped only for another contact's ANN), whispers `APPLY` / `APPPING` / `APPWD` (ALERT) to the most recent one, tries the next after 15 s without `APPACK`, retries at every contact appearance with a per-contact backoff (60 s doubled up to 30 minutes), takes an `APPACK` only from a contact it whispered, withdraws before and after receipt, at most 6 whispers a minute; the officer side checks every field of an `APPLY` (INT-06, the applicant must be the sender), keeps it in the minimal store `Data/Inbox.lua` (`officerInbox`, 200 per guild) and answers `APPACK`, `APPPING` and `APPWD` (tombstone for an unknown id), at most 6 answers a minute per sender; My Application explains when the game does not let the character send (`Tests/test_delivery.lua`, `Tests/test_stats.lua`).
+  - [x] Simulator: an application reaches an officer who comes online hours later (three simulated hours, then one periodic turn), and a decision taken while the applicant was away is learned at the next contact (`Tests/test_delivery.lua`).
+  - [ ] In game: an application reaches an officer online and an officer who logs in later, a withdrawal reaches the officer, and a refused whisper is explained ([checklist](../checklists/M4.md)).
 - Tests: delivery, retries, withdraw before and after receipt.
 
 ### M4.3 — Officer inbox and sync
