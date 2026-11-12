@@ -31,6 +31,8 @@ The rail shows the sections your character can use, one under the other, **Setti
 | an officer | My Guild, and Applications once your guild has a listing |
 | the Guild Master | Create Listing; once the guild has a listing: My Guild and Applications |
 
+**My Guild** shows your own guild's page read-only; with no listing yet it says so (and, for a few seconds after you log in, that it is waiting for it). The Guild Master has **Edit listing** and **Delist** there. Details in [[Publishing a Listing|Publishing-a-Listing]].
+
 The active section is gold and sticks out of the rail; a red number on a section counts what is waiting there. If your role changes while the window is open (you join, leave or are promoted), the window starts again on the first section of the new role.
 
 ## Pages and Back

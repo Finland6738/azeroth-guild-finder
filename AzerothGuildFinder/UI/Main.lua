@@ -103,7 +103,12 @@ function Main:Render()
 		if def.OnShow then xpcall(def.OnShow, geterrorhandler(), host, entry.params, entry) end
 	end
 	self.title:SetText(pageTitle(def, entry, self.book:Current()))
-	self.backButton:SetShown(self.book:CanGoBack())
+	local back = self.book:CanGoBack()
+	self.backButton:SetShown(back)
+	-- the title moves to the right of the Back button instead of sitting under it
+	self.title:ClearAllPoints()
+	if back then self.title:SetPoint("LEFT", self.backButton, "RIGHT", 6, 0)
+	else self.title:SetPoint("LEFT", self.bar, "LEFT", 0, 0) end
 	self:UpdateRail()
 end
 
@@ -126,8 +131,7 @@ function Main.HasListing()
 	local Role, Catalog = ns.Role, ns.Catalog
 	local key = Role and Role:GuildKey()
 	if not key or not Catalog then return false end
-	local status = Catalog:Status(key)
-	return status == "listed" or status == "inactive"
+	return ns.MyGuildModel.HasListing(Catalog:Status(key))
 end
 
 -- Recomputes the tabs of the role. `reset`: the role changed, start again on its first tab.

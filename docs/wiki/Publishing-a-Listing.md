@@ -12,11 +12,31 @@ The editor, the draft and the checklist are described in [[Creating a Listing|Cr
 4. **Recruitment**: status (open to all, selected classes, closed) and the **Looking for** grid of classes and roles (Tank, Healer, Melee, Ranged); new player friendly; accept applications through the addon.
 5. **Requirements**: minimum level, optional item level, a note.
 6. **Contact**: the Discord invite code and up to three contact characters.
-7. **Preview & publish**: the checklist must be all green. Until the steps arrive in the addon, publishing in a real client is not yet possible.
+7. **Preview & publish**: the checklist must be all green, then **Publish listing** turns on.
 
 ![Listing editor, Recruitment step](../specs/mockups/img/clean/03-listing-editor.webp)
 
 The draft is saved automatically. After publishing, the listing reaches other players over the next minutes, through every member of your guild who uses the addon. **Delist** removes it.
+
+> **Not checked in the game yet.** Publishing and everything below was tested on a simulated client only; the first real publication is the last in-game check of the first version ([checklist](https://github.com/Finland6738/azeroth-guild-finder/blob/main/docs/checklists/M3.md)).
+
+## After publishing: My Guild
+
+Once the guild has a listing, the **Create Listing** tab gives way to **My Guild** and **Applications**. **My Guild** is your guild's page exactly as players without a guild see it (see [[The Guild Page|The-Guild-Page]]), with your [[emblem|Emblems]] at the top and the guild's statistics. The status bar at the bottom says so.
+
+- **Edit listing** opens the editor on the published listing, one page over My Guild. **Back** returns to My Guild. The button is shown to the Guild Master only.
+- **Delist** asks first (*Remove your guild from Guild Finder? Pending applications will be closed.*). When it is done the tab goes back to **Create Listing**, with the editor filled in with the last listing.
+- **Applications** is a placeholder for now: applications arrive in a later version.
+
+Everybody else in the guild sees My Guild too, **read-only**:
+
+| You are | In My Guild you see |
+|---|---|
+| a member | the guild's page and the note *Only the Guild Master can edit the listing.* |
+| an officer | the same, and a note that applications will appear in the Applications tab |
+| the Guild Master | the guild's page with **Edit listing** and **Delist**, and the same note about applications |
+
+When the guild has **no listing**, members and officers see *Your guild has no listing yet*, with a short message you can select, copy (**Ctrl+C**) and send to your Guild Master. Right after you log in the page first says *Waiting for your guild's listing...*, because the Guild Master's addon may need a few seconds to send it; it never waits for more than about a minute. A Guild Master without a listing sees only **Create Listing**.
 
 ## Announcements and statistics
 

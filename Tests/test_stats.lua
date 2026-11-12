@@ -517,6 +517,8 @@ describe("simulator", function()
 			local s = sim:client(i):addon().OwnListing.state.stats
 			periodic, suppressed = periodic + s.periodic, suppressed + s.periodicSuppressed
 		end
+		T.log(("5 members, 300 simulated s, turns of 20-40 s: %d turns, %d periodic ANN sent, %d suppressed (without suppression: one ANN per turn)")
+			:format(periodic + suppressed, periodic, suppressed))
 		-- 5 members x about 10 turns each = about 50 turns; without suppression 50 ANN
 		truthy(periodic + suppressed >= 35, "turns: " .. (periodic + suppressed))
 		truthy(periodic <= 20, "periodic ANN sent: " .. periodic)

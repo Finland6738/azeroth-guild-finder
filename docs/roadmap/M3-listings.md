@@ -91,8 +91,12 @@
 - Branch: `step/m3-8-my-guild`
 - Depends on: M3.1–M3.7
 - Spec: SPEC-06 §1, mockup [06](../specs/mockups/img/clean/06-states.webp)
-- Scope: My Guild for members (read-only), officers, Guild Master (Edit, Delist); empty states; exit check recorded in `docs/checklists/M3.md`.
+- Scope: My Guild for members (read-only), officers (read-only, with a placeholder for Applications until M4) and the Guild Master (Edit listing, Delist with a question); the empty states (no listing yet, the copy still on its way, the Guild Master without a listing has only the editor); the exit check recorded in `docs/checklists/M3.md`.
 - Done when:
-  - [ ] Every role sees exactly the panels of SPEC-00 §5.
-  - [ ] Exit criterion met in game.
-- Docs: wiki Publishing a Listing, Emblems.
+  - [x] Offline: every role sees exactly the panels of SPEC-00 §5. The matrix of 4 roles x 6 states of the listing (none, waiting for the copy, listed, inactive, hidden, withdrawn) is checked cell by cell against a table written from the specification, in pure Lua and again on the mock client (the rail, the page and every control); My Guild is read-only for a member and an officer (no Edit, no Delist, no editor), the Guild Master has Edit listing (the editor pushed on My Guild, Back returns) and Delist (asks first, then the tab goes back to Create Listing); the empty and waiting states follow the catalog and the clock; in the simulator a listing published by a Guild Master reaches a client without a guild in under 2 minutes with the emblem and the statistics and shows in the members' My Guild (`Tests/test_my_guild.lua`).
+  - [x] Offline: the exit checks that do not need the client were run and recorded in [docs/checklists/M3.md](../checklists/M3.md) (2026-11-12: 1433 tests passed, `check_docs` and `check_addon` clean, the simulator numbers of M3).
+  - [ ] In game: the My Guild list of [docs/checklists/M3.md](../checklists/M3.md) holds with a Guild Master, an officer, a member and a character without a guild (waiting for the owner).
+  - [ ] Exit criterion met in game: a real Guild Master publishes a listing and a second client without a guild sees it within 2 minutes, with the emblem and the statistics ([checklist](../checklists/M3.md)). This also closes the *In game* boxes of M3.1–M3.7 that the lists confirm.
+- Tests: the role -> panels matrix, the page per role, Edit listing, Delist, the empty and waiting states, the roles changing with the window open, the exit criterion in the simulator (`Tests/test_my_guild.lua`).
+- Docs: wiki Publishing a Listing, Emblems, Interface Tour, Commands and Settings; SPEC-06 §1 (how My Guild is built).
+- Real client: `IsGuildLeader()` and `C_GuildInfo.IsGuildOfficer()` for each role, how long a member waits for the Guild Master's copy, the look of the left page (the guild's details, the buttons and the notes) at 60 %, 100 % and 140 %, the title next to the Back button.

@@ -8,6 +8,12 @@
 
 Prima di salvare o pubblicare, l'addon **ricontrolla** `IsGuildLeader()`: se il personaggio non è più GM, la modifica viene annullata con un avviso.
 
+Come lo fanno `UI/MyGuild.lua` e `UI/MyGuildModel.lua` (M3.8):
+
+- Le regole sono Lua puro in `UI/MyGuildModel.lua` e si provano senza finestre: `Model.Kind` decide che cosa contiene la pagina (`listing`, `loading`, `none`), `Model.View` quali controlli ha ogni ruolo, `Model.Matrix` produce ogni ruolo contro ogni stato dell'annuncio (nessun annuncio, in attesa, listed, inactive, hidden, delisted); `Tests/test_my_guild.lua` la confronta con una tabella scritta a mano da SPEC-00 §5. Le schede della finestra restano quelle di `Nav.TabsFor` (`Core/Role.lua`, `PanelsFor`): My Guild esiste per membri e ufficiali sempre e per il GM solo con un annuncio, Applications solo per ufficiali e GM con un annuncio, Create Listing solo per il GM senza annuncio.
+- Con un annuncio la scheda mostra la pagina della gilda di M2.7 (`UI/GuildPage.lua`) in modalità "propria": sola lettura, niente controlli contro il visitatore (niente "you are 32", niente "needs your class") e senza la scheda "How applying works". Nella barra di stato: il ruolo e "This is how players without a guild see your guild.". Il membro e l'ufficiale hanno sotto la nota "Only the Guild Master can edit the listing."; l'ufficiale e il GM un segnaposto per le candidature (finché non arriva M4); il GM i pulsanti **Edit listing** (apre l'editor come pagina `ListingEditor` sopra My Guild, con Back) e **Delist** (chiede conferma, poi `OwnListing:Delist()`, che ricontrolla il GM; senza più un annuncio la finestra dà al GM la scheda Create Listing).
+- Senza annuncio: lo stato vuoto di bozzetto 06 B ("Your guild has no listing yet", il nome della gilda, il ruolo, e un messaggio da selezionare e copiare per il GM). Un membro o un ufficiale appena entrato vede prima "Waiting for your guild's listing..." (un cerchio che gira) finché la copia può ancora arrivare: `OwnListing:Waiting()` è vero per `ARRIVAL_WAIT` (60 s) dal login o dall'ingresso in una nuova gilda, o mentre un `GLIST` aspetta il roster, e solo senza copia della gilda; la pagina si ridisegna da sola quando arriva la copia o passa l'attesa.
+
 ## 2. Editor (bozzetti [`03-listing-editor.webp`](mockups/img/03-listing-editor.webp) e [`07-emblem-designer.webp`](mockups/img/07-emblem-designer.webp))
 
 Una pagina con un **indice delle sezioni a sinistra**, che si possono saltare, e l'**anteprima dal vivo** a destra: la riga della lista come la vedranno gli altri.
