@@ -37,6 +37,7 @@ Data\OwnListing.lua
 Data\Applications.lua
 Data\Inbox.lua
 Net\Delivery.lua
+Net\InboxSync.lua
 UI\Skin.lua
 UI\Nav.lua
 UI\Widgets\Base.lua

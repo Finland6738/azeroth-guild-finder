@@ -146,6 +146,13 @@ function H.boot(opts)
 	if addonObject and addonObject.Sync then addonObject.Sync.AUTO = H.autoSync == true end
 	if addonObject and addonObject.OwnListing then addonObject.OwnListing.AUTO = H.autoSync == true end
 	if addonObject and addonObject.Stats then addonObject.Stats.AUTO = H.autoSync == true end
+	-- The officers' inbox sync (M4.3) follows the same switch, unless the test sets Mock.world.inboxSync (kept across a
+	-- /reload, so a reloaded client keeps it).
+	if addonObject and addonObject.InboxSync then
+		local wanted = Mock.world.inboxSync
+		if wanted == nil then wanted = H.autoSync end
+		addonObject.InboxSync.AUTO = wanted == true
+	end
 
 	for name, text in pairs(opts.saved or {}) do E[name] = deserialize(text) end
 
