@@ -556,9 +556,28 @@ Main:RegisterPage(Nav.SETTINGS, {
 		reset:SetPoint("TOPRIGHT", card.body, "TOPRIGHT", 0, 0)
 		host.resetButton = reset
 		host.card = card
+
+		-- Privacy: the anonymous alt count of SPEC-03 §4 (Data/Stats.lua). The full Settings page is M5.1.
+		local privacy = W.Card(host.content, { kind = "plain", title = L["SETTINGS_PRIVACY"], glyph = "glyph_shield", height = 124 })
+		privacy:SetPoint("TOPLEFT", card, "BOTTOMLEFT", 0, -16)
+		privacy:SetPoint("TOPRIGHT", card, "BOTTOMRIGHT", 0, -16)
+		local share = W.Switch(privacy.body, { label = L["SETTINGS_SHARE_ALTS"], width = 420,
+			checked = not ns.Stats or ns.Stats:Sharing(),
+			onChange = function(value, sw)
+				local ok = ns.Stats and ns.Stats:SetSharing(value)
+				if not ok then sw:SetChecked(not value, true) end
+			end })
+		share:SetPoint("TOPLEFT", privacy.body, "TOPLEFT", 0, 0)
+		local shareHelp = W.Text(privacy.body, "caption", "ink3")
+		shareHelp:SetPoint("TOPLEFT", share, "BOTTOMLEFT", 0, -6)
+		shareHelp:SetPoint("RIGHT", privacy.body, "RIGHT", 0, 0)
+		shareHelp:SetWordWrap(true)
+		shareHelp:SetText(L["SETTINGS_SHARE_ALTS_HELP"])
+		host.shareSwitch, host.privacy = share, privacy
 	end,
 	OnShow = function(host)
 		Main.scaleControl:SetSelected(Main:GetScale(), true)
+		if ns.Stats then host.shareSwitch:SetChecked(ns.Stats:Sharing(), true) end
 	end,
 })
 

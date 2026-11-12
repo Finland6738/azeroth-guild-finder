@@ -145,6 +145,7 @@ function H.boot(opts)
 	local addonObject = E.AzerothGuildFinder
 	if addonObject and addonObject.Sync then addonObject.Sync.AUTO = H.autoSync == true end
 	if addonObject and addonObject.OwnListing then addonObject.OwnListing.AUTO = H.autoSync == true end
+	if addonObject and addonObject.Stats then addonObject.Stats.AUTO = H.autoSync == true end
 
 	for name, text in pairs(opts.saved or {}) do E[name] = deserialize(text) end
 

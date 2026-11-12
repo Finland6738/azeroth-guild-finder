@@ -28,4 +28,4 @@ Also: the minimap button (left click opens, right click settings), the Addon Com
 | Share anonymous alt count with my guild | on |
 | Window size | 100 % (60 % to 140 %) |
 
-In this version the **Settings** tab of the window has the window size and a *Reset window position* button; the other options of the table arrive with the full Settings page. The window position is saved per character, the window size for the whole account.
+In this version the **Settings** tab of the window has the window size, a *Reset window position* button and, in the **Privacy** card, *Share anonymous alt count with my guild* (see [[Privacy and Data|Privacy-and-Data]]: it tells your guild only how many of your characters played this week, never which ones); the other options of the table arrive with the full Settings page. The window position is saved per character, the window size for the whole account.

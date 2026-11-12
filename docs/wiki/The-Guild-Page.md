@@ -25,6 +25,7 @@ Click a card in [[Finding a Guild|Finding-a-Guild]] to open the page of that gui
   - **Active characters**: characters of the guild that played in the last 7 days.
   - **Unique players**: the people behind those characters. When not every member uses the addon it is an estimate shown as a range, for example *19–24* (hover it to read how it is counted); when it is exact it is one number.
   - **Total members** and members **at max level**, a coloured bar with the **class mix** of the active characters, and how old the numbers are (*updated 3 h ago*).
+  - The numbers come from the guild's own members: every member who uses the addon counts them from the guild roster and sends them with the guild's announcement, and the newest count wins. On the page of **your own guild** you see your roster's numbers right away. How the unique players are estimated, and how to keep your characters out of it, is in [[Privacy and Data|Privacy-and-Data]].
 - **Requirements**: each one checked against **your character**: a green check when you meet it, a red cross when you do not, with your own level or item level next to it (*Level 20+ (you are 32)*). A requirement the game cannot tell the addon (for example your item level) shows without a check or a cross. The Guild Master's note is shown in quotes.
 - **How applying works**: the three steps, for someone who has never used the addon.
 

@@ -81,8 +81,11 @@
 - Spec: SPEC-03 §4, SPEC-02 §5, ADR 0006
 - Scope: `Data/Stats.lua` (members, active characters, at max level, class mix from the roster), `GTOK` tokens with `want` replies and 7-day store, unique players range, opt-out setting; periodic `ANN` every 30 ± 10 minutes with suppression and the contact flag.
 - Done when:
-  - [ ] Statistics match SPEC-03 §4 with partial addon coverage; announcements respect the suppression rule.
-- Tests: ranges with partial coverage, opt-out, suppression in the simulator.
+  - [x] Offline: the statistics (members, active characters in the last 7 days, at max level, class mix of the active characters) come from the roster as SPEC-03 §4 says, and the unique players range is exact with full addon coverage and widens with partial coverage, never above the active characters; `GTOK` carries only an anonymous token and a number over `GUILD`, at login with `want = 1` and every 24 hours, a `want` gets one answer after 1–20 s (one per minute), tokens are kept 7 days (also across `/reload`) and then forgotten; the opt-out sends nothing and leaves the account's own token out of the range; every `ANN` carries the statistics; the periodic `ANN` waits 30 ± 10 minutes drawn again every turn, carries `c = 1` for the Guild Master and officers, skips a turn after another client's `ANN` with the same or newer `rev` and `srev`, and never because of its own echo; in the simulator every member gets the same range and five members send about one `ANN` per turn instead of five; the statistics show in the editor's preview, on the guild page (our own guild at once) and the opt-out in Settings (`Tests/test_stats.lua`).
+  - [ ] In game: two members with the addon (and members without it) see the same statistics and unique players range on the guild page, `GTOK` goes over `GUILD` only, the Privacy switch works, and the periodic `ANN` keeps the listing alive on a client outside the guild ([checklist](../checklists/M3.md)).
+- Tests: ranges with partial coverage, opt-out, token expiry, ANN cadence and jitter, suppression in the simulator (`Tests/test_stats.lua`).
+- Docs: wiki The Guild Page, Privacy and Data, Commands and Settings, Publishing a Listing; SPEC-03 §4 and SPEC-02 §5 (how `Data/Stats.lua` and the periodic `ANN` do it), SPEC-01 §6 (`tokens`).
+- Real client: `GetGuildRosterLastOnline` and `GetMaxPlayerLevel` on Forever, the roster's class file names, how often `GUILD_ROSTER_UPDATE` fires, that `GTOK` reaches every member online.
 
 ### M3.8 — My Guild states and milestone check
 - Branch: `step/m3-8-my-guild`

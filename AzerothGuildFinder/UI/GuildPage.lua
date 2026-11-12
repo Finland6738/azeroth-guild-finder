@@ -747,6 +747,15 @@ function GuildPage:Refresh(resetScroll)
 	local host, k = self.host, self.k
 	if not host or not k or not ns.Catalog then return end
 	local entry, status = ns.Catalog:Get(k)
+	-- our own guild: the roster's statistics right away, when they are newer than the last ANN's (Data/Stats.lua)
+	if entry and entry.sum and ns.Stats then
+		local sum = ns.Stats:Overlay(entry.sum)
+		if sum ~= entry.sum then
+			local copy = {}
+			for f, v in pairs(entry) do copy[f] = v end
+			copy.sum, entry = sum, copy
+		end
+	end
 	local view = Model.View({ k = k, entry = entry, status = status, player = ns.BrowseModel.Player(), now = clock(),
 		heard = heardContacts(k), unavailable = self.unavailable[k], L = L })
 	self.view = view
@@ -823,5 +832,6 @@ Main:RegisterPage(GuildPage.PAGE, {
 if ns.Bus then
 	ns.Bus:On("CATALOG_UPDATED", function(k, what) GuildPage:OnCatalogChanged(k, what) end)
 	ns.Bus:On("DETAIL_UNAVAILABLE", function(k) GuildPage:OnDetailUnavailable(k) end)
+	ns.Bus:On("STATS_CHANGED", function(k) GuildPage:OnCatalogChanged(k, "stats") end)
 end
 if ns.addon then ns.addon.GuildPage = GuildPage end
