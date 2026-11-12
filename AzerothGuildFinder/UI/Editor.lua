@@ -490,8 +490,13 @@ local function createMini(parent)
 	card.tags = {}
 	card.acts = W.Text(card, "caption", "ink")
 	card.acts:SetPoint("TOPLEFT", card, "TOPLEFT", 12, -96)
-	card.acts:SetWidth(COL_W - 24)
+	card.acts:SetWidth(COL_W - 24 - 104)
 	card.acts:SetWordWrap(false)
+	-- the guild's statistics as the list shows them ("31 active / 149"), from the roster (Data/Stats.lua)
+	card.members = W.Text(card, "caption", "ink2", "RIGHT")
+	card.members:SetPoint("TOPRIGHT", card, "TOPRIGHT", -12, -96)
+	card.members:SetWidth(100)
+	card.members:SetWordWrap(false)
 	return card
 end
 
@@ -518,6 +523,11 @@ local function bindMini(card, display)
 	end
 	for i = #specs + 1, #card.tags do card.tags[i]:Hide() end
 	card.acts:SetText(display.activitiesText or "")
+	if display.active then
+		card.members:SetText((display.members and L["INFO_ACTIVE_OF"] or L["INFO_ACTIVE"]):format(display.active, display.members))
+	else
+		card.members:SetText(L["INFO_MEMBERS_UNKNOWN"])
+	end
 end
 
 local STATE_ICON = {
@@ -698,7 +708,9 @@ function Editor:Draw()
 	host.back:SetEnabled(self.stepper:CanBack())
 	host.next:SetEnabled(self.stepper:CanNext())
 
-	local display = Model.Preview(self.fields, self.ctx.key, self.ctx.now, L)
+	local st, _, statsKey
+	if ns.Stats then st, _, statsKey = ns.Stats:Current() end
+	local display = Model.Preview(self.fields, self.ctx.key, self.ctx.now, L, statsKey == self.ctx.key and st or nil)
 	local _, _, guildName = ns.Listing.ParseKey(self.ctx.key or "")
 	if index == Model.PUBLISH then
 		Browse.BindCard(host.card, display)
@@ -779,6 +791,7 @@ end
 if ns.Bus then
 	ns.Bus:On("OWN_LISTING_CHANGED", function(what) Editor:OnOwnListing(what) end)
 	ns.Bus:On("ROLE_CHANGED", function() if Editor:IsShown() then Editor:Draw() end end)
+	ns.Bus:On("STATS_CHANGED", function() if Editor:IsShown() then Editor:Draw() end end)
 end
 if ns.addon then
 	ns.addon.Editor = Editor

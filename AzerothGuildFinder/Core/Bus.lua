@@ -23,6 +23,8 @@
 --                                                        "published", "delisted" (by this Guild Master) or "received" (a GLIST).
 --   TABARD_UPDATED()                                     UI/Emblem.lua; GUILDTABARD_UPDATE (or a change of guild): the guild tabard
 --                                                        may read differently now (Emblem.ReadTabard).
+--   STATS_CHANGED(k)                                     Data/Stats.lua; a GTOK arrived or the sharing setting changed: the
+--                                                        statistics of guild k (the player's own) may read differently now.
 -- Later modules add their events here.
 local ADDON_NAME, ns = ...
 ns = ns or {}

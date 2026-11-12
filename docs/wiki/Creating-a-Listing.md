@@ -60,7 +60,7 @@ The **left page** lists the seven steps. Each shows its state: a green check whe
 
 ## The live preview and the checklist
 
-On the right of every step you see the **live preview**: the card other players will see in Find a Guild, updated as you type. Under it, the **Before publishing** checklist:
+On the right of every step you see the **live preview**: the card other players will see in Find a Guild, updated as you type, with your guild's statistics as the announcements will carry them (*31 active / 149*, counted from the guild roster). Under it, the **Before publishing** checklist:
 
 - You are the Guild Master
 - Subtitle

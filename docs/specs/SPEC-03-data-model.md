@@ -80,6 +80,19 @@ L'interfaccia mostra "Unique players: 14" se `u7lo == u7hi`, altrimenti "Unique 
 
 Riservatezza: i compagni di gilda vedono solo che un membro ha *n* personaggi attivi, non quali. Un'impostazione ("Share anonymous alt count with my guild", attiva di base) permette di non inviare `GTOK`.
 
+### Come lo fa `Data/Stats.lua` (M3.7)
+
+Dove le regole sopra lasciano margine (i numeri sono campi di `Stats` e i test li possono cambiare):
+
+- **Attivo**: un personaggio online ora, o uscito da **meno** di 7 giorni (168 ore, `GetGuildRosterLastOnline` in anni, mesi, giorni e ore). `max` conta i personaggi attivi con `level == GetMaxPlayerLevel()`; se il livello massimo non si legge, `max` manca. `cls` usa il `classFileName` del roster tradotto in `classID` con l'elenco delle classi del client (o la tabella di `Data/Enums.lua`); una classe sconosciuta non viene contata. `m` è `GetNumGuildMembers()`. `srev` è l'ora del server del calcolo arrotondata **per difetto** all'ora.
+- **Token**: `token = Hash32Hex("gtok:" .. accountSecret .. ":" .. guildKey)`, 8 cifre esadecimali. Il messaggio è `GTOK{ token, n, want? }` (nient'altro: né il nome della gilda né quello del personaggio); `n` è un intero 1–50. I token ricevuti con un formato diverso, da un canale diverso da `GUILD` o rimandati dal server a chi li ha inviati vengono scartati.
+- **Quali personaggi sono dell'account**: il client non lo sa dal roster. Ogni personaggio, entrando in gioco in una gilda, si annota in `AzerothGuildFinderDB.tokens.mine[guildKey]` come **hash del nome** con l'ora (e si toglie dalle altre gilde). `n` conta quelli annotati negli ultimi 7 giorni che sono ancora nel roster; il personaggio in gioco conta sempre.
+- **Invio**: 5–15 s dopo il login (o l'entrata in una gilda) con `want = 1`, poi ogni 24 h senza `want`. Una richiesta `want = 1` riceve **una** risposta dopo 1–20 s; le richieste sentite nel frattempo la condividono e ogni client risponde al massimo una volta al minuto.
+- **Archivio**: `AzerothGuildFinderDB.tokens.heard[guildKey][token] = { n, at }`, sostituito dal token più recente dello stesso account e dimenticato dopo 7 giorni (anche dopo un `/reload`); al massimo 1000 token per gilda e 20 gilde.
+- **Intervallo**: oltre al calcolo del punto 5, `u7lo` e `u7hi` non superano mai `a7` (un giocatore unico ha almeno un personaggio attivo; un token vecchio non fa salire la stima sopra il roster).
+- **Rinuncia** (`settings.shareAltCount = false`): nessun `GTOK` inviato, né al login né in risposta, e il token del proprio account non entra nel calcolo neppure sul proprio client, così tutti i membri ottengono lo stesso intervallo. I token degli altri si ricevono comunque. Chi riattiva l'opzione invia il proprio token dopo 5–15 s; chi la disattiva sparisce dagli archivi degli altri entro 7 giorni. L'interruttore è nella pagina Settings (carta Privacy).
+- **Dove si vedono**: in ogni `ANN` del client (pubblicazione, ripetizione, annuncio periodico; la copia della gilda e il `GLIST` non le portano), nell'anteprima dell'editor ("4 active / 5") e nella sezione Members della pagina della gilda. Per la **propria** gilda la pagina mostra i numeri del roster appena sono più recenti di quelli dell'ultimo `ANN`, senza cambiare il catalogo.
+
 ### Data di fondazione (D12)
 
 Il client non offre un'API che dia la data di fondazione della gilda in modo affidabile. **Nella V1 non viene mostrata.** Al suo posto la pagina mostra "Listed since" (`first`) e "Updated" (`upd`), che sono date certe.

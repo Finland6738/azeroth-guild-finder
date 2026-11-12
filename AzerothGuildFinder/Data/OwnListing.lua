@@ -23,6 +23,12 @@
 --                INT-02 anyway): one GLIST over GUILD serves every member, at most one answer per REPLY_GAP.
 --   GM change    the roster decides: the old Guild Master's GLIST is refused as soon as the roster names another one;
 --                the new one publishes from the guild copy, so the ownerId stays (SPEC-06 §5).
+--   periodic ANN every member with the guild copy listed (the Guild Master too) announces it on the channel every
+--                ANN_PERIOD seconds (30 +/- 10 minutes, drawn again for every turn), with the statistics of
+--                Data/Stats.lua and c = 1 for the Guild Master and the officers. A turn is skipped when an ANN of the guild
+--                from another client with the same or a higher rev and srev arrived since the turn was armed
+--                (SPEC-02 §5), so a guild with many members online sends about one ANN per turn, not one per member.
+--                Every ANN this client sends (publish, relay, periodic) carries the statistics; the guild copy does not.
 --
 -- Bus event: OWN_LISTING_CHANGED(what, k), what = "draft", "published", "delisted", "received". Sender names stay in
 -- memory for the length of one check and are never printed or saved.
@@ -46,7 +52,8 @@ OwnListing.REPLY_GAP = 30             -- Guild Master: one GLIST answer in this 
 OwnListing.RELAY_DELAY = { 5, 30 }    -- SPEC-02 §5: a member's ANN after a newer GLIST
 OwnListing.RECENT_ANN = 60            -- an ANN of the same revision heard in this time suppresses the relay
 OwnListing.ROSTER_WAIT = 30           -- a GLIST waits this long for the roster to name the Guild Master
-OwnListing.AUTO = true                -- false: no GLREQ by itself (the single-client tests switch it off)
+OwnListing.ANN_PERIOD = { 1200, 2400 } -- SPEC-02 §5: the periodic ANN, every 30 +/- 10 minutes
+OwnListing.AUTO = true                -- false: no GLREQ and no periodic ANN by themselves (the single-client tests)
 
 local DETAIL_FIELDS = { desc = true, disc = true, cont = true, note = true }
 
@@ -57,7 +64,7 @@ local function newStats()
 	return {
 		published = 0, delisted = 0, glistSent = 0, glistReceived = 0, accepted = 0, refused = 0, older = 0, foreign = 0,
 		invalid = 0, rosterWaits = 0, requestsSent = 0, requestsHeard = 0, requestsSuppressed = 0, replies = 0,
-		relays = 0, relaysSuppressed = 0, delRelays = 0,
+		relays = 0, relaysSuppressed = 0, delRelays = 0, periodic = 0, periodicSuppressed = 0, periodicSkipped = 0,
 	}
 end
 
@@ -71,6 +78,7 @@ local function resetState()
 		lastRequestAt = nil, requestGen = 0, requestItem = nil,
 		replyAt = nil, replyPending = false,
 		relayGen = {},
+		annGen = 0, annKey = nil, annNextAt = nil,   -- the periodic ANN: timer generation, guild, Now() of the next turn
 		stats = newStats(),
 	}
 	OwnListing.state = state
@@ -219,9 +227,21 @@ local function sendGlist(rec)
 	return ns.Transport:Send("GUILD", msg, { key = "GLIST" })
 end
 
+-- The summary with the statistics of our guild (Data/Stats.lua), when the roster gives them.
+local function withStats(rec)
+	local sum = summaryOf(rec)
+	sum.st, sum.srev = nil, nil
+	local Stats = ns.Stats
+	if Stats then
+		local st, srev, key = Stats:Current()
+		if st and key == rec.k then sum.st, sum.srev = st, srev end
+	end
+	return sum
+end
+
 -- The summary on the channel (Sync:Announce also puts it in the local catalog) and the detail in the local catalog.
 local function announce(rec, contact)
-	ns.Sync:Announce(summaryOf(rec), { contact = contact })
+	ns.Sync:Announce(withStats(rec), { contact = contact })
 	ns.Catalog:PutDetail(detailOf(rec))
 	state.announced[rec.k] = true
 end
@@ -501,10 +521,67 @@ function OwnListing:OnCatalog(k)
 	if max(entry.sum.rev, entry.delRev or 0) > (copy and copy.rev or 0) then self:ScheduleRequest() end
 end
 
--- ROLE_CHANGED: a GLIST waiting for another guild's roster is dropped; a member of a guild asks for the copy.
+---------------------------------------------------------------------------------------------------------------------
+-- The periodic ANN (SPEC-02 §5)
+---------------------------------------------------------------------------------------------------------------------
+
+-- One turn of the periodic ANN. `since`: Now() when the turn was armed; an ANN of the guild heard from another client
+-- after it, with the same or a higher rev and srev, skips this turn. Returns true, or false plus "no-guild",
+-- "not-listed" or "suppressed".
+function OwnListing:AnnounceTurn(since)
+	local role, key = current()
+	if not key then return false, "no-guild" end
+	local copy = self:Get()
+	if not copy or copy.del then
+		state.stats.periodicSkipped = state.stats.periodicSkipped + 1
+		return false, "not-listed"
+	end
+	local srev = 0
+	if ns.Stats then
+		local st, s, k = ns.Stats:Current()
+		if st and k == key then srev = s end
+	end
+	if ns.Sync:Suppressed(key, copy.rev, srev, since or 0) then
+		state.stats.periodicSuppressed = state.stats.periodicSuppressed + 1
+		return false, "suppressed"
+	end
+	state.stats.periodic = state.stats.periodic + 1
+	announce(copy, role == "officer" or role == "gm")
+	return true
+end
+
+-- Arms the next periodic turn after a random ANN_PERIOD delay (the jitter is drawn again for every turn); the turn
+-- arms the one after it. A later call replaces the armed turn. Returns the delay.
+function OwnListing:StartAnnouncing()
+	state.annGen = state.annGen + 1
+	local gen, since = state.annGen, now()
+	local _, key = current()
+	state.annKey = key
+	local delay = rnd(OwnListing.ANN_PERIOD)
+	state.annNextAt = since + delay
+	after(delay, function()
+		if gen ~= state.annGen then return end
+		OwnListing:AnnounceTurn(since)
+		OwnListing:StartAnnouncing()
+	end)
+	return delay
+end
+
+function OwnListing:StopAnnouncing()
+	state.annGen = state.annGen + 1
+	state.annKey, state.annNextAt = nil, nil
+end
+
+-- ROLE_CHANGED: a GLIST waiting for another guild's roster is dropped; a member of a guild asks for the copy. The
+-- periodic ANN runs while the character is in a guild (a promotion does not restart it).
 function OwnListing:OnRoleChanged(role, key, oldRole, oldKey)
 	if key ~= oldKey then state.pending = nil end
 	if key and role ~= "gm" and role ~= "none" then self:ScheduleRequest() end
+	if not key then
+		self:StopAnnouncing()
+	elseif OwnListing.AUTO and (state.annKey ~= key or not state.annNextAt) then
+		self:StartAnnouncing()
+	end
 end
 
 function OwnListing:Reset() resetState() end
@@ -564,6 +641,8 @@ function OwnListing:DebugLines()
 			s.rosterWaits),
 		("  GLREQ sent %d (skipped %d), heard %d, answered %d; relayed ANN %d (suppressed %d), DEL %d"):format(
 			s.requestsSent, s.requestsSuppressed, s.requestsHeard, s.replies, s.relays, s.relaysSuppressed, s.delRelays),
+		("  periodic ANN %d (suppressed %d, not listed %d), next turn %s"):format(s.periodic, s.periodicSuppressed,
+			s.periodicSkipped, state.annNextAt and (("in %d min"):format(floor(max(0, state.annNextAt - now()) / 60))) or "off"),
 	}
 end
 

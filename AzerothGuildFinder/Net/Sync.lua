@@ -246,7 +246,7 @@ function Sync:Contacts(k, maxAge)
 	return names
 end
 
--- The last ANN heard for guild k: { rev, srev, at } (at = Now()), or nil.
+-- The last ANN heard for guild k from another client: { rev, srev, at } (at = Now()), or nil.
 function Sync:LastAnnounce(k) return state.lastAnn[k] end
 
 -- §5 suppression: true when an ANN of guild k with rev and srev equal or higher arrived after `since` (Now() time),
@@ -264,12 +264,15 @@ local function onAnn(msg, sender)
 	local ok, why = ns.Catalog:PutSummary(msg, { sender = sender, dist = "CHANNEL" })
 	if ACCEPTED[why] then
 		state.stats.ann = state.stats.ann + 1
-		local a = state.lastAnn[msg.k]
-		local srev = tonumber(msg.srev) or 0
-		if not a or msg.rev > a.rev or (msg.rev == a.rev and srev >= a.srev) then
-			state.lastAnn[msg.k] = { rev = msg.rev, srev = srev, at = now() }
-		else
-			a.at = now()
+		-- our own ANN comes back from the channel: it must not suppress our next periodic turn (§5)
+		if not isSelf(sender) then
+			local a = state.lastAnn[msg.k]
+			local srev = tonumber(msg.srev) or 0
+			if not a or msg.rev > a.rev or (msg.rev == a.rev and srev >= a.srev) then
+				state.lastAnn[msg.k] = { rev = msg.rev, srev = srev, at = now() }
+			else
+				a.at = now()
+			end
 		end
 		if msg.c == 1 and not isSelf(sender) then rememberContact(msg.k, sender) end
 	else

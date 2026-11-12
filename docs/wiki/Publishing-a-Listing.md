@@ -18,6 +18,12 @@ The editor, the draft and the checklist are described in [[Creating a Listing|Cr
 
 The draft is saved automatically. After publishing, the listing reaches other players over the next minutes, through every member of your guild who uses the addon. **Delist** removes it.
 
+## Announcements and statistics
+
+Once the listing is out, your guild keeps it alive by itself: every member who uses the addon (you included) **announces** it on the shared channel about every **30 minutes** (a random time between 20 and 40). When a member hears a guildmate's announcement with the same or newer content and statistics, it skips its own turn, so a guild with many members online still sends about one announcement every half hour. Announcements from you and your officers also tell applicants that a contact is online.
+
+Every announcement carries the guild's [[statistics|The-Guild-Page]] (members, active characters, at max level, class mix, unique players), counted from the guild roster at that moment. You see the same numbers on the preview card of the editor (*31 active / 149*). Nothing personal is in them; see [[Privacy and Data|Privacy-and-Data]].
+
 ## Good to know
 
 - You can publish **one change every 5 minutes** (the limit keeps the shared channel quiet and survives `/reload`). The draft has no limit: change it as often as you like and publish when it is ready.

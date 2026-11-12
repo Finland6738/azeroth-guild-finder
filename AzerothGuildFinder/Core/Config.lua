@@ -1,5 +1,6 @@
 -- Config: SavedVariables, schema versions, defaults, validation and migrations (SPEC-01 §6, ADR 0011). Lua 5.1.
---   AzerothGuildFinderDB          (account)   = { schemaVersion, accountSecret, catalog[realm][faction], syncAt, settings }
+--   AzerothGuildFinderDB          (account)   = { schemaVersion, accountSecret, catalog[realm][faction], syncAt, tokens,
+--                                                 settings }
 --   AzerothGuildFinderCharDB      (character) = { schemaVersion, application, officerInbox, ownListing, ui, minimap }
 -- Load() runs on ADDON_LOADED (from AGF:OnInitialize): defaults are merged without overwriting anything, old data is
 -- migrated step by step, bad values are reset and listed in Config.issues. Data from a NEWER schema is never rewritten:
@@ -38,6 +39,7 @@ Config.defaults = {
 		accountSecret = "",            -- created once on first load, never sent anywhere
 		catalog = {},                  -- [realm][faction] = { ... } (SPEC-03)
 		syncAt = {},                   -- ["realm|faction"] = time of the last full catalog sync (SPEC-02 §6)
+		tokens = { mine = {}, heard = {} },   -- GTOK store (Data/Stats.lua, SPEC-03 §4): tokens heard, own characters as hashes
 		settings = {
 			minimapButton = true,
 			notifyIcon = true,
@@ -66,6 +68,9 @@ Config.rules = {
 	["account.accountSecret"] = { type = "string", pattern = "^%x+$", minLen = 32, maxLen = 32 },
 	["account.catalog"] = { type = "table" },
 	["account.syncAt"] = { type = "table" },
+	["account.tokens"] = { type = "table" },
+	["account.tokens.mine"] = { type = "table" },
+	["account.tokens.heard"] = { type = "table" },
 	["account.settings"] = { type = "table" },
 	["account.settings.minimapButton"] = { type = "boolean" },
 	["account.settings.notifyIcon"] = { type = "boolean" },

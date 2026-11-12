@@ -8,7 +8,8 @@
 --   Model.Same(a, b)                       true when two sets of fields publish the same listing
 --   Model.View(fields, ctx)                the checklist: { items, steps, ready, complete, first, clean }
 --   Model.Action(view, ctx)                the main button: { mode, label, enabled, reason, kind, step }
---   Model.Preview(fields, key, now, L)     the display fields of the listing card (BrowseModel.Card), for the live preview
+--   Model.Preview(fields, key, now, L, st) the display fields of the listing card (BrowseModel.Card), for the live preview;
+--                                          st: the guild's statistics now (Data/Stats.lua), shown as others will see them
 --   Model.Clamp / TextStats                typed text cut to SPEC-03's limits (subtitle 60, description 500 and 12 lines), the counters
 --   Model.MainLanguage / Secondary / SetMain / SetSecondary   the language fields (`lang1`, the mask `lang`)
 --   Model.Banners()                        the verified banners, for the gallery
@@ -867,9 +868,14 @@ end
 -- Preview
 ---------------------------------------------------------------------------------------------------------------------
 -- The display fields of the card others will see (BrowseModel.Card with no player: nothing is checked against anybody).
-function Model.Preview(fields, key, now, L)
+-- `st`: the statistics every ANN of the guild carries (Data/Stats.lua); the draft never holds any.
+function Model.Preview(fields, key, now, L, st)
 	local sum = Model.Clean(fields, key) or { k = key or Model.PLACEHOLDER_KEY, rev = 1 }
 	sum.upd = now
+	if type(st) == "table" then
+		local clean = Listing().SanitizeSummary({ k = sum.k, rev = 1, st = st })
+		sum.st = clean and clean.st or nil
+	end
 	return ns.BrowseModel.Card(sum, nil, nil, { now = now, L = L })
 end
 
