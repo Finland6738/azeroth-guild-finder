@@ -53,6 +53,7 @@ OwnListing.RELAY_DELAY = { 5, 30 }    -- SPEC-02 §5: a member's ANN after a new
 OwnListing.RECENT_ANN = 60            -- an ANN of the same revision heard in this time suppresses the relay
 OwnListing.ROSTER_WAIT = 30           -- a GLIST waits this long for the roster to name the Guild Master
 OwnListing.ANN_PERIOD = { 1200, 2400 } -- SPEC-02 §5: the periodic ANN, every 30 +/- 10 minutes
+OwnListing.ARRIVAL_WAIT = 60          -- My Guild: a member waits this long after asking for the copy before it says "no listing"
 OwnListing.AUTO = true                -- false: no GLREQ and no periodic ANN by themselves (the single-client tests)
 
 local DETAIL_FIELDS = { desc = true, disc = true, cont = true, note = true }
@@ -76,6 +77,7 @@ local function resetState()
 		lastGlistAt = nil,     -- Now() of the last GLIST accepted or sent
 		heardRequestAt = nil,  -- Now() of the last GLREQ of another member that our own would repeat
 		lastRequestAt = nil, requestGen = 0, requestItem = nil,
+			watchAt = nil,         -- Now() when this client started waiting for the guild copy (login, a new guild)
 		replyAt = nil, replyPending = false,
 		relayGen = {},
 		annGen = 0, annKey = nil, annNextAt = nil,   -- the periodic ANN: timer generation, guild, Now() of the next turn
@@ -205,6 +207,17 @@ function OwnListing:CanEdit()
 	if not key then return nil, "no-guild" end
 	if not C().Guild.IsGuildLeader() then return nil, "not-leader" end
 	return key
+end
+
+-- True while a member or an officer may still receive the guild copy: it asked for it (login, a new guild) less than
+-- ARRIVAL_WAIT seconds ago, or a GLIST waits for the roster, and no copy is here yet. The Guild Master has nothing to wait
+-- for. My Guild shows "waiting for the listing" instead of "no listing yet" while this is true.
+function OwnListing:Waiting()
+	local role, key = current()
+	if not key or role == "gm" or self:Get() then return false end
+	if state.pending then return true end
+	local since = state.watchAt
+	return since ~= nil and now() - since < OwnListing.ARRIVAL_WAIT
 end
 
 -- Seconds before the next publication is allowed (0 = now).
@@ -575,8 +588,11 @@ end
 -- ROLE_CHANGED: a GLIST waiting for another guild's roster is dropped; a member of a guild asks for the copy. The
 -- periodic ANN runs while the character is in a guild (a promotion does not restart it).
 function OwnListing:OnRoleChanged(role, key, oldRole, oldKey)
-	if key ~= oldKey then state.pending = nil end
-	if key and role ~= "gm" and role ~= "none" then self:ScheduleRequest() end
+	if key ~= oldKey then state.pending, state.watchAt = nil, nil end
+	if key and role ~= "gm" and role ~= "none" then
+		if key ~= oldKey then state.watchAt = now() end   -- a new guild: its copy may be on its way
+		self:ScheduleRequest()
+	end
 	if not key then
 		self:StopAnnouncing()
 	elseif OwnListing.AUTO and (state.annKey ~= key or not state.annNextAt) then
@@ -664,7 +680,10 @@ if ns.addon then
 		OwnListing:RegisterEvent("GUILD_ROSTER_UPDATE", function() OwnListing:OnRoster() end)
 		OwnListing:RegisterEvent("PLAYER_ENTERING_WORLD", function()
 			local role, key = current()
-			if key and role ~= "gm" and role ~= "none" then OwnListing:ScheduleRequest() end
+			if key and role ~= "gm" and role ~= "none" then
+				state.watchAt = now()   -- the login: the Guild Master's answer to our GLREQ may take a few seconds
+				OwnListing:ScheduleRequest()
+			end
 		end)
 	end
 end

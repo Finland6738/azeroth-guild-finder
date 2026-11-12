@@ -1,6 +1,6 @@
 # Emblems
 
-Every listing has an **emblem**: a shield with a background colour, a border, an emblem and a steel frame. It is shown on your guild's card in Find a Guild, on your guild page and in the listing editor. You set it in step 1 of the editor, **Identity** (see [[Creating a Listing|Creating-a-Listing]]).
+Every listing has an **emblem**: a shield with a background colour, a border, an emblem and a steel frame. It is shown on your guild's card in Find a Guild, on your guild page (150 px, also what your own guild's members see in **My Guild**, see [[Publishing a Listing|Publishing-a-Listing]]) and in the listing editor. You set it in step 1 of the editor, **Identity** (see [[Creating a Listing|Creating-a-Listing]]).
 
 ![Emblem designer](../specs/mockups/img/clean/07-emblem-designer.webp)
 
@@ -30,6 +30,6 @@ The designer covers the step page. Every click is saved at once in your draft, a
 
 - Everybody's game draws the same emblem from the same pieces, so your emblem looks the same to every player.
 - The emblem pieces are the game's own tabard pieces, drawn by each player's game: Guild Finder does not copy any picture of the game.
-- If a player's game cannot draw a piece (for example an older version of Guild Finder that does not know it yet), that player sees your guild's **initial** in place of the emblem, or no border. A listing without an emblem shows a plain blue shield with the initial in gold.
+- If a player's game cannot draw a piece (for example an older version of Guild Finder that does not know it yet), that player sees your guild's **initial** in place of the emblem, or no border. A listing without an emblem shows a plain blue shield with the initial in gold. The same shield, faded, stands in the empty **My Guild** page of a guild that has no listing yet.
 
 > **Not checked in the game yet.** The list of tabard pieces in this version is provisional: it is confirmed with the in-game checks of the first version. Until then some emblems may show as **?** in the designer, or the designer may offer only Guild Finder's own symbols if your game does not have the tabard emblems at all. Your choice is kept either way.

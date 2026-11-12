@@ -11,6 +11,11 @@
 --               visitor's time zone, UTC smaller), Members (aggregates only), Requirements checked against the visitor,
 --               How applying works. The page scrolls with the mouse wheel when it is taller than the window.
 --
+-- My Guild (UI/MyGuild.lua, M3.8) reuses the same drawing for the player's own guild, read-only: `GuildPage.Build(host)` builds the
+-- frames into any host that has `left` and `content` frames, `GuildPage:Show(host, k, own)` points the page at a guild and
+-- `GuildPage:Hide(host)` lets go of it. In "own" mode the guild's members are not visitors: nothing is checked against the
+-- player (no "you are 32", no "they need your class") and the "How applying works" card is left out.
+--
 -- The page is drawn from the summary alone and completes when the detail arrives (SPEC-05 §3): About, Discord and the
 -- contacts say "Loading details..." while Sync:RequestDetail waits (20 s), then "Details unavailable right now (...)". The
 -- Bus tells when the detail lands (CATALOG_UPDATED k "detail") or does not (DETAIL_UNAVAILABLE k).
@@ -695,7 +700,9 @@ local function bindRight(host, view)
 	local lookH = bindLooking(host, view)
 	local aboutH, actH = bindAbout(host, view), bindActivity(host, view)
 	local memH, reqH = bindMembers(host, view), bindRequirements(host, view)
-	local howH = bindHow(host)
+	local own = GuildPage.own == true
+	local howH = own and 0 or bindHow(host)
+	host.how:SetShown(not own)
 	local y0 = LOOK_Y + lookH + GAP
 	local ly, ry, colsH = Model.Columns({ aboutH, actH }, { memH, reqH }, GAP)
 	local function put(card, x, y)
@@ -706,7 +713,7 @@ local function bindRight(host, view)
 	put(host.members, COL_L + GAP, y0 + ry[1]); put(host.reqs, COL_L + GAP, y0 + ry[2])
 	local howY = y0 + colsH + GAP
 	put(host.how, 0, howY)
-	GuildPage.contentH = howY + howH + 4
+	GuildPage.contentH = own and (y0 + colsH + 4) or (howY + howH + 4)
 	host.inner:SetHeight(GuildPage.contentH)
 end
 
@@ -756,7 +763,7 @@ function GuildPage:Refresh(resetScroll)
 			copy.sum, entry = sum, copy
 		end
 	end
-	local view = Model.View({ k = k, entry = entry, status = status, player = ns.BrowseModel.Player(), now = clock(),
+	local view = Model.View({ k = k, entry = entry, status = status, player = (not self.own) and ns.BrowseModel.Player() or nil, now = clock(),
 		heard = heardContacts(k), unavailable = self.unavailable[k], L = L })
 	self.view = view
 	bindLeft(host, view)
@@ -803,30 +810,40 @@ local function title(params)
 	return name or ""
 end
 
+-- Builds the frames of the page into `host` (any table with `left` and `content` frames). Once per host.
+function GuildPage.Build(host)
+	GuildPage.host = host
+	GuildPage.coalescer = ns.BrowseModel.NewCoalescer(after, GuildPage.REFRESH_DELAY, function()
+		if GuildPage:IsShown() then GuildPage:Refresh() end
+	end)
+	buildLeft(host)
+	buildRight(host)
+end
+
+-- Points the page at guild `k` on `host` (the caller has set host.shown) and draws it. own: the player's own guild (My Guild).
+function GuildPage:Show(host, k, own)
+	self.host, self.k, self.own = host, k, own == true
+	self.unavailable[k or ""] = nil
+	self.offset = 0
+	self:RequestDetail()
+	self:Refresh(true)
+end
+
+-- The page leaves the screen (the caller has hidden its frames).
+function GuildPage:Hide(host)
+	host.shown = false
+	if self.coalescer then self.coalescer:Cancel() end
+	W.HideTooltip()
+end
+
 Main:RegisterPage(GuildPage.PAGE, {
 	title = title,
-	Build = function(host)
-		GuildPage.host = host
-		GuildPage.coalescer = ns.BrowseModel.NewCoalescer(after, GuildPage.REFRESH_DELAY, function()
-			if GuildPage:IsShown() then GuildPage:Refresh() end
-		end)
-		buildLeft(host)
-		buildRight(host)
-	end,
+	Build = GuildPage.Build,
 	OnShow = function(host, params)
-		GuildPage.host = host
-		GuildPage.k = params and params.k
-		GuildPage.unavailable[GuildPage.k or ""] = nil
-		GuildPage.offset = 0
-		GuildPage:RequestDetail()
-		GuildPage:Refresh(true)
+		GuildPage:Show(host, params and params.k, false)
 		Main:SetStatus("", nil)
 	end,
-	OnHide = function(host)
-		host.shown = false
-		GuildPage.coalescer:Cancel()
-		W.HideTooltip()
-	end,
+	OnHide = function(host) GuildPage:Hide(host) end,
 })
 
 if ns.Bus then
