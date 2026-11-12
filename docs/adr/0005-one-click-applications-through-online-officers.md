@@ -11,7 +11,7 @@ Applying must be as simple as in Albion (one button), but without a server an ap
 
 1. **Apply** sends name, class, race, level and item level, read automatically, plus the roles the player optionally ticks in the confirmation (Tank, Healer, Melee DPS, Ranged DPS, only those possible for the class): no free text. At most **one open application per character** (not per account); it expires after 14 days; after a decline the same guild can be applied to again after 7 days.
 2. It is delivered by whisper to a **contact**: the Guild Master or an officer seen online recently (their public announcements carry a contact flag). With no contact online it stays "sent" and is retried each time a contact appears.
-3. Officers keep a shared inbox in sync over the `OFFICER` channel; the highest `stateRev` wins.
+3. Officers keep a shared inbox in sync over the `OFFICER` channel; the highest `stateRev` wins, and a final state is never undone by an open copy (M4.3: the full order is in SPEC-07 §4, in Italian; if `OFFICER` does not carry addon messages, the `GUILD` fallback of SPEC-02 §7 is used).
 4. **Invite** uses the game's own guild invite. The applicant learns the result at the next contact.
 5. Officers and the Guild Master get a movable notification icon with a badge and a quick list. The Guild Master can close applications through the addon.
 

@@ -51,7 +51,7 @@ msg     = { v = PROTO, t = "<TIPO>", ... campi del tipo ... }
 | `APPACK` | WHISPER | contatto → candidato | `{id, state}` | ricezione di `APPLY` o `APPPING` |
 | `APPPING` | WHISPER | candidato → contatto | `{id}` | quando vede online un contatto della gilda |
 | `APPWD` | WHISPER | candidato → contatto | ritiro `{id}` | il candidato ritira la candidatura |
-| `APPSYNC` | OFFICER | ufficiale ↔ ufficiale | elenco compatto `{id: stateRev}` e record mancanti | al login e dopo ogni cambio |
+| `APPSYNC` | OFFICER | ufficiale ↔ ufficiale | record cambiati `{k, recs}`; elenco compatto `{k, q=1, ids = {id: versione}}`; risposta `{k, to, ids}` con gli id diversi; richiesta `{k, to, want}` ([SPEC-07 §4](SPEC-07-applications.md#4-sincronizzazione-tra-ufficiali)) | al login e dopo ogni cambio |
 | `PING` | CHANNEL | qualsiasi → tutti | `{nonce}`: **messaggio di diagnostica** | solo `/gf debug ping` (M1.8) |
 | `PONG` | WHISPER | chi risponde → mittente del `PING` | `{nonce}` | risposta a un `PING` |
 
@@ -130,7 +130,7 @@ Dove le regole sopra lasciano margine ([ADR 0021](../adr/0021-guild-copy-of-the-
 - **Ripetizione nel canale**: il membro che accetta una copia più recente invia un `ANN` dopo 5–30 s, a meno che negli ultimi 60 s abbia sentito un `ANN` della stessa `rev` (un ufficiale mette `c=1`). Una copia ritirata viene ripetuta come `DEL` solo da chi ha annunciato la gilda in questa sessione (INT-05).
 - **GLREQ**: al login e quando il catalogo pubblico mostra una `rev` più recente della copia, dopo 3–10 s, a meno che nel frattempo arrivi un `GLIST` o il `GLREQ` di un altro membro con la stessa `rev` o una più vecchia; al massimo uno ogni 5 minuti; un `GLREQ` ancora in coda viene annullato se nel frattempo arriva una di queste due cose. Il GM raccoglie le richieste per 2 s e risponde con un solo `GLIST`, al massimo uno ogni 30 s.
 
-- **APPSYNC** (OFFICER): ogni ufficiale e il GM tengono una copia della casella delle candidature. All'entrata in gioco si scambiano l'elenco compatto e si inviano i record mancanti; per ogni record vince la versione con lo `stateRev` più alto ([SPEC-07 §4](SPEC-07-applications.md#4-sincronizzazione-tra-ufficiali)). Se `OFFICER` non fosse accettato come canale per gli addon [verificare], si userebbe `GUILD` e chi non è ufficiale ignorerebbe i messaggi. È peggio per la riservatezza, quindi va deciso dopo lo spike.
+- **APPSYNC** (OFFICER): ogni ufficiale e il GM tengono una copia della casella delle candidature. All'entrata in gioco si scambiano l'elenco compatto e si inviano i record mancanti; per ogni record vince la versione con lo `stateRev` più alto ([SPEC-07 §4](SPEC-07-applications.md#4-sincronizzazione-tra-ufficiali)). Se `OFFICER` non fosse accettato come canale per gli addon [verificare], si userebbe `GUILD` e chi non è ufficiale ignorerebbe i messaggi. È peggio per la riservatezza, quindi va deciso dopo lo spike. Nel M4.3 (`Net/InboxSync.lua`) il ripiego è una sola costante, `InboxSync.DIST`; con `GUILD` un messaggio conta solo se il grado del mittente nel roster legge la chat degli ufficiali. Il dettaglio dei messaggi, della versione dei record e dei limiti è nella nota di realizzazione di [SPEC-07 §4](SPEC-07-applications.md#4-sincronizzazione-tra-ufficiali).
 
 ## 8. Integrità e limiti del modello P2P
 

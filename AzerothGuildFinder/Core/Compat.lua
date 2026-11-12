@@ -233,6 +233,34 @@ function Guild.LeaderName()
 	return nil
 end
 
+-- The rank index (0 = Guild Master) of the roster member called `name` ("Name" or "Name-Realm", compared without the
+-- realm and the case), or nil while the roster is not loaded or has no such member.
+function Guild.MemberRankIndex(name)
+	if type(name) ~= "string" or name == "" or not Guild.InGuild() then return nil end
+	local want = (name:match("^[^%-]+") or name):lower()
+	local total = Guild.RosterCount()   -- (two results: tonumber would read the second as a base)
+	total = math.min(tonumber(total) or 0, Guild.MAX_ROSTER)
+	for i = 1, total do
+		local row = Guild.RosterRow(i)
+		if row and type(row.name) == "string" and (row.name:match("^[^%-]+") or row.name):lower() == want then
+			return tonumber(row.rankIndex)
+		end
+	end
+	return nil
+end
+
+-- true when members of rank `rankIndex` read officer chat: the rank of the Guild Master, or a rank whose permissions
+-- (C_GuildInfo.GuildControlGetRankFlags, 1-based rank order) have "officer chat listen", the third flag [verify in
+-- game, SPEC-02 §7]. nil when the client does not say.
+Guild.OFFICER_LISTEN_FLAG = 3
+function Guild.RankIsOfficer(rankIndex)
+	if type(rankIndex) ~= "number" then return nil end
+	if rankIndex == 0 then return true end
+	local flags, state = first("C_GuildInfo.GuildControlGetRankFlags", rankIndex + 1)
+	if state ~= AVAILABLE or type(flags) ~= "table" then return nil end
+	return flags[Guild.OFFICER_LISTEN_FLAG] == true
+end
+
 ---------------------------------------------------------------------------------------------------------------------
 -- Player
 ---------------------------------------------------------------------------------------------------------------------
