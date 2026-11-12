@@ -55,7 +55,7 @@ Config.defaults = {
 		schemaVersion = Config.SCHEMA_VERSION,
 		officerInbox = {},             -- [guildKey] = { ... }
 		ownListing = { draft = nil, published = nil, pubAt = nil },   -- Data/OwnListing.lua
-		ui = { filters = {} },         -- notifyPos, mainPos: nil until the user moves them
+		ui = { filters = {} },         -- notifyPos, mainPos: nil until the user moves them; appsSeenAt: when the Applications panel was last left
 		minimap = { hide = false },    -- LibDBIcon format
 	},
 }
@@ -91,6 +91,7 @@ Config.rules = {
 	["char.ui.filters"] = { type = "table" },
 	["char.ui.notifyPos"] = posRule(),
 	["char.ui.mainPos"] = posRule(),
+	["char.ui.appsSeenAt"] = { type = "timestamp", optional = true },
 	["char.minimap"] = { type = "table" },
 	["char.minimap.hide"] = { type = "boolean" },
 }

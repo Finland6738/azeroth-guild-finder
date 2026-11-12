@@ -3,9 +3,9 @@
 -- What each role sees (the rules are in UI/MyGuildModel.lua and are tested without frames):
 --   member   the guild's page read-only (the same page the visitors see, UI/GuildPage.lua in "own" mode), a note that only
 --            the Guild Master can edit the listing
---   officer  the same, plus a placeholder for the Applications that arrive with M4
+--   officer  the same, plus a line with the number of pending applications (it opens the Applications tab)
 --   GM       the same with Edit listing (opens the editor on the listing, pushed on this tab) and Delist (asks first), plus
---            the placeholder for the Applications
+--            the same Applications line
 -- A guild without a listing shows an empty state ("Your guild has no listing yet", with a message to copy for the Guild
 -- Master); a member who has just logged in and whose copy may still be on its way sees "Waiting for your guild's listing..."
 -- for up to OwnListing.ARRIVAL_WAIT seconds. A Guild Master without a listing has no My Guild at all: the window gives
@@ -117,8 +117,11 @@ end
 -- The Guild Master's two buttons, the note for everybody else and the Applications placeholder, over the guild page's footer.
 local function buildExtras(host)
 	local left = host.left
-	host.apps = CreateFrame("Frame", nil, left)
+	-- the Applications line: how many wait, and a click opens the Applications tab (M4.4)
+	host.apps = CreateFrame("Button", nil, left)
 	host.apps:SetSize(LW, 52)
+	host.apps:RegisterForClicks("LeftButtonUp")
+	host.apps:SetScript("OnClick", function() Main:Select("Applications") end)
 	host.apps.title = W.Text(host.apps, "overline", "ink3")
 	host.apps.title:SetPoint("TOPLEFT", host.apps, "TOPLEFT", 0, 0)
 	host.apps.title:SetText(L["MG_APPS_TITLE"]:upper())
@@ -126,7 +129,7 @@ local function buildExtras(host)
 	host.apps.text:SetPoint("TOPLEFT", host.apps.title, "BOTTOMLEFT", 0, -3)
 	host.apps.text:SetWidth(LW)
 	host.apps.text:SetWordWrap(true)
-	host.apps.text:SetText(L["MG_APPS_SOON"])
+	host.apps.text:SetText(L["MG_APPS_NONE"])
 	host.apps:SetPoint("BOTTOMLEFT", left, "BOTTOMLEFT", 0, 96)
 	host.apps:Hide()
 
@@ -225,6 +228,10 @@ function MyGuild:Refresh()
 	host.delist:SetShown(listing and view.delist)
 	host.note:SetShown(listing and view.readOnly)
 	host.apps:SetShown(listing and view.applications)
+	if listing and view.applications then
+		local n = ns.AppsPanel and ns.AppsPanel:PendingCount() or 0
+		host.apps.text:SetText(n == 0 and L["MG_APPS_NONE"] or (n == 1 and L["MG_APPS_ONE"] or L["MG_APPS_N"]:format(n)))
+	end
 	if not (listing and view.delist) then host.confirm:Hide() end
 
 	if listing then
@@ -340,6 +347,7 @@ if ns.Bus then
 	end)
 	ns.Bus:On("OWN_LISTING_CHANGED", function() if MyGuild:IsShown() then MyGuild:Refresh() end end)
 	ns.Bus:On("ROLE_CHANGED", function() if MyGuild:IsShown() then MyGuild:Refresh() end end)
+	ns.Bus:On("INBOX_CHANGED", function() if MyGuild:IsShown() then MyGuild:Refresh() end end)
 end
 
 function MyGuild:DebugLines()
@@ -347,7 +355,7 @@ function MyGuild:DebugLines()
 	local view = Model.View(ctx)
 	return { ("My Guild: role %s, catalog %s, waiting for the copy %s -> %s%s"):format(ctx.role, tostring(ctx.status),
 		ctx.waiting and "yes" or "no", view.page and view.kind or "no My Guild tab",
-		(view.edit and ", Edit and Delist" or "") .. (view.applications and ", Applications placeholder" or "")) }
+		(view.edit and ", Edit and Delist" or "") .. (view.applications and ", Applications line" or "")) }
 end
 
 if ns.addon then

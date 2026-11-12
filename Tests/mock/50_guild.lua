@@ -13,7 +13,8 @@
 --                   members={ {name=, level=, class=, rank=<index>, online=, zone=, note=, lastOnline={y,m,d,h}} } }
 --   Mock.guild.Leave()          the character has no guild
 --   Mock.guild.SetMyRank(i)     changes the rank and fires PLAYER_GUILD_UPDATE and GUILD_ROSTER_UPDATE
---   Mock.guild.invites          names passed to C_GuildInfo.Invite
+--   Mock.guild.invites          names of the invites that went out (C_GuildInfo.Invite)
+--   Mock.guild.inviteReply      what the game answers to an invite: "ok" | "silent" | "offline" | "denied" | "inguild" | "blocked"
 -- The roster arrives asynchronously after C_GuildInfo.GuildRoster(), as in the client (GUILD_ROSTER_UPDATE on a later frame).
 local Mock, H = ...
 local W = Mock.world
@@ -134,8 +135,24 @@ function C_GuildInfo.GuildRoster()
 	C_Timer.After(0, function() Mock.Fire("GUILD_ROSTER_UPDATE") end)
 end
 
+-- What the game answers is Mock.guild.inviteReply: "ok" (default: the invite goes out and the game says so), "silent" (it
+-- goes out and the game says nothing), "offline" (UI_ERROR_MESSAGE: no player named ...), "denied" (no permission),
+-- "inguild" (already in a guild) or "blocked" (a protected call: ADDON_ACTION_FORBIDDEN, nothing happens).
 function C_GuildInfo.Invite(name)
-	guild.invites[#guild.invites + 1] = name
+	local reply = guild.inviteReply or "ok"
+	local base = tostring(name):match("^[^%-]+") or tostring(name)
+	if reply == "blocked" then
+		Mock.Fire("ADDON_ACTION_FORBIDDEN", "AzerothGuildFinder", "C_GuildInfo.Invite()")
+	elseif reply == "offline" then
+		Mock.Fire("UI_ERROR_MESSAGE", 50, ("No player named '%s' is currently playing."):format(base))
+	elseif reply == "denied" then
+		Mock.Fire("UI_ERROR_MESSAGE", 51, "You don't have permission to do that.")
+	elseif reply == "inguild" then
+		Mock.Fire("UI_ERROR_MESSAGE", 52, ("%s is already in a guild."):format(base))
+	else
+		guild.invites[#guild.invites + 1] = name
+		if reply == "ok" then Mock.Fire("CHAT_MSG_SYSTEM", ("You have invited %s to join your guild."):format(base)) end
+	end
 end
 
 -- rankOrder is 1-based (luaIndex). Flags follow the order of the retail UI: 1 guild chat listen, 2 guild chat speak,

@@ -261,6 +261,33 @@ function Guild.RankIsOfficer(rankIndex)
 	return flags[Guild.OFFICER_LISTEN_FLAG] == true
 end
 
+-- Invites the character `name` ("Name" or "Name-Realm") to the player's guild with the game's own call, C_GuildInfo.Invite
+-- (the Invite button of the Applications panel, SPEC-07 §5). The call returns nothing: whether the invite really went out
+-- is told by the game's messages (Data/Decisions.lua reads them). Returns "sent" when the call ran, or nil and why: "name"
+-- (not a plain character name), "missing" (no such function), "restricted" (the client refuses it) or "error".
+-- A protected call from addon code does not raise: the client fires ADDON_ACTION_FORBIDDEN instead (Data/Decisions.lua).
+function Guild.Invite(name)
+	if type(name) ~= "string" or name == "" or name:find("[%s|%c]") or #name > 64 then return nil, "name" end
+	local state = Compat.Call("C_GuildInfo.Invite", name)
+	if state == AVAILABLE then return "sent" end
+	return nil, state
+end
+
+-- The text of a client global string (ERR_GUILD_INVITE_S ...), or nil when the client has none or hides it.
+function Compat.GlobalString(name)
+	local v = Resolve(name)
+	if type(v) == "string" and not IsSecret(v) and v ~= "" then return v end
+	return nil
+end
+
+-- The name of a race for its id in the client's own language (C_CreatureInfo.GetRaceInfo), nil when unknown.
+function Compat.RaceName(raceID)
+	if type(raceID) ~= "number" then return nil end
+	local info = first("C_CreatureInfo.GetRaceInfo", raceID)
+	if type(info) == "table" and type(info.raceName) == "string" and info.raceName ~= "" then return info.raceName end
+	return nil
+end
+
 ---------------------------------------------------------------------------------------------------------------------
 -- Player
 ---------------------------------------------------------------------------------------------------------------------
@@ -394,6 +421,14 @@ end
 function Chat.OpenWhisper(name)
 	if type(name) ~= "string" or name == "" or name:find("[%s|]") then return false end
 	local _, state = first("ChatFrame_OpenChat", "/w " .. name .. " ")
+	return state == AVAILABLE
+end
+
+-- The fallback of the Invite button (SPEC-07 §5, spike S10): opens the chat box with "/ginvite Name " typed in; the officer
+-- presses Enter. false when the name is not a plain character name or the client has no ChatFrame_OpenChat.
+function Chat.OpenGuildInvite(name)
+	if type(name) ~= "string" or name == "" or name:find("[%s|%c]") then return false end
+	local _, state = first("ChatFrame_OpenChat", "/ginvite " .. name .. " ")
 	return state == AVAILABLE
 end
 
