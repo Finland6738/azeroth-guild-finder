@@ -578,10 +578,27 @@ Main:RegisterPage(Nav.SETTINGS, {
 		shareHelp:SetWordWrap(true)
 		shareHelp:SetText(L["SETTINGS_SHARE_ALTS_HELP"])
 		host.shareSwitch, host.privacy = share, privacy
+
+		-- Notifications: how the Guild Master and the officers hear about applications (SPEC-07 §6; the icon is M4.5). The
+		-- same three switches are on the Applications tab.
+		local notify = W.Card(host.content, { kind = "plain", title = L["SETTINGS_NOTIFY"], glyph = "glyph_inbox", height = 214 })
+		notify:SetPoint("TOPLEFT", privacy, "BOTTOMLEFT", 0, -16)
+		notify:SetPoint("TOPRIGHT", privacy, "BOTTOMRIGHT", 0, -16)
+		local notifyNote = W.Text(notify.body, "caption", "ink3")
+		notifyNote:SetPoint("TOPLEFT", notify.body, "TOPLEFT", 0, 0)
+		notifyNote:SetPoint("RIGHT", notify.body, "RIGHT", 0, 0)
+		notifyNote:SetWordWrap(true)
+		notifyNote:SetText(L["SETTINGS_NOTIFY_NOTE"])
+		if ns.AppsPanel then host.notifySwitches = ns.AppsPanel.BuildOptions(notify.body, 420, notifyNote, 8) end
+		host.notify = notify
 	end,
 	OnShow = function(host)
 		Main.scaleControl:SetSelected(Main:GetScale(), true)
 		if ns.Stats then host.shareSwitch:SetChecked(ns.Stats:Sharing(), true) end
+		-- only the Guild Master and the officers have notifications (SPEC-00 §5)
+		local role = ns.Role and ns.Role:Get() or "none"
+		host.notify:SetShown(host.notifySwitches ~= nil and ns.AppsModel ~= nil and ns.AppsModel.CanSee(role))
+		if host.notifySwitches then host.notifySwitches.Refresh() end
 	end,
 })
 

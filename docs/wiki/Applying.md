@@ -1,6 +1,6 @@
 # Applying
 
-> **Status:** applying works in the addon since M4.1 and, since M4.2, the application **goes by itself to the guild's Guild Master or an officer** when one is online with Guild Finder. The officers' panel to read it arrives with M4.4. Nothing of this has been tried in WoW Forever yet.
+> **Status:** applying works in the addon since M4.1 and, since M4.2, the application **goes by itself to the guild's Guild Master or an officer** when one is online with Guild Finder. Officers read it in the **Applications** panel (see [[Managing Applications|Managing-Applications]]; since M4.4). Nothing of this has been tried in WoW Forever yet.
 
 ## Apply in three steps
 
