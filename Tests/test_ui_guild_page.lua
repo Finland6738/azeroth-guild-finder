@@ -84,19 +84,13 @@ describe("opening", function()
 		eq(A().Browse.search, "aur")
 	end)
 
-	it("the Apply button is not there until the applications exist", function()
+	it("the left page has the Apply button under the tags (M4.1; its states are in test_applications.lua)", function()
 		put("Aurora")
 		putDetail("Aurora")
 		local h = open("Aurora")
-		local function scan(frame)
-			if frame.GetLabel then
-				local label = frame:GetLabel()
-				falsy(label:find("Apply"), "no Apply button yet")
-			end
-			for _, child in ipairs(frame._children or {}) do scan(child) end
-		end
-		scan(h.left)
-		scan(h.content)
+		truthy(h.apply:IsShown())
+		eq(h.apply:GetLabel(), "Apply to Aurora")
+		truthy(h.applyNote:IsShown())
 	end)
 
 	it("opening one guild after another shows the second, not the first", function()

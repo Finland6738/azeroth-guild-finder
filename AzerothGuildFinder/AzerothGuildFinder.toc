@@ -34,6 +34,7 @@ Net\Ping.lua
 Net\Sync.lua
 Data\Stats.lua
 Data\OwnListing.lua
+Data\Applications.lua
 UI\Skin.lua
 UI\Nav.lua
 UI\Widgets\Base.lua
@@ -45,14 +46,17 @@ UI\Emblem.lua
 UI\BrowseModel.lua
 UI\GuildPageModel.lua
 UI\MyGuildModel.lua
+UI\ApplyModel.lua
 UI\FilterModel.lua
 UI\EditorModel.lua
 UI\Main.lua
+UI\Apply.lua
 UI\FilterPanel.lua
 UI\Browse.lua
 UI\GuildPage.lua
 UI\Editor.lua
 UI\MyGuild.lua
+UI\MyApplication.lua
 UI\EmblemDesigner.lua
 UI\EditorSteps.lua
 UI\Gallery.lua

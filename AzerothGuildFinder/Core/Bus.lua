@@ -25,6 +25,11 @@
 --                                                        may read differently now (Emblem.ReadTabard).
 --   STATS_CHANGED(k)                                     Data/Stats.lua; a GTOK arrived or the sharing setting changed: the
 --                                                        statistics of guild k (the player's own) may read differently now.
+--   APPLICATION_CHANGED(id, state, oldState)            Data/Applications.lua; the player's own application id was saved (oldState
+--                                                        nil), withdrawn, answered by an officer or expired.
+--   APPLICATION_OUTBOX(kind, id)                         Data/Applications.lua; application id needs a message to an officer: kind
+--                                                        "APPLY" or "APPWD" (the network sends it from M4.2: Applications:Outbox()).
+--   APPLICATION_SEEN()                                   Data/Applications.lua; the player looked at the changes (the tab's dot goes).
 -- Later modules add their events here.
 local ADDON_NAME, ns = ...
 ns = ns or {}

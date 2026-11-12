@@ -2,6 +2,7 @@
 --   AzerothGuildFinderDB          (account)   = { schemaVersion, accountSecret, catalog[realm][faction], syncAt, tokens,
 --                                                 settings }
 --   AzerothGuildFinderCharDB      (character) = { schemaVersion, application, officerInbox, ownListing, ui, minimap }
+--                                                 application = { recs = { ... } } is owned by Data/Applications.lua
 -- Load() runs on ADDON_LOADED (from AGF:OnInitialize): defaults are merged without overwriting anything, old data is
 -- migrated step by step, bad values are reset and listed in Config.issues. Data from a NEWER schema is never rewritten:
 -- the addon works on a copy and refuses writes (Config:IsReadOnly). Nothing here reads a player or guild name.

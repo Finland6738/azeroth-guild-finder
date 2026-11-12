@@ -192,4 +192,4 @@ Esempi: `"Ördine del Drago"` → `ordinedeldrago`; `"[AD] GankEmAll"` → `adga
 | `stateRev` | int | aumenta a ogni cambio di stato |
 | `by` | string | chi ha deciso (visibile solo a GM e ufficiali) |
 
-Ciclo di vita e regole in [SPEC-07](SPEC-07-applications.md).
+Ciclo di vita e regole in [SPEC-07](SPEC-07-applications.md). Il candidato conserva le proprie candidature in `AzerothGuildFinderCharDB.application.recs`, con tre campi solo locali: `upd` (ora dell'ultimo cambio di stato), `wd` (ritiro da consegnare) e `unseen` (cambio non ancora visto) ([nota del M4.1](SPEC-07-applications.md#7-lato-candidato-my-application)).

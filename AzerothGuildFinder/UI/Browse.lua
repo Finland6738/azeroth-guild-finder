@@ -3,7 +3,7 @@
 -- What the player sees: on the right page a search box (3 letters, normalized, 250 ms after the last key), the count
 -- "24 of 142 guilds" and the fixed "Sorted A-Z"; under it the guild cards, one every 188 px, scrolled with the mouse wheel
 -- or the bar; a status bar. On the left page the filters (UI/FilterPanel.lua, rules in UI/FilterModel.lua). A click on a
--- card opens its page (UI/GuildPage.lua, M2.7).
+-- card opens its page (UI/GuildPage.lua, M2.7); its Apply button (UI/Apply.lua, M4.1) asks to confirm and saves an application.
 -- All rules (order, search, states, texts of a card, which rows are visible) live in UI/BrowseModel.lua and are tested
 -- without frames; this file creates the frames and copies what the model says into them.
 --
@@ -35,6 +35,7 @@ Browse.PAGE = "FindGuild"            -- the tab id (UI/Nav.lua)
 Browse.GUILD_PAGE = "GuildPage"      -- the page UI/GuildPage.lua registers
 Browse.WHEEL_STEP = 64               -- px per notch of the mouse wheel
 Browse.POLL = 5                      -- seconds between two looks at the sync state while the page is shown
+Browse.APPLY_MAX_W = 260             -- px, the widest the Apply button of a card gets (a longer reason is cut; the tooltip has it)
 
 local M = Skin.METRICS
 local CARD_H, STEP, GAP = Model.CARD_H, Model.STEP, Model.GAP
@@ -148,6 +149,14 @@ local function createRow(parent, slot)
 	row.more = W.Text(row, "caption", "ink3")
 	row.updated = text(row, "caption", "ink3", COL[3], y2 + 1, COL_W)
 
+	-- Apply, at the bottom right of the upper part over the banner (UI/Apply.lua: its state and reason, SPEC-05 §4)
+	row.apply = W.Button(row, { text = L["APPLY"], kind = "primary", size = "sm" })
+	row.apply:SetPoint("BOTTOMRIGHT", row, "TOPRIGHT", -14, -(TOP_H - 12))
+	row.apply:SetFrameLevel(row:GetFrameLevel() + 4)
+	row.apply:EnableMouseWheel(true)
+	row.apply:SetScript("OnMouseWheel", function(_, delta) Browse:ScrollBy(-delta * Browse.WHEEL_STEP) end)
+	row.apply:Hide()
+
 	-- hover: a gold edge; the tooltip has the short description and the requirement
 	row:SetScript("OnEnter", function(self) self.edge:SetHex("#d6a23a", 1) end)
 	row:SetScript("OnLeave", function(self) self.edge:SetHex("#a06e3c", 0.45) end)
@@ -243,6 +252,10 @@ local function bindRow(row, card, index)
 		row.more:Hide()
 	end
 	row.updated:SetText(card.updatedText or "")
+
+	-- Apply: a row of the list only (the editor's preview, index 0, shows none)
+	if index and index > 0 and ns.Apply then ns.Apply.Bind(row.apply, card.k, "card", Browse.APPLY_MAX_W)
+	else row.apply:Hide() end
 
 	-- tooltip: the description of the summary, then the requirement
 	local lines = {}
@@ -576,6 +589,9 @@ if ns.Bus then
 	ns.Bus:On("CATALOG_UPDATED", function() Browse:Touch() end)
 	ns.Bus:On("CATALOG_SYNCED", function() Browse:Touch() end)
 	ns.Bus:On("CHANNEL_READY", function() Browse:Touch() end)
+	-- an application saved, withdrawn or answered changes the Apply buttons of the cards
+	ns.Bus:On("APPLICATION_CHANGED", function() Browse:RefreshNow() end)
+	ns.Bus:On("TRANSPORT_LISTEN_ONLY", function() Browse:RefreshNow() end)
 end
 if ns.addon then
 	ns.addon.Browse = Browse

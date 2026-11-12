@@ -5,8 +5,8 @@
 --
 --   Left page   the emblem (UI/Emblem.lua, 150 px), name, subtitle, tags (languages, faction, commitment); the Discord copy
 --               field (the fixed prefix https://discord.gg/ plus the code: a click selects it all, Ctrl+C copies); the contact
---               characters with a Whisper button; "Listed since ... · Updated ..." at the bottom. The Apply button is not
---               here yet: it arrives with the applications (M4).
+--               characters with a Whisper button; "Listed since ... · Updated ..." at the bottom. Under the tags the Apply
+--               button (UI/Apply.lua, M4.1) with its state and one line that explains it (SPEC-05 §4).
 --   Right page  the banner by client fileID, the gold "Looking for" card over it, About, Activity (days and times in the
 --               visitor's time zone, UTC smaller), Members (aggregates only), Requirements checked against the visitor,
 --               How applying works. The page scrolls with the mouse wheel when it is taller than the window.
@@ -119,6 +119,8 @@ local function buildLeft(host)
 	host.tags = {}
 	host.appsNote = W.Text(left, "caption", "ink2", "CENTER")
 	host.appsNote:SetText(L["GP_APPS_CLOSED"])
+	host.apply = W.Button(left, { text = L["APPLY"], kind = "primary", size = "lg", width = LW })
+	host.applyNote = W.Text(left, "caption", "ink2", "CENTER")
 	host.divider = W.Divider(left, LW)
 	host.contactTitle = W.Text(left, "overline", "ink3")
 	host.contactTitle:SetText(L["GP_CONTACT"]:upper())
@@ -176,6 +178,7 @@ local function bindLeft(host, view)
 	if view.gone then
 		host.sub:SetText("")
 		host.tagHolder:Hide(); host.appsNote:Hide(); host.divider:Hide(); host.contactTitle:Hide(); host.copy:Hide()
+		host.apply:Hide(); host.applyNote:Hide()
 		host.detailMsg:Hide(); host.footer:SetText("")
 		for _, row in ipairs(host.contactRows) do row:Hide() end
 		add(host.emblem, 150, "TOP"); add(host.name, nameH, "TOP")
@@ -213,10 +216,24 @@ local function bindLeft(host, view)
 		if view.appsClosed then noteH = setWrapped(host.appsNote, L["GP_APPS_CLOSED"], LW) end
 		host.divider:Show(); host.contactTitle:Show()
 
+		-- Apply (a visitor only: the own guild's page in My Guild has none). Closed applications hide it (the note says so).
+		local applyH, applyNoteH = 0, 0
+		local apply = (not GuildPage.own) and ns.Apply and ns.Apply.Bind(host.apply, view.k, "page", LW) or nil
+		GuildPage.applyView = apply
+		if apply and apply.shown then
+			applyH = host.apply:GetHeight()
+			applyNoteH = setWrapped(host.applyNote, apply.note or "", LW)
+		else
+			host.apply:Hide()
+		end
+		host.applyNote:SetShown(applyNoteH > 0)
+
 		add(host.emblem, 150, "TOP")
 		add(host.name, nameH, "TOP")
 		add(host.sub, subH, "TOP")
 		add(host.tagHolder, tagsH, "TOP")
+		add(host.apply, applyH, "TOP")
+		add(host.applyNote, applyNoteH, "TOP")
 		add(host.appsNote, noteH, "TOP")
 		add(host.divider, 1)
 		add(host.contactTitle, 14)
@@ -850,5 +867,7 @@ if ns.Bus then
 	ns.Bus:On("CATALOG_UPDATED", function(k, what) GuildPage:OnCatalogChanged(k, what) end)
 	ns.Bus:On("DETAIL_UNAVAILABLE", function(k) GuildPage:OnDetailUnavailable(k) end)
 	ns.Bus:On("STATS_CHANGED", function(k) GuildPage:OnCatalogChanged(k, "stats") end)
+	-- an application saved, withdrawn or answered changes the Apply button
+	ns.Bus:On("APPLICATION_CHANGED", function() if GuildPage:IsShown() then GuildPage:Refresh() end end)
 end
 if ns.addon then ns.addon.GuildPage = GuildPage end

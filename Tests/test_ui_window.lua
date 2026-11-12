@@ -446,8 +446,9 @@ describe("pages", function()
 	end)
 
 	it("a tab nobody registered shows a short 'coming soon' page", function()
+		main().pages.MyApplication = nil   -- (Find a Guild has its page since M2.5, My Application since M4.1)
 		main():Show()
-		main():Select("MyApplication")   -- (Find a Guild has its page since M2.5)
+		main():Select("MyApplication")
 		local host = main().hosts.MyApplication
 		truthy(host.content:IsShown())
 		eq(host.card.title:GetText(), "My Application")
