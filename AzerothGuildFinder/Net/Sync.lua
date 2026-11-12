@@ -80,6 +80,7 @@ local function resetState()
 		details = {},       -- [k] = { nonce, at, gen } pending detail requests
 		contacts = {},      -- [k] = { [sender] = last seen }      memory only
 		lastAnn = {},       -- [k] = { rev, srev, at }
+		lastContactAnn = {}, -- [k] = { rev, srev, at }: the same, only for ANN with c = 1 (a contact's turn, §5)
 		peers = {},         -- [name hash] = last seen on the channel
 		recent = {},        -- { { name =, at = } } newest first   memory only
 		nonces = {},        -- [nonce] = true for the CATREQs of this client in the last ANSWER_TTL seconds
@@ -250,10 +251,21 @@ end
 function Sync:LastAnnounce(k) return state.lastAnn[k] end
 
 -- §5 suppression: true when an ANN of guild k with rev and srev equal or higher arrived after `since` (Now() time),
--- so this client skips its own periodic ANN for one turn.
-function Sync:Suppressed(k, rev, srev, since)
-	local a = state.lastAnn[k]
+-- so this client skips its own periodic ANN for one turn. `contact`: the turn of a contact (GM or officer, c = 1) is
+-- skipped only for another contact's ANN: a member's ANN does not tell applicants that a contact is online (SPEC-07 §3).
+function Sync:Suppressed(k, rev, srev, since, contact)
+	local a = (contact and state.lastContactAnn or state.lastAnn)[k]
 	return a ~= nil and a.at > (since or 0) and a.rev >= (rev or 0) and a.srev >= (srev or 0)
+end
+
+local function noteAnn(list, msg)
+	local a = list[msg.k]
+	local srev = tonumber(msg.srev) or 0
+	if not a or msg.rev > a.rev or (msg.rev == a.rev and srev >= a.srev) then
+		list[msg.k] = { rev = msg.rev, srev = srev, at = now() }
+	else
+		a.at = now()
+	end
 end
 
 local function onAnn(msg, sender)
@@ -266,15 +278,14 @@ local function onAnn(msg, sender)
 		state.stats.ann = state.stats.ann + 1
 		-- our own ANN comes back from the channel: it must not suppress our next periodic turn (§5)
 		if not isSelf(sender) then
-			local a = state.lastAnn[msg.k]
-			local srev = tonumber(msg.srev) or 0
-			if not a or msg.rev > a.rev or (msg.rev == a.rev and srev >= a.srev) then
-				state.lastAnn[msg.k] = { rev = msg.rev, srev = srev, at = now() }
-			else
-				a.at = now()
+			noteAnn(state.lastAnn, msg)
+			if msg.c == 1 then
+				noteAnn(state.lastContactAnn, msg)
+				rememberContact(msg.k, sender)
+				-- a contact of guild k is online: the applications waiting for it go out (Net/Delivery.lua)
+				emit("CONTACT_SEEN", msg.k, sender)
 			end
 		end
-		if msg.c == 1 and not isSelf(sender) then rememberContact(msg.k, sender) end
 	else
 		state.stats.annRejected = state.stats.annRejected + 1
 	end

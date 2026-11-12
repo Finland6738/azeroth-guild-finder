@@ -371,6 +371,35 @@ describe("announcements", function()
 		eq(OL().state.stats.periodicSuppressed, 1)
 	end)
 
+	it("an officer's turn is skipped only for another contact's ANN (M4.2: applicants must hear a contact)", function()
+		inGuild(1)
+		capture()
+		local rec = fields({ k = KEY, rev = 4, upd = 1767000000, first = 1766000000, own = "0badc0de" })
+		AzerothGuildFinderCharDB.ownListing.published = A().Listing.SanitizeFull(rec)
+		local srev = S().Srev(GetServerTime())
+		local since = GetTime()
+		local ann = fields({ t = "ANN", k = KEY, rev = 4, upd = 1767000000, first = 1766000000, own = "0badc0de", srev = srev,
+			st = { m = 5, a7 = 4 } })
+		for f in pairs({ desc = 1, disc = 1, cont = 1, note = 1 }) do ann[f] = nil end
+		local seen = {}
+		A().Bus:On("CONTACT_SEEN", function(k, who) seen[#seen + 1] = { k, who } end)
+		Mock.Advance(1)
+		Sync():OnMessage(ann, "Garrosh", "CHANNEL")   -- a member's ANN
+		eq(OL():AnnounceTurn(since), true, "a member's ANN does not stand for a contact")
+		eq(sentOf("ANN")[1].msg.c, 1)
+		eq(#seen, 0)
+		ann.c = 1
+		Mock.Advance(1)
+		Sync():OnMessage(ann, "Jaina", "CHANNEL")      -- another officer's ANN
+		deepEq(seen, { { KEY, "Jaina" } })
+		local ok, why = OL():AnnounceTurn(since)
+		eq(ok, false) eq(why, "suppressed")
+		-- a member's turn is still skipped by any ANN of the guild
+		Mock.guild.SetMyRank(3)
+		A().Role:Refresh()
+		eq(select(2, OL():AnnounceTurn(since)), "suppressed")
+	end)
+
 	it("our own ANN coming back from the channel never suppresses our next turn", function()
 		inGuild(0)
 		capture()

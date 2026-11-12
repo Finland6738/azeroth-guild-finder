@@ -28,6 +28,8 @@
 --                Data/Stats.lua and c = 1 for the Guild Master and the officers. A turn is skipped when an ANN of the guild
 --                from another client with the same or a higher rev and srev arrived since the turn was armed
 --                (SPEC-02 §5), so a guild with many members online sends about one ANN per turn, not one per member.
+--                The turn of a contact (c = 1) is skipped only for another contact's ANN (M4.2): applicants learn from
+--                it that a contact is online (SPEC-07 §3).
 --                Every ANN this client sends (publish, relay, periodic) carries the statistics; the guild copy does not.
 --
 -- Bus event: OWN_LISTING_CHANGED(what, k), what = "draft", "published", "delisted", "received". Sender names stay in
@@ -554,12 +556,13 @@ function OwnListing:AnnounceTurn(since)
 		local st, s, k = ns.Stats:Current()
 		if st and k == key then srev = s end
 	end
-	if ns.Sync:Suppressed(key, copy.rev, srev, since or 0) then
+	local contact = role == "officer" or role == "gm"
+	if ns.Sync:Suppressed(key, copy.rev, srev, since or 0, contact) then
 		state.stats.periodicSuppressed = state.stats.periodicSuppressed + 1
 		return false, "suppressed"
 	end
 	state.stats.periodic = state.stats.periodic + 1
-	announce(copy, role == "officer" or role == "gm")
+	announce(copy, contact)
 	return true
 end
 

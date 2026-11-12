@@ -25,9 +25,10 @@
 --   not looked at yet, the dot on the My Application tab).
 -- Final records are kept 30 days after their last change (the cooldown needs the declines), at most MAX_RECORDS in all.
 --
--- Network (M4.2): nothing is sent here. Each record that needs a message is in `Applications:Outbox()` (APPLY for a sent
+-- Network: nothing is sent here. Each record that needs a message is in `Applications:Outbox()` (APPLY for a sent
 -- application, APPPING for a received one, APPWD for a withdrawal not yet confirmed) and every new need is announced on
--- the Bus as APPLICATION_OUTBOX(kind, id). An answer from an officer comes back through `Applications:OnAck(id, state)`.
+-- the Bus as APPLICATION_OUTBOX(kind, id); Net/Delivery.lua (M4.2) whispers them to the guild's contacts. An answer from
+-- an officer comes back through `Applications:OnAck(id, state)`.
 -- Every change of a record is announced as APPLICATION_CHANGED(id, state, oldState).
 local ADDON_NAME, ns = ...
 ns = ns or {}
