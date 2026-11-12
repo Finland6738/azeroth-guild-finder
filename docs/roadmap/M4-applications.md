@@ -10,7 +10,9 @@
 - Spec: SPEC-07 §1–§2, §7, ADR 0005
 - Scope: `Data/Applications.lua` (record, states, `stateRev`, APP-01…APP-06: one open application **per character**, 14-day expiry, 7-day cooldown after a decline); Apply button states on the card and the guild page; confirmation with **optional role checkboxes** (only roles valid for the class); My Application tab with status, Withdraw, View guild.
 - Done when:
-  - [ ] Every Apply state of SPEC-05 §4 is shown with its reason.
+  - [x] Offline: `Data/Applications.lua` keeps the record of SPEC-03 §8 per character (`AzerothGuildFinderCharDB.application`), with the states and transitions of SPEC-07 §2 checked pair by pair, `stateRev` raised at every change, APP-01…APP-06 (no guild, one open application per character, `apps = true` and the requirements, the roles of the class only, 14-day expiry, 7-day cooldown after a decline), the officers' conflict rule for M4.3, the repair of damaged saved data, and a clean hook for M4.2 (`Applications:Outbox()`, Bus `APPLICATION_OUTBOX`, `Applications:OnAck`); nothing is sent (`Tests/test_applications.lua`).
+  - [x] Offline: every Apply state of SPEC-05 §4 is shown with its reason on the card and on the guild page (on the button, in the tooltip, and in a line under the guild page's button); the confirmation offers only the roles of the player's class, none ticked; My Application shows the status with its explanation, the road, the roles, the expiry, Withdraw (asks first) and View guild, the empty state, and a dot on the tab for a change the player did not make (`Tests/test_ui_apply.lua`).
+  - [ ] In game: the Apply button, the confirmation and My Application look like mockups 01, 02 and 06 D, every state reads well at 60 % and 140 %, and an application survives `/reload` and a logout on that character only ([checklist](../checklists/M4.md)).
 - Tests: every rule and transition.
 
 ### M4.2 — Delivery to officers

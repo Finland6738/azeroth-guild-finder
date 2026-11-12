@@ -52,7 +52,7 @@ Guilds are **always in alphabetical order**: nobody can pay or post repeatedly t
 - **May be inactive** (amber) when the guild has not announced itself for more than 14 days; after 30 days it leaves the list;
 - an information band: active members (*31 active / 149*), the play days and times **in your time zone**, the classes they look for (up to four icons, then *+2*; *Looking for any class* when they take anyone), up to three activities, the requirement checked against your character (*Level 20+* with a check mark, or *Level 40+ (you are 32)* in red) and when the listing was last updated.
 
-Hover a card to see its subtitle and requirement; click it to open [[The Guild Page|The-Guild-Page]]; **Back** returns to the list with your search, filters and place. The Discord and Apply buttons of the cards arrive with the applications.
+Hover a card to see its subtitle and requirement; click it to open [[The Guild Page|The-Guild-Page]]; **Back** returns to the list with your search, filters and place. The **Apply** button at the bottom right of a card applies to that guild after a short question, or says why you cannot (see [[Applying|Applying]]); hover it for the full reason. The Discord button of the cards is not there yet: the guild page has the Discord link.
 
 Only guilds of **your faction and realm** are shown.
 
