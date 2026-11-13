@@ -13,7 +13,7 @@ body:
     id: version
     attributes:
       label: Addon version
-      description: Shown in the AddOns list at the character screen, or with `/gf debug`.
+      description: Shown in the AddOns list at the character screen, or at the top of the `/gf debug` report.
       placeholder: "0.x.y"
     validations:
       required: true
@@ -56,5 +56,6 @@ body:
     id: errors
     attributes:
       label: Lua errors and /gf debug output (optional)
-      description: Paste the error text or the diagnostic output. Remove player names first.
+      description: |
+        Type `/gf debug` in the game: the report opens in a box. Press **Select all**, then Ctrl+C, and paste it here. It holds the versions, the capabilities, the sync state, the last addon errors and your settings, and no player or guild names. If the game showed a Lua error box, paste its text too. Remove any name you do not want to share.
       render: text

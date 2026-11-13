@@ -26,11 +26,16 @@ Mock.errors = W.errors
 
 local userHandler
 
+local recording
 local function record(msg)
+	-- a handler installed with seterrorhandler may wrap this recorder (the addon's diagnostics do): no second record
+	if recording then return msg end
+	recording = true
 	W.errors[#W.errors + 1] = { message = tostring(msg), trace = H.traceback(tostring(msg), 3) }
 	if userHandler then
 		pcall(userHandler, msg)
 	end
+	recording = false
 	return msg
 end
 
@@ -227,6 +232,12 @@ end
 function Mock.PlainOutput()
 	local lines = {}
 	for i, line in ipairs(W.output) do lines[i] = Mock.Strip(line) end
+	-- `/gf debug` shows its report in the copy box (M5.4), not in the chat: the open box counts as output
+	local addon = _G.AzerothGuildFinder
+	local box = addon and addon.DiagnosticsBox
+	if box and box.IsShown and box:IsShown() and box:GetText() then
+		for line in (box:GetText() .. "\n"):gmatch("(.-)\n") do lines[#lines + 1] = line end
+	end
 	return lines
 end
 
