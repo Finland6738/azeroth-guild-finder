@@ -31,11 +31,21 @@ Issues, pull requests, commit messages and public documentation are in **English
 ## 3. Changing the code
 
 - Modules are isolated and talk through the internal event bus ([SPEC-01 §3](docs/specs/SPEC-01-platform-architecture.md)).
-- Every visible string goes through AceLocale (`L["KEY"]`).
+- Every visible string goes through AceLocale (`L["KEY"]`), see [Localization and key names](#localization-and-key-names).
 - Saved data changes need a schema migration ([ADR 0011](docs/adr/0011-savedvariables-and-schema-versions.md)).
 - Never call game textures by copying files: reference them by fileID ([ADR 0007](docs/adr/0007-emblems-from-tabard-pieces.md)).
 - The addon lives in `AzerothGuildFinder/` (Lua 5.1 only). Libraries are never committed: they are pinned in `.pkgmeta`; run `python -I -X utf8 tools/fetch_libs.py` to download them and `python -I -X utf8 tools/install_addon.py` to copy the addon into your AddOns folder (path in the git-ignored `tools/local.ini`). The textures in `AzerothGuildFinder/Media/` are drawn by `python -X utf8 tools/make_media.py` (needs Pillow): change the script, not the files.
 - Mockups: edit `docs/specs/mockups/html/`, then run `bash docs/specs/mockups/render.sh` (Chrome and Python with Pillow).
+
+### Localization and key names
+
+Every visible string is an `enUS` key in `AzerothGuildFinder/Locale/enUS.lua` and the code reads it with `L["KEY"]` (a later `Locale/itIT.lua` needs no code change, [ADR 0016](docs/adr/0016-english-first-ui-and-documentation-languages.md)). `Tests/test_l10n.lua` enforces it:
+
+- **Hard-coded strings**: the test parses every file in `UI/` and fails on a string literal that is a multi-word sentence, or that goes into a text slot (`SetText`, `label =`, `title =`, `text =`, `help =`, `tooltip =`, ...) without `L`. Key-shaped literals (`"SETTINGS_SCALE"`) and `#rrggbb` colours are fine.
+- **Exceptions** (strings the player never reads: a slash command shown as a hint, a state name, a colour token, a development sample): end the line with `-- l10n-ok: reason`, or put that comment on the line above. For a block, wrap it in `-- l10n-off: reason` and `-- l10n-on`. The body of a `DebugLines` function and the `AddDebugSection` calls are exempt: debug output is English only because it goes into bug reports.
+- **Keys**: every `L["KEY"]` / `L("KEY")` must exist in `enUS`, and every `enUS` key must be used: by `L[...]`, as a key-shaped literal kept in a data table (`label = "APPS_OPT_ICON"`), or through a built prefix or suffix (`"ACTIVITY_" .. id`, `"PACE_" .. v .. "_TIP"`). An unused key fails the test: delete it.
+
+Naming a key: `AREA_THING` or `AREA_THING_PART`, upper case with underscores; the area first (`SETTINGS_`, `BROWSE_`, `APPS_`, `ED_` for the editor, `MG_` for My Guild, `GP_` for the guild page, `PING_`, `HELP_`, ...), then what it is, then a suffix for its role: `_TIP` a tooltip, `_HELP` the longer explanation of a setting, `_TITLE` a heading, `_HINT` a hint below a field, `_EMPTY` an empty state. Keys that are built from data end in the data's own id (`LANG_de`, `CLASS_WARRIOR`, `ACTIVITY_3`). Put a key next to the others of its area. Write the value as a whole sentence with `%s` / `%d` placeholders (never glue sentences from pieces, other languages order words differently) and read it with `L["KEY"]:format(...)`.
 
 ## 4. Checks and tests
 

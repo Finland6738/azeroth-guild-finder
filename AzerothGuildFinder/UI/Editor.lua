@@ -316,11 +316,13 @@ function Editor:RefreshPages()
 end
 
 -- Development builds: sample values so that the checklist and Publish can be tried before the steps exist.
+-- l10n-off: sample values of development builds only (never in a release)
 Editor.SAMPLE = {
 	sub = "A sample listing from a development build", desc = "This listing was filled in with sample values by a development build of the addon.",
 	lang1 = 1, lang = 1, tags = { 1, 2 }, pace = 2, days = 31, t0 = 1140, t1 = 1380, rec = 1, apps = true, want = { [0] = 15 },
 	newb = true, minL = 1, emb = { t = 2, e = 0 },
 }
+-- l10n-on
 
 function Editor:FillSample()
 	if not (ns.Config and ns.Config.DEV) then return false end

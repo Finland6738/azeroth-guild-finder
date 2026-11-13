@@ -96,7 +96,7 @@ function Model.Menu(ctx, L)
 		{ key = "lock", text = L["NOTIFY_MENU_LOCK"], checked = ctx.locked == true, kind = "check" },
 		{ key = "onlyWhenPending", text = L["NOTIFY_MENU_PENDING"], checked = ctx.onlyWhenPending == true, kind = "check" },
 		{ key = "sound", text = L["NOTIFY_MENU_SOUND"], checked = ctx.sound == true, kind = "check" },
-		{ key = "hide", text = L["NOTIFY_MENU_HIDE"], hint = "/gf notify", kind = "action" },
+		{ key = "hide", text = L["NOTIFY_MENU_HIDE"], hint = "/gf notify", kind = "action" }, -- l10n-ok: a slash command
 	}
 end
 

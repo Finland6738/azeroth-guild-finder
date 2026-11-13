@@ -94,11 +94,11 @@ local function build(host)
 	local fb = fields.body
 	local search = W.Field(fb, { placeholder = L["GALLERY_SEARCH"], glyph = "glyph_search", width = 340 })
 	search:SetPoint("TOPLEFT", fb, "TOPLEFT", 0, 0)
-	local copy = W.CopyField(fb, { text = "https://discord.gg/example", width = 340 })
+	local copy = W.CopyField(fb, { text = "https://discord.gg/example", width = 340 }) -- l10n-ok: gallery sample
 	copy:SetPoint("TOPLEFT", fb, "TOPLEFT", 360, 0)
 	local mono = W.Text(fb, "mono", "ink2")
 	mono:SetPoint("TOPLEFT", fb, "TOPLEFT", 0, -56)
-	mono:SetText("20:00-23:30  /gf scale 100")
+	mono:SetText("20:00-23:30  /gf scale 100") -- l10n-ok: gallery sample
 	host.group, host.copy, host.search = group, copy, search
 end
 

@@ -24,7 +24,7 @@
 - Branch: `step/m5-3-l10n`
 - Scope: every visible string through `L[...]`; a test that fails on hard-coded strings in `UI/`; key naming guide; `itIT` left for V2.
 - Done when:
-  - [ ] The string audit test passes.
+  - [x] The string audit test passes (`Tests/test_l10n.lua`: no hard-coded visible string in `UI/`, every used key exists, no unused key).
 
 ### M5.4 — Diagnostics
 - Branch: `step/m5-4-diagnostics`

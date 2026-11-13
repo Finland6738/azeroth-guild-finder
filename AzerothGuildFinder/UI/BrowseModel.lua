@@ -99,7 +99,7 @@ end
 -- hint "short": the query has 1-2 letters (the list is not narrowed). reset: the "Reset filters" button shows.
 function Model.State(ctx)
 	local state = { kind = "list" }
-	if ctx.query and ctx.query.state == "short" then state.hint = "short" end
+	if ctx.query and ctx.query.state == "short" then state.hint = "short" end -- l10n-ok: a state name
 	if (ctx.total or 0) == 0 then
 		if ctx.syncing then state.kind = "loading"
 		elseif (ctx.peers or 0) == 0 then state.kind = "nopeers"
