@@ -7,6 +7,8 @@
 --   Nav.NewBook()                   -> the tabs and one stack per tab: SetTabs, Select, Push, Back, Current, Page
 --   Nav.ClampScale / FitScale       -> window scale 60 %..140 %, and the largest scale that fits the screen
 --   Nav.PosToSaved / SavedToPos     -> a window position that survives a change of scale
+--   Nav.ClampPos                    -> a saved position pulled back so the window stays on the screen
+--   Nav.KeyAction                   -> what a key press does in the window ("back" for Backspace, or nil)
 --
 -- Tab ids are the panel names of Core/Role (FindGuild, MyApplication, MyGuild, CreateListing, Applications) plus
 -- "Settings". The root page of a tab has the id of the tab; pages pushed on top of it (a guild page) have their own.
@@ -248,6 +250,47 @@ end
 function Nav.SavedToPos(pos, scale)
 	scale = Nav.ClampScale(scale)
 	return pos.point, pos.relPoint or pos.point, (pos.x or 0) / scale, (pos.y or 0) / scale
+end
+
+-- Where each anchor point sits on a rectangle: fractions of the width (from the left) and the height (from the bottom).
+local ANCHORS = {
+	TOPLEFT = { 0, 1 }, TOP = { 0.5, 1 }, TOPRIGHT = { 1, 1 }, LEFT = { 0, 0.5 }, CENTER = { 0.5, 0.5 }, RIGHT = { 1, 0.5 },
+	BOTTOMLEFT = { 0, 0 }, BOTTOM = { 0.5, 0 }, BOTTOMRIGHT = { 1, 0 },
+}
+
+-- Pulls a saved position (point, relPoint, x, y in parent units, as Config.IsPos gives it) back so that the whole box
+-- of the window stays on the parent (the screen). `box` = { w, h, right, top } in the window's own units at scale 1:
+-- the window size plus how far the rail sticks out to the right and the close button above the top. The box is kept
+-- `margin` px (parent units) inside the parent edges; a box larger than the parent keeps its top left corner visible.
+-- Returns x, y (the same point and relPoint) and whether anything moved. Without usable sizes nothing moves.
+Nav.CLAMP_MARGIN = 8
+function Nav.ClampPos(pos, scale, parentW, parentH, box, margin)
+	local x, y = pos.x or 0, pos.y or 0
+	if not (isNumber(parentW) and isNumber(parentH) and parentW > 0 and parentH > 0 and type(box) == "table") then return x, y, false end
+	local a, r = ANCHORS[pos.point], ANCHORS[pos.relPoint or pos.point]
+	if not (a and r) then return x, y, false end
+	scale = Nav.ClampScale(scale)
+	margin = margin or Nav.CLAMP_MARGIN
+	local w, h = box.w * scale, box.h * scale
+	local right, top = (box.right or 0) * scale, (box.top or 0) * scale
+	-- the anchor on the parent, measured from the parent's bottom left, then the window's own bottom left corner
+	local ax, ay = r[1] * parentW + x, r[2] * parentH + y
+	local left, bottom = ax - a[1] * w, ay - a[2] * h
+	local minLeft, maxLeft = margin, parentW - margin - w - right
+	local minBottom, maxBottom = margin, parentH - margin - h - top
+	local newLeft, newBottom = left, bottom
+	if maxLeft < minLeft then newLeft = minLeft else newLeft = max(minLeft, min(maxLeft, left)) end
+	if maxBottom < minBottom then newBottom = maxBottom else newBottom = max(minBottom, min(maxBottom, bottom)) end
+	local nx, ny = x + (newLeft - left), y + (newBottom - bottom)
+	return nx, ny, (nx ~= x or ny ~= y)
+end
+
+-- What a key press does in the main window. Backspace goes back one page, unless there is nowhere to go back to or a
+-- text box has the keyboard (then Backspace edits the text); anything else is not ours. Esc is not handled here: the
+-- window is in UISpecialFrames, which closes it (and the game first closes whatever else Esc would close).
+function Nav.KeyAction(key, canGoBack, editFocused)
+	if key == "BACKSPACE" and canGoBack and not editFocused then return "back" end
+	return nil
 end
 
 -- The default place: the centre of the screen, a little to the left so that the rail has room.

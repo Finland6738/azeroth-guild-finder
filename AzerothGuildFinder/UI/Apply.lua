@@ -102,7 +102,7 @@ local function build()
 	layer.box = box
 
 	local inner = Apply.DIALOG_W - 48
-	box.title = W.Text(box, "titleL", "#6a4523")
+	box.title = W.Text(box, "titleL", "ink2")
 	box.title:SetPoint("TOPLEFT", box, "TOPLEFT", 24, -22)
 	box.title:SetWidth(inner)
 	box.title:SetWordWrap(false)

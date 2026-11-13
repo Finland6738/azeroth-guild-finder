@@ -174,8 +174,12 @@ describe("the saved position", function()
 
 	it("a position off the screen is pulled back and a damaged one becomes the default", function()
 		local pos = M().Clamp({ point = "CENTER", relPoint = "CENTER", x = 99999, y = -99999 }, 60, 1920, 1080)
-		eq(pos.x, 1920)
-		eq(pos.y, -1080)
+		-- the whole icon (60 px, the badge 6 px out at the right and 4 at the top, 8 px margin) is kept on the screen
+		eq(pos.x, 916)
+		eq(pos.y, -502)
+		local top = M().Clamp({ point = "CENTER", relPoint = "CENTER", x = -99999, y = 99999 }, 60, 1920, 1080)
+		eq(top.x, -922)
+		eq(top.y, 1080 / 2 - 8 - 30 - 4)
 		local ok = { point = "CENTER", relPoint = "CENTER", x = 100, y = 50 }
 		eq(M().Clamp(ok, 60, 1920, 1080), ok)
 		eq(M().Clamp("junk", 60, 1920, 1080), M().DEFAULT_POS)

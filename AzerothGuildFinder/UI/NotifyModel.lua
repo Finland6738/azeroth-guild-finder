@@ -120,10 +120,9 @@ Model.DEFAULT_POS = { point = "CENTER", relPoint = "CENTER", x = 360, y = 120 }
 function Model.Clamp(pos, size, screenW, screenH)
 	if not (ns.Config and ns.Config.IsPos(pos)) then return Model.DEFAULT_POS end
 	if type(screenW) ~= "number" or type(screenH) ~= "number" then return pos end
-	local limitX, limitY = screenW, screenH
-	local x = min(limitX, max(-limitX, pos.x))
-	local y = min(limitY, max(-limitY, pos.y))
-	if x == pos.x and y == pos.y then return pos end
+	-- the whole icon, with its badge sticking out at the top right, stays on the screen (Nav.ClampPos)
+	local x, y, moved = ns.Nav.ClampPos(pos, 1, screenW, screenH, { w = size or Model.SIZE, h = size or Model.SIZE, right = 6, top = 4 })
+	if not moved then return pos end
 	return { point = pos.point, relPoint = pos.relPoint, x = x, y = y }
 end
 

@@ -8,7 +8,7 @@
   /* ink */
   --ink: #3b2412;
   --ink-2: #6a4526;
-  --ink-3: #8c6844;
+  --ink-3: #6a4f34;
   --ink-inv: #fbe9cc;
   /* parchment */
   --parch-hi: #fbe3bd;
@@ -35,10 +35,10 @@
   --blue: #2a64bd;
   --blue-lo: #163d7c;
   /* states */
-  --ok: #2e7d32;
+  --ok: #246227;
   --ok-bg: #e2efd3;
-  --warn: #a8700a;
-  --bad: #b3261e;
+  --warn: #764e07;
+  --bad: #a5231c;
   --bad-bg: #f6dccf;
   /* class colours */
   --c-warrior: #c69b6d; --c-paladin: #f48cba; --c-hunter: #aad372; --c-rogue: #fff468;
@@ -131,7 +131,7 @@ body {
 .plate {
   display: flex; align-items: center; justify-content: space-between;
   padding: 8px 12px; border-radius: var(--r-xs);
-  background: linear-gradient(#a57d55, #8a6440); color: #fff4df;
+  background: linear-gradient(#8d6540, #86603c); color: #fff4df;
   box-shadow: inset 0 0 0 1px rgba(255, 230, 190, .35), 0 0 0 2px #6e4c2c, var(--e1);
   font: 700 14px/18px Roboto; letter-spacing: .3px;
 }
@@ -185,7 +185,7 @@ body {
 .btn.tonal { background: linear-gradient(180deg, #f3d7a9, #dcb27a); color: #4a2c12; --rim: #7a5430; box-shadow: inset 0 1px 0 rgba(255,255,255,.6), inset 0 -2px 3px rgba(90,50,10,.2), 0 0 0 1.5px var(--rim), var(--e1); }
 .btn.ghost { background: transparent; color: #6a3e14; box-shadow: none; padding: 0 10px; }
 .btn.metal { background: linear-gradient(180deg, #5c646c, #30353b 55%, #1d2024); color: #e9edf1; --rim: #111; }
-.btn[disabled], .btn.disabled { background: linear-gradient(180deg, #a4a4a4, #7a7a7a 50%, #5d5d5d); color: #e3e3e3; text-shadow: none; --rim: #3c3c3c; cursor: default; }
+.btn[disabled], .btn.disabled { background: linear-gradient(180deg, #8c8c8c, #6a6a6a 50%, #555555); color: #f2f2f2; text-shadow: none; --rim: #3c3c3c; cursor: default; }
 .icon-btn { width: 36px; height: 36px; border-radius: 50%; display: inline-grid; place-items: center; color: var(--ink-2); }
 .icon-btn:hover { background: rgba(120, 70, 20, .1); }
 
@@ -285,7 +285,7 @@ body {
 
 /* days */
 .days { display: flex; gap: 4px; }
-.days span { width: 30px; height: 28px; border-radius: 6px; display: grid; place-items: center; font: 700 12px/1 Roboto; color: #8c6844; background: rgba(160, 110, 60, .14); }
+.days span { width: 30px; height: 28px; border-radius: 6px; display: grid; place-items: center; font: 700 12px/1 Roboto; color: #6a4f34; background: rgba(160, 110, 60, .14); }
 .days span.on { color: #ffeac2; background: linear-gradient(#7a4a22, #5a3315); box-shadow: var(--e1); }
 
 /* copy field */

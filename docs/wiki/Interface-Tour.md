@@ -13,12 +13,21 @@ You can open the window in four ways; the same ways close it:
 - click the addon in the **Addon Compartment** menu next to the minimap;
 - press the key you assign to **Toggle Guild Finder** in *Key Bindings → AddOns* (no key is assigned by default).
 
-Close it with **Esc** or with the round gold button at the top right corner.
+Close it with **Esc** or with the round gold button at the top right corner. If a text box has the keyboard, **Esc** first lets go of it; press it again to close.
 
 ## Moving and resizing
 
 - Drag the window by its **left page** or by the **title bar**. It remembers where you left it; `/gf reset` puts it back in the middle of the screen.
-- The window size goes from **60 % to 140 %**: use the size control on the **Settings** tab, or type `/gf scale 80`. On a small screen the window is made smaller than you asked, so that the whole book, the rail and the close button stay on the screen; your choice is kept.
+- The window size goes from **60 % to 140 %**: use the size control on the **Settings** tab, or type `/gf scale 80`. On a small screen the window is made smaller than you asked, so that the whole book, the rail and the close button stay on the screen; your choice is kept. If you change resolution and the saved place would now be off the screen, the window opens inside it; on a bigger screen it goes back to where you left it.
+
+## Keyboard and tooltips
+
+| Key | What it does |
+|---|---|
+| **Esc** | Closes the window. While you are typing in a text box, the first press only leaves the box |
+| **Backspace** | Goes back one page (the same as the **Back** button). While you are typing in a text box it deletes a character as usual, and on the first page of a section it does nothing |
+
+Every round icon button has a tooltip that says what it does: hover over it. Text is never smaller than 12 pixels at 100 % size, and the text colours are checked for contrast against the parchment.
 
 ## The side rail
 
@@ -37,7 +46,7 @@ The active section is gold and sticks out of the rail; a red number on a section
 
 ## Pages and Back
 
-Opening a guild from the list replaces the list with the guild's page and shows a **Back** button in the title bar; **Backspace** does the same. When you come back, the list is as you left it.
+Opening a guild from the list replaces the list with the guild's page and shows a **Back** button in the title bar; **Backspace** does the same (not while you are typing in a text box: there it deletes a character). When you come back, the list is as you left it.
 
 ## The building blocks
 

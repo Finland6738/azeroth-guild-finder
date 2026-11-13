@@ -372,7 +372,7 @@ local function createStepButton(host, index)
 	b.num = W.Text(b, "overline", "white", "CENTER")
 	b.num:SetPoint("CENTER", b.disc, "CENTER", 0, 0)
 	b.num:SetText(tostring(index))
-	b.label = W.Text(b, "titleS", "#4b2e14")
+	b.label = W.Text(b, "titleS", "ink")
 	b.label:SetPoint("LEFT", b, "LEFT", 46, 0)
 	b.label:SetText(Model.StepLabel(index, L))
 	b.mark = W.Texture(b, "glyph_check", "OVERLAY", nil)
@@ -389,15 +389,15 @@ end
 local function paintStep(b, status, active)
 	b.active = active
 	b.status = status
-	b.bg:SetHex(active and "#fbe5b5" or "#fff4de", active and 1 or 0)
+	b.bg:SetHex(active and Skin.STEP.activeCard or "#fff4de", active and 1 or 0)
 	b.edge:SetHex(active and "#b8820f" or "#a06e3c", active and 1 or 0)
-	W.TintHex(b.disc, active and "#7a4a22" or (status == "ok" and "#2e7d32" or "#d6b98c"))
-	W.TextColor(b.num, (active or status == "ok") and "white" or "#6a4526")
+	W.TintHex(b.disc, active and Skin.STEP.activeFill or (status == "ok" and Skin.COLORS.ok or Skin.STEP.idleFill))
+	W.TextColor(b.num, (active or status == "ok") and "white" or "ink")
 	local mark = (status == "ok" and "glyph_check") or (status == "bad" and "glyph_close") or nil
 	b.mark:SetShown(mark ~= nil)
 	if mark then
 		b.mark:SetTexture(W.Media(mark))
-		W.TintHex(b.mark, status == "ok" and "#2e7d32" or "#b3261e")
+		W.TintHex(b.mark, status == "ok" and Skin.COLORS.ok or Skin.COLORS.bad)
 	end
 	b.note:SetText(status == "optional" and L["ED_OPTIONAL"] or "")
 end
@@ -406,7 +406,7 @@ local function buildLeft(host)
 	local left = host.left
 	host.plate = W.Plate(left, { text = L["ED_SECTIONS"], width = LW })
 	host.plate:SetPoint("TOPLEFT", left, "TOPLEFT", 0, 0)
-	host.ready = W.Text(left, "caption", "#fff4df", "RIGHT")
+	host.ready = W.Text(left, "caption", "plateText", "RIGHT")
 	host.ready:SetPoint("RIGHT", host.plate, "RIGHT", -12, 0)
 	host.stepButtons = {}
 	for i = 1, Model.COUNT do
