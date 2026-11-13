@@ -273,7 +273,7 @@ function Notify:CreateList()
 	list.title:SetPoint("TOPLEFT", list, "TOPLEFT", 16, -14)
 	list.guild = W.Text(list, "caption", "ink2", "RIGHT")
 	list.guild:SetPoint("TOPRIGHT", list, "TOPRIGHT", -44, -17)
-	list.close = W.CloseButton(list, function() Notify:CloseList() end)
+	list.close = W.CloseButton(list, function() Notify:CloseList() end, L["BTN_CLOSE"])
 	list.close:SetPoint("TOPRIGHT", list, "TOPRIGHT", -8, -8)
 	list.rows = {}
 	for i = 1, Model.QUICK_MAX do list.rows[i] = listRow(list, i) end

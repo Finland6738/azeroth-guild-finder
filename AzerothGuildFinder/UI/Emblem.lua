@@ -90,7 +90,7 @@ end
 local function showInitial(frame, layer)
 	local fs = frame.initial
 	place(fs, frame, layer.rect)
-	fs:SetFont(initialFont(), layer.fontPx, "OUTLINE")
+	fs:SetFont(initialFont(), Skin.ClampPx(layer.fontPx), "OUTLINE")
 	local c = layer.color
 	fs:SetTextColor(c[1], c[2], c[3], 1)
 	fs:SetText(layer.text)

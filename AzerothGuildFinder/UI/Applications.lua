@@ -115,7 +115,7 @@ local function buildLeft(host)
 
 	host.emblem = ns.Emblem.Create(left, 56)
 	host.emblem:SetPoint("TOPLEFT", host.plate, "BOTTOMLEFT", 0, -14)
-	host.guild = W.Text(left, "headline", "#3a200c")
+	host.guild = W.Text(left, "headline", "inkDeep")
 	host.guild:SetPoint("TOPLEFT", host.emblem, "TOPRIGHT", 12, -2)
 	host.guild:SetWidth(LW - 70)
 	host.guild:SetWordWrap(false)

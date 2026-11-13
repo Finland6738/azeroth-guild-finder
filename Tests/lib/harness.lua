@@ -128,8 +128,19 @@ function H.boot(opts)
 
 	local ns = {}
 	Mock.loadedFiles = {}
+	local sourcePaths = {}
+	-- The text of a file of the addon as it was loaded ("AzerothGuildFinder/UI/Main.lua"), for the source audits (font
+	-- sizes, colour literals); nil for a name that was not loaded.
+	function Mock.ReadSource(name)
+		local path = sourcePaths[name]
+		if not path then return nil end
+		local source = cfg.readfile(path)
+		if source:sub(1, 3) == "98791" then source = source:sub(4) end
+		return source
+	end
 	for _, entry in ipairs(cfg.plan) do
 		Mock.loadedFiles[#Mock.loadedFiles + 1] = entry.name
+		if entry.path then sourcePaths[entry.name] = entry.path end
 		if entry.code then
 			local chunk, err = loadstring(entry.code, "@" .. entry.name)
 			if not chunk then error(err, 0) end

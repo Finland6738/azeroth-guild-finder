@@ -1,6 +1,9 @@
 -- Skin: the design tokens of SPEC-04 §5 and ADR 0008 (colours, sizes, type scale, media paths) and the font objects.
 -- The tokens are the ones of docs/specs/mockups/html/agf.css; a change there is a change here. Pixel sizes are at 100 %
--- window scale. Lua 5.1; the pure helpers (Hex, Color, Style) need no client.
+-- window scale. Lua 5.1; the pure helpers (Hex, Color, Luminance, Contrast, Blend, TextPairs) need no client.
+-- Text colours are always tokens (never a "#rrggbb" literal in a W.Text / TextColor call): Skin.TextPairs() lists every
+-- text-on-background pair the windows draw and Tests/test_ui_polish.lua checks them against WCAG 2.1 (4.5:1; 7:1 for the
+-- main ink), so a new pair must be added there.
 local ADDON_NAME, ns = ...
 ns = ns or {}
 local Skin = {}
@@ -29,7 +32,8 @@ end
 
 Skin.COLORS = {
 	-- ink
-	ink = "#3b2412", ink2 = "#6a4526", ink3 = "#8c6844", inkInv = "#fbe9cc",
+	ink = "#3b2412", ink2 = "#6a4526", ink3 = "#6a4f34", inkInv = "#fbe9cc",
+	inkDeep = "#3a200c", brand = "#5a3a1c",   -- headlines of the left page, the window title
 	-- parchment
 	parchHi = "#fbe3bd", parch = "#f6d6a6", parchLo = "#eec58d", pageLeft = "#e9c897", line = "#dcb07a", line2 = "#b98a53",
 	-- metal
@@ -39,9 +43,13 @@ Skin.COLORS = {
 	redHi = "#e9555a", red = "#b81f25", redLo = "#7d0f13", redTxt = "#ffdc7a",
 	blueHi = "#5d9bea", blue = "#2a64bd", blueLo = "#163d7c",
 	-- states
-	ok = "#2e7d32", okBg = "#e2efd3", warn = "#a8700a", bad = "#b3261e", badBg = "#f6dccf",
+	ok = "#246227", okBg = "#e2efd3", warn = "#764e07", bad = "#a5231c", badBg = "#f6dccf",
 	-- surfaces used by widgets
 	snackbar = "#2d241b", snackbarText = "#f7ead2", tooltipBg = "#1f1a15", white = "#ffffff",
+	plateFill = "#8d6540", plateRim = "#6e4c2c", plateText = "#fff4df",   -- the brown plate of a left-page section
+	onIron = "#f0f3f6", ironTile = "#3c4248", popup = "#fbe9c5",                            -- text on the dark steel tiles of the emblem designer
+	badLight = "#ff9a8f", okLight = "#9bd69e",                         -- ok / bad lines of a tooltip (dark background)
+	linkInk = "#1b3d73", fieldBlue = "#fffaf0",                          -- Discord / copy field text and its background
 }
 
 -- r, g, b, a of a named colour (alpha 1 unless given); white for an unknown name.
@@ -59,19 +67,143 @@ Skin.KINDS = {
 	tonal = { fill = "#e8c28f", rim = "#7a5430", text = "#4a2c12", gloss = true },
 	metal = { fill = "#3a4047", rim = "#111111", text = "#e9edf1", gloss = true },
 	ghost = { fill = nil, rim = nil, text = "#6a3e14", gloss = false },
-	disabled = { fill = "#7a7a7a", rim = "#3c3c3c", text = "#e3e3e3", gloss = false },
+	disabled = { fill = "#6a6a6a", rim = "#3c3c3c", text = "#f2f2f2", gloss = false },
 }
 
 -- Colours of the tag kinds: background and text.
 Skin.TAGS = {
 	default = { bg = "#d9b98c", text = "#5b391a" },
-	ok = { bg = "#e2efd3", text = "#2e7d32" },
-	bad = { bg = "#f6dccf", text = "#b3261e" },
+	ok = { bg = "#e2efd3", text = "#246227" },
+	bad = { bg = "#f6dccf", text = "#a5231c" },
 	gold = { bg = "#f8e2a6", text = "#7a5208" },
 	casual = { bg = "#dcebd0", text = "#2e6b2e" },
 	soft = { bg = "#f6e1a8", text = "#7a5208" },
 	hard = { bg = "#f3c9bd", text = "#8e1b12" },
 }
+
+-- Cards (W.Card): fill, edge and whether a shadow shows.
+Skin.CARDS = {
+	plain = { fill = "#fff4de", fillAlpha = 0.55, edge = "#a06e3c", edgeAlpha = 0.45 },
+	elevated = { fill = "#fbe9c5", fillAlpha = 1, edge = "#a06e3c", edgeAlpha = 0.4, shadow = true },
+	gold = { fill = "#fbe8b4", fillAlpha = 1, edge = "#d6a23a", edgeAlpha = 1, shadow = true },
+}
+
+-- The side rail (Main): tab fill, edge and label colour, off and on.
+Skin.RAIL = {
+	bg = { off = "#30353b", on = "#5a4018" }, edge = { off = "#5c646d", on = "#f2bf3c" }, text = { off = "#cfd6dc", on = "#fff3d1" },
+}
+
+-- Segmented controls, the editor's step discs, the day squares and the count badge.
+Skin.SEGMENT = { onFill = "#5a3315", onText = "#ffeac2", offFill = "#fff4dd", offText = "ink" }
+Skin.STEP = { activeFill = "#7a4a22", idleFill = "#d6b98c", activeCard = "#fbe5b5" }
+Skin.DAYS = { onFill = "#5a3315", onText = "#ffeac2", offFill = "#fff5e1", offFillAlpha = 0.45, offText = "ink3" }
+Skin.BADGE = { fill = "#d32f2f", text = "white" }
+
+-- Tooltip lines are drawn on the game's dark tooltip: the state colours of the parchment are swapped for light ones.
+Skin.ON_DARK = { bad = "badLight", ok = "okLight", warn = "gold" }
+
+---------------------------------------------------------------------------------------------------------------------
+-- Contrast (WCAG 2.1): the pure arithmetic and the list of every text-on-background pair the windows draw
+---------------------------------------------------------------------------------------------------------------------
+local function hexOf(value)
+	if type(value) ~= "string" then return nil end
+	if Skin.COLORS[value] then return Skin.COLORS[value] end
+	if value:match("^#%x%x%x%x%x%x$") then return value end
+	return nil
+end
+
+-- Relative luminance (0..1) of a token name or "#rrggbb"; nil when it is neither.
+function Skin.Luminance(color)
+	local r, g, b = Skin.Hex(hexOf(color))
+	if not r then return nil end
+	local function lin(c) return c <= 0.03928 and c / 12.92 or ((c + 0.055) / 1.055) ^ 2.4 end
+	return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b)
+end
+
+-- Contrast ratio (1..21) of two colours (tokens or "#rrggbb"); nil when one is unknown.
+function Skin.Contrast(a, b)
+	local la, lb = Skin.Luminance(a), Skin.Luminance(b)
+	if not la or not lb then return nil end
+	if la < lb then la, lb = lb, la end
+	return (la + 0.05) / (lb + 0.05)
+end
+
+-- "#rrggbb" of `fg` painted with `alpha` over `bg` (tokens or hex).
+function Skin.Blend(fg, bg, alpha)
+	local fr, fgg, fb = Skin.Hex(hexOf(fg))
+	local br, bgg, bb = Skin.Hex(hexOf(bg))
+	if not fr or not br then return nil end
+	local a = alpha or 1
+	return "#" .. Skin.ToHex(fr * a + br * (1 - a), fgg * a + bgg * (1 - a), fb * a + bb * (1 - a))
+end
+
+Skin.MIN_CONTRAST = 4.5         -- WCAG AA for normal text
+Skin.MIN_CONTRAST_INK = 7       -- the main ink on parchment (SPEC-04 §5.3)
+
+-- The text tokens drawn straight on the parchment (and on cards) and the contrast each must reach there.
+Skin.INK_TEXT = { ink = 7, inkDeep = 7, ink2 = 4.5, ink3 = 4.5, brand = 4.5, ok = 4.5, warn = 4.5, bad = 4.5 }
+
+-- The light surfaces: the two pages, the popup, the active step and every card kind painted over each page.
+function Skin.Surfaces()
+	local list = {
+		{ name = "parchHi", hex = Skin.COLORS.parchHi }, { name = "parch", hex = Skin.COLORS.parch },
+		{ name = "pageLeft", hex = Skin.COLORS.pageLeft }, { name = "popup", hex = Skin.COLORS.popup },
+		{ name = "stepActive", hex = Skin.STEP.activeCard },
+	}
+	local kinds = {}
+	for kind in pairs(Skin.CARDS) do kinds[#kinds + 1] = kind end
+	table.sort(kinds)
+	for _, kind in ipairs(kinds) do
+		local c = Skin.CARDS[kind]
+		for _, page in ipairs({ "parch", "pageLeft" }) do
+			list[#list + 1] = { name = "card " .. kind .. " on " .. page, hex = Skin.Blend(c.fill, Skin.COLORS[page], c.fillAlpha) }
+		end
+	end
+	return list
+end
+
+-- Every { name, fg, bg, min } the interface draws. fg and bg are tokens or hex; `min` is the ratio to reach.
+function Skin.TextPairs()
+	local pairsOut = {}
+	local function add(name, fg, bg, min) pairsOut[#pairsOut + 1] = { name = name, fg = fg, bg = bg, min = min or Skin.MIN_CONTRAST } end
+
+	local inks = {}
+	for token in pairs(Skin.INK_TEXT) do inks[#inks + 1] = token end
+	table.sort(inks)
+	for _, surface in ipairs(Skin.Surfaces()) do
+		for _, token in ipairs(inks) do add(token .. " on " .. surface.name, token, surface.hex, Skin.INK_TEXT[token]) end
+		add("ghost button on " .. surface.name, Skin.KINDS.ghost.text, surface.hex)
+	end
+
+	local kinds = {}
+	for kind in pairs(Skin.KINDS) do if Skin.KINDS[kind].fill then kinds[#kinds + 1] = kind end end
+	table.sort(kinds)
+	for _, kind in ipairs(kinds) do add("button " .. kind, Skin.KINDS[kind].text, Skin.KINDS[kind].fill) end
+
+	local tags = {}
+	for kind in pairs(Skin.TAGS) do tags[#tags + 1] = kind end
+	table.sort(tags)
+	for _, kind in ipairs(tags) do add("tag " .. kind, Skin.TAGS[kind].text, Skin.TAGS[kind].bg) end
+
+	for _, state in ipairs({ "off", "on" }) do add("rail tab " .. state, Skin.RAIL.text[state], Skin.RAIL.bg[state]) end
+	add("plate", "plateText", "plateFill")
+	add("snackbar text", "snackbarText", "snackbar")
+	add("snackbar action", "gold", "snackbar")
+	for _, token in ipairs({ "white", "gold", "badLight", "okLight" }) do add("tooltip " .. token, token, "tooltipBg") end
+	add("segment on", Skin.SEGMENT.onText, Skin.SEGMENT.onFill)
+	add("segment off", Skin.SEGMENT.offText, Skin.SEGMENT.offFill)
+	add("day on", Skin.DAYS.onText, Skin.DAYS.onFill)
+	for _, page in ipairs({ "parch", "pageLeft" }) do
+		add("day off on " .. page, Skin.DAYS.offText, Skin.Blend(Skin.DAYS.offFill, Skin.COLORS[page], Skin.DAYS.offFillAlpha))
+	end
+	add("step number active", "white", Skin.STEP.activeFill)
+	add("step number done", "white", "ok")
+	add("step number idle", "ink", Skin.STEP.idleFill)
+	add("count badge", Skin.BADGE.text, Skin.BADGE.fill)
+	add("emblem tile", "onIron", "ironTile")
+	add("link field", "linkInk", "fieldBlue")
+	return pairsOut
+end
 
 ---------------------------------------------------------------------------------------------------------------------
 -- Sizes (px at 100 %)
@@ -107,6 +239,14 @@ Skin.STYLES = {
 	monoM = { family = "RobotoMono", weight = "Medium", px = 12.5 },
 }
 
+-- The pixel size a style is drawn at (100 % window scale): never under MIN_FONT_PX. Text that is not a style (the initial
+-- inside an emblem) goes through Skin.ClampPx.
+function Skin.ClampPx(px) return max(Skin.MIN_FONT_PX, tonumber(px) or Skin.MIN_FONT_PX) end
+function Skin.FontPx(style)
+	local s = Skin.STYLES[style]
+	return s and Skin.ClampPx(s.px) or nil
+end
+
 Skin.FONT_DIR = "Interface\\AddOns\\" .. tostring(ADDON_NAME) .. "\\Media\\Fonts\\"
 Skin.MEDIA_DIR = "Interface\\AddOns\\" .. tostring(ADDON_NAME) .. "\\Media\\"
 
@@ -135,7 +275,7 @@ function Skin.CreateFonts()
 		if not Skin.fonts[style] then
 			local name = "AGF_" .. style:sub(1, 1):upper() .. style:sub(2)
 			local object = CreateFont(name)
-			local px = max(Skin.MIN_FONT_PX, s.px)
+			local px = Skin.ClampPx(s.px)
 			local file = Skin.FontFile(style)
 			local ok = object:SetFont(file, px, "")
 			-- SetFont answers false for a file it cannot load; a client that answers nothing is checked with GetFont

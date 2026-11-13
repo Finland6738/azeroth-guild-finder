@@ -86,7 +86,9 @@ def pill_gloss():
     """Light on the top half only: strongest at the top edge, nothing from the middle down."""
     m = rrect_mask(64, 3, 13)
     fade = Image.new("L", m.size, 0)
-    fade.paste(vgradient(32, 150, 0), (0, 0))   # the upper half; the lower half stays empty
+    # the upper half, the full width (a square gradient would cover only the left half); the lower half stays empty
+    top = Image.linear_gradient("L").resize((m.size[0], m.size[1] // 2)).point(lambda v: int(150 * (1 - v / 255.0)))
+    fade.paste(top, (0, 0))
     return to_rgba(ImageChops.multiply(m, fade))
 
 
@@ -108,13 +110,17 @@ def field_ring():
 
 
 def shadow_soft():
-    """A soft shadow: the shape is 32 px in from the edge and blurred; display it larger than the thing it shadows."""
+    """A soft shadow in two layers, like the Material elevation of the mockups (an ambient halo and a tighter core): the
+    shape is 40 px in from the edge of a 128 px square and blurred twice; the alpha is zero at the border, so a stretched
+    nine-slice never shows a seam. Display it larger than the thing it shadows (corner 32, outset 10-30)."""
     size = 128
-    m = Image.new("L", (size, size), 0)
-    ImageDraw.Draw(m).rounded_rectangle([40, 40, size - 41, size - 41], radius=14, fill=255)
-    m = m.filter(ImageFilter.GaussianBlur(14))
+    shape = Image.new("L", (size, size), 0)
+    ImageDraw.Draw(shape).rounded_rectangle([40, 40, size - 41, size - 41], radius=14, fill=255)
+    halo = shape.filter(ImageFilter.GaussianBlur(14))
+    core = shape.filter(ImageFilter.GaussianBlur(5))
+    alpha = ImageChops.add(halo.point(lambda v: int(v * 0.75)), core.point(lambda v: int(v * 0.40)))   # add() stops at 255
     img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
-    img.putalpha(m)
+    img.putalpha(alpha)
     return img
 
 

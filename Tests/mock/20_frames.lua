@@ -266,15 +266,19 @@ function Widget:HasFocus() return self._focused == true end
 function Widget:SetFocus()
 	if not self._focused then
 		self._focused = true
+		Mock.keyboardFocus = self
 		runScript(self, "OnEditFocusGained")
 	end
 end
 function Widget:ClearFocus()
 	if self._focused then
 		self._focused = false
+		if Mock.keyboardFocus == self then Mock.keyboardFocus = nil end
 		runScript(self, "OnEditFocusLost")
 	end
 end
+-- dump: the edit box that has the keyboard, nil when none (what Backspace handling asks before it steals the key)
+function GetCurrentKeyBoardFocus() return Mock.keyboardFocus end
 function Widget:HighlightText() self._highlighted = true end
 function Widget:SetCursorPosition(n) self._cursor = n end
 function Widget:GetCursorPosition() return self._cursor or 0 end

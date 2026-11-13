@@ -83,9 +83,9 @@ Corrispondenze principali: navigation rail → schede metalliche **con etichetta
 ### 5.3 Colori, superfici e stato
 
 - **Pergamena** (`parch` `#f6d6a6`, pagina sinistra più scura `#e9c897`) con grana leggera; **metallo** (acciaio `#9aa4ae`, ferro `#2a2e33`) per cornici, barra laterale e chiusura; **oro** `#f2bf3c` per la selezione e la scheda attiva.
-- **Testo**: inchiostro `#3b2412` su pergamena, contrasto ≥ 7:1; testo secondario `#6a4526` ≥ 4,5:1. Niente testo chiaro su pergamena.
+- **Testo**: inchiostro `#3b2412` su pergamena, contrasto ≥ 7:1; testo secondario `#6a4526` e terziario `#6a4f34` ≥ 4,5:1. Niente testo chiaro su pergamena. Il contrasto WCAG 2.1 di **ogni coppia testo/sfondo** disegnata (`Skin.TextPairs()`: inchiostri e colori di stato su pagine e card, pulsanti, tag, barra laterale, targhetta, snackbar, tooltip) è verificato da un test offline (`Tests/test_ui_polish.lua`): ≥ 4,5:1, e ≥ 7:1 per l'inchiostro principale. Il testo è sempre un token di colore, mai un esadecimale scritto nel codice. Nei tooltip (sfondo scuro del gioco) i colori di stato sono sostituiti da varianti chiare (`Skin.ON_DARK`).
 - **Azioni**: rosso lucido = azione principale (una sola per schermata), blu = solo Discord, pergamena = secondarie, grigio = disattivato **con il motivo scritto** accanto.
-- **Stato**: verde `#2e7d32` (soddisfatto, ricevuto), rosso `#b3261e` (non soddisfatto, rifiutato), oro (nuovo, evidenza). Mai solo il colore: sempre anche un'icona o un testo.
+- **Stato**: verde `#246227` (soddisfatto, ricevuto), rosso `#a5231c` (non soddisfatto, rifiutato), ambra scuro `#764e07` (avviso), oro (nuovo, evidenza). Mai solo il colore: sempre anche un'icona o un testo.
 - **Illustrazioni**: nelle righe della lista e nelle intestazioni, immagini del client sfumate nella pergamena a destra, come in Albion ([SPEC-08 §3](SPEC-08-assets-emblems-l10n.md#3-sfondi)).
 
 ### 5.4 Fattibilità in WoW
@@ -94,11 +94,13 @@ Tutto si costruisce con oggetti standard, senza librerie grafiche:
 
 - pillole, campi e card: texture **nine-slice** nostre in `Media/` (angoli arrotondati, bordo metallico, lucido) + `SetVertexColor` per le varianti di colore;
 - gradienti: `Texture:SetGradient`;
-- ombre: texture sfumate nostre sotto le card e la finestra;
+- ombre: texture sfumate nostre sotto le card e la finestra (due strati, alone e nucleo, con alfa zero al bordo perché non si veda la giuntura quando è stirata); `tools/check_addon.py` verifica le texture (potenze di due, peso, bordo dell'ombra, bande centrali dei nine-slice, grana senza giunture);
 - grana della pergamena: una texture nostra ripetuta (tile), oppure la pergamena del client se la verifica dello spike la conferma;
 - icone: icone del client per classi, ruoli e contenuti. Le Material Symbols dei bozzetti sono solo segnaposti.
 
 ### 5.5 Densità e accessibilità
 
 - Righe della lista: circa 176 px (riquadro con illustrazione + fascia di informazioni, come Albion); il testo lungo viene tagliato con "…" e mostrato intero nel tooltip.
-- Tutto si usa anche senza trascinare; tooltip su ogni icona; i colori delle classi sono sempre accompagnati da sigla o nome.
+- Tutto si usa anche senza trascinare; tooltip su ogni icona (un test offline fallisce se un pulsante senza etichetta non ne ha uno); i colori delle classi sono sempre accompagnati da sigla o nome.
+- **Tastiera**: `Esc` chiude la finestra (`UISpecialFrames`; in un campo di testo toglie prima il focus); `Backspace` torna indietro nella pila delle pagine, **mai mentre un campo di testo ha il focus** (`Nav.KeyAction`). Nessun testo sotto i **12 px** a scala 100 %: le dimensioni sono token (`Skin.STYLES`, `Skin.ClampPx`) e un test fallisce se uno scende sotto.
+- **Piccoli schermi**: a 1280 × 720 e a ogni scala 60–140 % libro, barra laterale e pulsante di chiusura restano nello schermo (`Nav.FitScale`); la posizione salvata (anche l'icona di notifica) viene riportata dentro lo schermo (`Nav.ClampPos`) senza essere riscritta, così su uno schermo più grande la finestra torna dov'era.

@@ -253,7 +253,7 @@ function W.Segmented(parent, items, opts)
 	seg.segments, seg.order = {}, {}
 	seg.onChange = opts.onChange
 	seg.bg = W.NineSlice(seg, "field", { corner = h / 2, layer = "BACKGROUND" })
-	seg.bg:SetHex("#fff4dd")
+	seg.bg:SetHex(Skin.SEGMENT.offFill)
 	seg.ring = W.NineSlice(seg, "field_ring", { corner = h / 2, layer = "BACKGROUND", sublevel = 1 })
 	seg.ring:SetHex("#4a525a")
 
@@ -273,7 +273,7 @@ function W.Segmented(parent, items, opts)
 		b:SetPoint("LEFT", seg, "LEFT", x, 0)
 		b:RegisterForClicks("LeftButtonUp")
 		b.bg = W.NineSlice(b, "pill", { corner = (h - 2 * pad) / 2, layer = "ARTWORK" })
-		b.bg:SetHex("#5a3315")
+		b.bg:SetHex(Skin.SEGMENT.onFill)
 		b.bg:Hide()
 		b.text = W.Text(b, "label", "ink", "CENTER")
 		b.text:SetAllPoints(b)
@@ -293,7 +293,7 @@ function W.Segmented(parent, items, opts)
 		for k, b in pairs(self.segments) do
 			local on = k == key
 			b.bg:SetShown(on)
-			W.TextColor(b.text, on and "#ffeac2" or "#4a2c12")
+			W.TextColor(b.text, on and Skin.SEGMENT.onText or Skin.SEGMENT.offText)
 		end
 		if not silent and self.onChange then self.onChange(key, self) end
 	end
@@ -434,7 +434,7 @@ local function refreshPopup(sel)
 		row.key = item.key
 		row.text:SetText(item.text)
 		row.check:SetShown(sel.chosen[item.key] == true)
-		W.TextColor(row.text, sel.chosen[item.key] and "gold2" or "ink")
+		W.TextColor(row.text, sel.chosen[item.key] and "warn" or "ink")
 		row:Show()
 	end
 	for i = visible + 1, #pop.rows do pop.rows[i]:Hide() end
@@ -458,7 +458,7 @@ local function buildPopup(sel)
 	pop.shadow = W.NineSlice(pop, "shadow", { corner = 32, outset = 14, layer = "BACKGROUND", sublevel = -2 })
 	pop.shadow:SetColor(0.2, 0.1, 0, 0.45)
 	pop.bg = W.NineSlice(pop, "card", { corner = 10, layer = "BACKGROUND" })
-	pop.bg:SetHex("#fbe9c5", 1)
+	pop.bg:SetHex(Skin.COLORS.popup, 1)
 	pop.edge = W.NineSlice(pop, "card_edge", { corner = 10, layer = "BACKGROUND", sublevel = 1 })
 	pop.edge:SetHex("#a06e3c", 0.9)
 	pop.more = W.Texture(pop, "pill", "OVERLAY", nil)
@@ -682,7 +682,7 @@ end
 function W.CopyField(parent, opts)
 	opts = opts or {}
 	local field = fieldFrame(parent, opts.width, 8)
-	field.bg:SetHex("#fffaf0")
+	field.bg:SetHex(Skin.COLORS.fieldBlue)
 	field.ring:SetHex("#2a64bd")
 	field.value = opts.text or ""
 
@@ -690,7 +690,7 @@ function W.CopyField(parent, opts)
 	field.edit = edit
 	edit:SetAutoFocus(false)
 	edit:SetFontObject(Skin.Font("mono"))
-	edit:SetTextColor(Skin.Hex("#1b3d73"))
+	edit:SetTextColor(Skin.Hex(Skin.COLORS.linkInk))
 	edit:SetPoint("LEFT", field, "LEFT", 12, 0)
 	edit:SetPoint("RIGHT", field, "RIGHT", -40, 0)
 	edit:SetHeight(Skin.METRICS.fieldH - 6)

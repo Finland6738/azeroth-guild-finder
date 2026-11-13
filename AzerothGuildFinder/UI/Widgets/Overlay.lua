@@ -30,7 +30,7 @@ function W.ShowTooltip(owner, source, anchor)
 	GameTooltip:SetText(content.title, 1, 0.93, 0.76)
 	for _, line in ipairs(content.lines) do
 		if type(line) == "table" then
-			local r, g, b = Skin.Color(line.color or "white")
+			local r, g, b = Skin.Color(Skin.ON_DARK[line.color] or line.color or "white")
 			GameTooltip:AddLine(line.text, r, g, b, true)
 		else
 			GameTooltip:AddLine(line, 0.95, 0.9, 0.81, true)

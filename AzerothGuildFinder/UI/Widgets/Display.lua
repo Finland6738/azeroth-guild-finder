@@ -25,11 +25,7 @@ local max = math.max
 ---------------------------------------------------------------------------------------------------------------------
 -- Card
 ---------------------------------------------------------------------------------------------------------------------
-local CARDS = {
-	plain = { fill = "#fff4de", fillAlpha = 0.55, edge = "#a06e3c", edgeAlpha = 0.45 },
-	elevated = { fill = "#fbe9c5", fillAlpha = 1, edge = "#a06e3c", edgeAlpha = 0.4, shadow = true },
-	gold = { fill = "#fbe8b4", fillAlpha = 1, edge = "#d6a23a", edgeAlpha = 1, shadow = true },
-}
+local CARDS = Skin.CARDS   -- fills and edges are tokens (UI/Skin.lua), checked for text contrast
 
 function W.Card(parent, opts)
 	opts = opts or {}
@@ -116,7 +112,7 @@ function W.Badge(parent, opts)
 	badge.rim = W.NineSlice(badge, "pill", { corner = h / 2, layer = "BACKGROUND", outset = 2 })
 	badge.rim:SetHex("#2a0808")
 	badge.bg = W.NineSlice(badge, "pill", { corner = h / 2, layer = "BACKGROUND", sublevel = 1 })
-	badge.bg:SetHex("#d32f2f")
+	badge.bg:SetHex(Skin.BADGE.fill)
 	badge.text = W.Text(badge, "overline", "white", "CENTER")
 	badge.text:SetPoint("CENTER", badge, "CENTER", 0, 0)
 	function badge:SetCount(n)
@@ -206,12 +202,11 @@ function W.Plate(parent, opts)
 	plate.shadow = W.NineSlice(plate, "shadow", { corner = 32, outset = 12, layer = "BACKGROUND", sublevel = -2 })
 	plate.shadow:SetColor(0.2, 0.1, 0, 0.35)
 	plate.edge = W.NineSlice(plate, "card", { corner = 4, layer = "BACKGROUND", outset = 2 })
-	plate.edge:SetHex("#6e4c2c")
+	plate.edge:SetHex(Skin.COLORS.plateRim)
 	plate.bg = W.NineSlice(plate, "card", { corner = 4, layer = "BACKGROUND", sublevel = 1 })
-	plate.bg:SetHex("#a07a52")
-	plate.text = W.Text(plate, "titleS", "#fff4df")
+	plate.bg:SetHex(Skin.COLORS.plateFill)
+	plate.text = W.Text(plate, "titleS", "plateText")
 	plate.text:SetPoint("LEFT", plate, "LEFT", 12, 0)
-	plate.text:SetTextColor(Skin.Hex("#fff4df"))
 	plate.text:SetText(opts.text or "")
 	function plate:SetText(text) self.text:SetText(text or "") end
 	return plate
@@ -220,8 +215,8 @@ end
 ---------------------------------------------------------------------------------------------------------------------
 -- Day badges: the seven squares of W.DayToggles, for showing and not for choosing
 ---------------------------------------------------------------------------------------------------------------------
-local DAY_ON = { fill = "#5a3315", fillAlpha = 1, edge = "#3d210b", text = "#ffeac2" }
-local DAY_OFF = { fill = "#fff5e1", fillAlpha = 0.45, edge = "#b98a53", text = "#a88c6c" }
+local DAY_ON = { fill = Skin.DAYS.onFill, fillAlpha = 1, edge = "#3d210b", text = Skin.DAYS.onText }
+local DAY_OFF = { fill = Skin.DAYS.offFill, fillAlpha = Skin.DAYS.offFillAlpha, edge = "#b98a53", text = Skin.COLORS[Skin.DAYS.offText] }
 
 function W.DayBadges(parent, opts)
 	opts = opts or {}

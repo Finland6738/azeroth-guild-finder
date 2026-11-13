@@ -106,7 +106,7 @@ end
 local function buildLeft(host)
 	local left = host.left
 	host.emblem = ns.Emblem.Create(left, 150)
-	host.name = W.Text(left, "headline", "#3a200c", "CENTER")
+	host.name = W.Text(left, "headline", "inkDeep", "CENTER")
 	host.name:SetWidth(LW)
 	host.name:SetWordWrap(true)
 	host.name:SetMaxLines(2)

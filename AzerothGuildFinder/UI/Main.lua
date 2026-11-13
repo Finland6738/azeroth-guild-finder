@@ -162,9 +162,7 @@ end
 ---------------------------------------------------------------------------------------------------------------------
 -- The side rail
 ---------------------------------------------------------------------------------------------------------------------
-local TAB_BG = { off = "#30353b", on = "#5a4018" }
-local TAB_EDGE = { off = "#5c646d", on = "#f2bf3c" }
-local TAB_TEXT = { off = "#cfd6dc", on = "#fff3d1" }
+local TAB_BG, TAB_EDGE, TAB_TEXT = Skin.RAIL.bg, Skin.RAIL.edge, Skin.RAIL.text
 
 local function createTabButton(self, index)
 	local m = Skin.METRICS
@@ -258,10 +256,26 @@ function Main:EffectiveScale()
 	return Nav.FitScale(self:GetScale(), UIParent:GetWidth(), UIParent:GetHeight(), m.windowW, m.windowH, m.railW)
 end
 
+-- The box that must stay on the screen, in window units at scale 1: the book, the rail sticking out on the right and the
+-- close button above the top corner (the 8 px is how far the rail goes under the right page).
+function Main.Box()
+	local m = Skin.METRICS
+	return { w = m.windowW, h = m.windowH, right = m.railW - 8, top = 12 }
+end
+
+-- The saved position pulled back onto the screen (after a smaller resolution or a bigger scale it may be off it). The
+-- saved value itself is not rewritten: back on the big screen the window returns where it was.
+function Main:ClampedPos(pos)
+	local scale = self.effective or self:GetScale()
+	local x, y = Nav.ClampPos(pos, scale, UIParent:GetWidth(), UIParent:GetHeight(), Main.Box())
+	return { point = pos.point, relPoint = pos.relPoint or pos.point, x = x, y = y }
+end
+
 function Main:ApplyPosition()
 	if not self.frame then return end
 	local pos = ns.Config and ns.Config:Get("char.ui.mainPos")
 	if not (ns.Config and ns.Config.IsPos(pos)) then pos = Nav.DEFAULT_POS end
+	pos = self:ClampedPos(pos)
 	local point, relPoint, x, y = Nav.SavedToPos(pos, self.effective or self:GetScale())
 	self.frame:ClearAllPoints()
 	self.frame:SetPoint(point, UIParent, relPoint, x, y)
@@ -355,7 +369,7 @@ function Main:Create()
 	self.rightPage.gutter:SetWidth(22)
 
 	-- left page: the brand, then the area of the current page
-	self.brand = W.Text(self.leftPage, "display", "#5a3a1c")
+	self.brand = W.Text(self.leftPage, "display", "brand")
 	self.brand:SetPoint("TOPLEFT", self.leftPage, "TOPLEFT", 30, -26)
 	self.brand:SetText(L["BRAND_TITLE"])
 	self.brandSub = W.Text(self.leftPage, "overline", "ink3")
@@ -381,7 +395,7 @@ function Main:Create()
 		tooltip = L["BTN_BACK_TIP"], onClick = function() Main:Back() end })
 	self.backButton:SetPoint("LEFT", bar, "LEFT", -6, 0)
 	self.backButton:Hide()
-	self.title = W.Text(bar, "titleL", "#6a4523")
+	self.title = W.Text(bar, "titleL", "ink2")
 	self.title:SetPoint("LEFT", bar, "LEFT", 0, 0)
 	self.headerArea = CreateFrame("Frame", nil, bar)
 	self.headerArea:SetPoint("TOPRIGHT", bar, "TOPRIGHT", 0, 0)
@@ -432,11 +446,12 @@ function Main:Create()
 		if not found then table.insert(UISpecialFrames, Main.NAME) end
 	end
 
-	-- Backspace goes back one page; every other key reaches the game as usual
+	-- Backspace goes back one page (never while a text box has the keyboard); every other key reaches the game as usual
 	f:EnableKeyboard(true)
 	f:SetPropagateKeyboardInput(true)
 	f:SetScript("OnKeyDown", function(frame, key)
-		if key == "BACKSPACE" and Main.book:CanGoBack() then
+		local typing = GetCurrentKeyBoardFocus and GetCurrentKeyBoardFocus() ~= nil
+		if Nav.KeyAction(key, Main.book:CanGoBack(), typing) == "back" then
 			frame:SetPropagateKeyboardInput(false)
 			Main:Back()
 		else
