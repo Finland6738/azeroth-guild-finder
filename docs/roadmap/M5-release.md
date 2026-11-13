@@ -9,7 +9,8 @@
 - Spec: SPEC-04 §4
 - Scope: Settings panel (`Settings.RegisterCanvasLayoutCategory`) and the Settings rail page: minimap button, notification icon and "only when pending", sound, anonymous alt count, scale, reset positions.
 - Done when:
-  - [ ] Every option persists and has a default as in the wiki.
+  - [x] Offline: one definition of the options (`UI/SettingsModel.lua`: minimap button, window size, anonymous alt count, notification icon, only when pending, sound; defaults taken from `Config.defaults` and equal to the wiki table) is drawn by one builder (`UI/SettingsPage.lua`) for both the Settings rail page and the panel in the game's Settings window (`Settings.RegisterCanvasLayoutCategory`, skipped with a note in `/gf debug` when the client lacks it); every option persists across a reload, applies at once (minimap button, window scale, Stats sharing, notification icon, Bus event), a damaged value falls back to its default, *Reset window position* puts back the window and the notification icon, the panel's Defaults button restores everything (`Tests/test_settings.lua`).
+  - [ ] In game: the panel appears under *Options → AddOns* (or is absent without breaking anything), the page and the panel show the same values and follow each other, every option takes effect and is kept after `/reload` and a logout ([checklist](../checklists/M5.md)).
 
 ### M5.2 — Visual polish and accessibility
 - Branch: `step/m5-2-polish`

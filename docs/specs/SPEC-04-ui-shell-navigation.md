@@ -56,6 +56,8 @@ Pagina in `Settings` (`Settings.RegisterCanvasLayoutCategory`), con poche voci:
 - UI scale
 - Reset window positions
 
+Le stesse voci stanno nella scheda Settings della finestra e nel pannello di `Settings`, disegnate dalla stessa definizione (`UI/SettingsModel.lua`, `UI/SettingsPage.lua`): un cambiamento vale subito e viene salvato. Se il client non ha l'API, il pannello non viene aggiunto e la scheda ha tutto. I valori predefiniti sono quelli della wiki (*Commands and settings*). *Reset window positions* rimette la finestra e l'icona di notifica; il pulsante *Defaults* del pannello ripristina anche tutte le voci.
+
 ## 5. Design system (D20): Albion fuori, Material dentro
 
 Riferimento visivo: [`00-design-system.webp`](mockups/img/clean/00-design-system.webp); i token sono in [`mockups/html/agf.css`](mockups/html/agf.css).

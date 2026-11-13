@@ -151,6 +151,7 @@ function AGF:OnEnable()
 	if ns.Compat then ns.Compat:Probe() end   -- PLAYER_LOGIN: the capability table for /gf debug and later modules
 	if ns.Entry then ns.Entry:Register() end  -- the minimap button
 	if ns.Notify then ns.Notify:Init() end    -- the applications icon and its chat link
+	if ns.SettingsPage then ns.SettingsPage.RegisterPanel() end   -- the panel in the game's Settings window, when it has one
 end
 
 -- Key binding and AddOn Compartment entry points (globals named in the TOC and Bindings.xml).

@@ -508,7 +508,7 @@ function Main:Open(tab)
 end
 
 ---------------------------------------------------------------------------------------------------------------------
--- Pages the shell brings itself: "coming soon" and Settings (the full Settings page is M5.1)
+-- Pages the shell brings itself: "coming soon" and Settings
 ---------------------------------------------------------------------------------------------------------------------
 Main.placeholder = {
 	Build = function(host)
@@ -530,11 +530,11 @@ Main.placeholder = {
 	end,
 }
 
-local SCALES = { 0.6, 0.8, 1.0, 1.2, 1.4 }
-
+-- The Settings page: one definition of the options (UI/SettingsModel.lua), drawn by UI/SettingsPage.lua, which also draws
+-- the panel in the game's Settings window.
 Main:RegisterPage(Nav.SETTINGS, {
 	Build = function(host)
-		host.plate = W.Plate(host.left, { text = L["SETTINGS_WINDOW"], width = 260 })
+		host.plate = W.Plate(host.left, { text = L["SETTINGS_TITLE"], width = 260 })
 		host.plate:SetPoint("TOPLEFT", host.left, "TOPLEFT", 0, 0)
 		host.note = W.Text(host.left, "caption", "ink2")
 		host.note:SetPoint("TOPLEFT", host.plate, "BOTTOMLEFT", 2, -12)
@@ -542,63 +542,16 @@ Main:RegisterPage(Nav.SETTINGS, {
 		host.note:SetWordWrap(true)
 		host.note:SetText(L["SETTINGS_NOTE"])
 
-		local card = W.Card(host.content, { kind = "plain", title = L["SETTINGS_WINDOW"], glyph = "glyph_gear", height = 168 })
-		card:SetPoint("TOPLEFT", host.content, "TOPLEFT", 0, 0)
-		card:SetPoint("TOPRIGHT", host.content, "TOPRIGHT", 0, 0)
-		local label = W.Text(card.body, "label", "ink")
-		label:SetPoint("TOPLEFT", card.body, "TOPLEFT", 0, 0)
-		label:SetText(L["SETTINGS_SCALE"])
-		local items = {}
-		for _, s in ipairs(SCALES) do items[#items + 1] = { key = s, text = Nav.ScaleLabel(s) } end
-		Main.scaleControl = W.Segmented(card.body, items, { selected = Main:GetScale(), onChange = function(key) Main:SetScale(key) end })
-		Main.scaleControl:SetPoint("TOPLEFT", label, "BOTTOMLEFT", 0, -8)
-		local help = W.Text(card.body, "caption", "ink3")
-		help:SetPoint("TOPLEFT", Main.scaleControl, "BOTTOMLEFT", 0, -8)
-		help:SetText(L["SETTINGS_SCALE_HELP"])
-		local reset = W.Button(card.body, { text = L["SETTINGS_RESET_POS"], kind = "tonal", size = "sm",
-			onClick = function() Main:ResetPosition(); W.Snackbar.Show(L["RESET_DONE"], { key = "reset" }) end })
-		reset:SetPoint("TOPRIGHT", card.body, "TOPRIGHT", 0, 0)
-		host.resetButton = reset
-		host.card = card
-
-		-- Privacy: the anonymous alt count of SPEC-03 §4 (Data/Stats.lua). The full Settings page is M5.1.
-		local privacy = W.Card(host.content, { kind = "plain", title = L["SETTINGS_PRIVACY"], glyph = "glyph_shield", height = 124 })
-		privacy:SetPoint("TOPLEFT", card, "BOTTOMLEFT", 0, -16)
-		privacy:SetPoint("TOPRIGHT", card, "BOTTOMRIGHT", 0, -16)
-		local share = W.Switch(privacy.body, { label = L["SETTINGS_SHARE_ALTS"], width = 420,
-			checked = not ns.Stats or ns.Stats:Sharing(),
-			onChange = function(value, sw)
-				local ok = ns.Stats and ns.Stats:SetSharing(value)
-				if not ok then sw:SetChecked(not value, true) end
-			end })
-		share:SetPoint("TOPLEFT", privacy.body, "TOPLEFT", 0, 0)
-		local shareHelp = W.Text(privacy.body, "caption", "ink3")
-		shareHelp:SetPoint("TOPLEFT", share, "BOTTOMLEFT", 0, -6)
-		shareHelp:SetPoint("RIGHT", privacy.body, "RIGHT", 0, 0)
-		shareHelp:SetWordWrap(true)
-		shareHelp:SetText(L["SETTINGS_SHARE_ALTS_HELP"])
-		host.shareSwitch, host.privacy = share, privacy
-
-		-- Notifications: how the Guild Master and the officers hear about applications (SPEC-07 §6; the icon is M4.5). The
-		-- same three switches are on the Applications tab.
-		local notify = W.Card(host.content, { kind = "plain", title = L["SETTINGS_NOTIFY"], glyph = "glyph_inbox", height = 214 })
-		notify:SetPoint("TOPLEFT", privacy, "BOTTOMLEFT", 0, -16)
-		notify:SetPoint("TOPRIGHT", privacy, "BOTTOMRIGHT", 0, -16)
-		local notifyNote = W.Text(notify.body, "caption", "ink3")
-		notifyNote:SetPoint("TOPLEFT", notify.body, "TOPLEFT", 0, 0)
-		notifyNote:SetPoint("RIGHT", notify.body, "RIGHT", 0, 0)
-		notifyNote:SetWordWrap(true)
-		notifyNote:SetText(L["SETTINGS_NOTIFY_NOTE"])
-		if ns.AppsPanel then host.notifySwitches = ns.AppsPanel.BuildOptions(notify.body, 420, notifyNote, 8) end
-		host.notify = notify
+		local view = ns.SettingsPage.Build(host.content, {})
+		host.settings, host.card = view, view.cards.window
+		host.resetButton = view.resetButton
+		host.shareSwitch = view.controls.shareAltCount
+		host.notifySwitches = view.controls
+		host.notify, host.privacy = view.cards.notifications, view.cards.privacy
+		Main.scaleControl = view.controls.uiScale
 	end,
 	OnShow = function(host)
-		Main.scaleControl:SetSelected(Main:GetScale(), true)
-		if ns.Stats then host.shareSwitch:SetChecked(ns.Stats:Sharing(), true) end
-		-- only the Guild Master and the officers have notifications (SPEC-00 §5)
-		local role = ns.Role and ns.Role:Get() or "none"
-		host.notify:SetShown(host.notifySwitches ~= nil and ns.AppsModel ~= nil and ns.AppsModel.CanSee(role))
-		if host.notifySwitches then host.notifySwitches.Refresh() end
+		host.settings:Refresh()
 	end,
 })
 

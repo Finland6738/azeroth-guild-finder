@@ -53,6 +53,7 @@ UI\MyGuildModel.lua
 UI\ApplyModel.lua
 UI\ApplicationsModel.lua
 UI\NotifyModel.lua
+UI\SettingsModel.lua
 UI\FilterModel.lua
 UI\EditorModel.lua
 UI\Main.lua
@@ -65,6 +66,7 @@ UI\MyGuild.lua
 UI\MyApplication.lua
 UI\Applications.lua
 UI\Notify.lua
+UI\SettingsPage.lua
 UI\EmblemDesigner.lua
 UI\EditorSteps.lua
 UI\Gallery.lua

@@ -50,13 +50,13 @@ function Entry:Register()
 	})
 	if not self.object then return false end
 	local db = config.db.char.minimap
-	if config:Get("account.settings.minimapButton") == false then db.hide = true end
+	db.hide = config:Get("account.settings.minimapButton") == false   -- the account setting decides for every character
 	icon:Register(LDB_NAME, self.object, db)
 	self.icon, self.registered = icon, true
 	return true
 end
 
--- Shows or hides the minimap button and remembers the choice (the Settings page of M5.1 calls this).
+-- Shows or hides the minimap button and remembers the choice (the Settings page calls this).
 function Entry:SetMinimapShown(shown)
 	local config = ns.Config
 	if config then
