@@ -2,7 +2,7 @@
 
 The Guild Master and the **officers** see the **Applications** tab (in the side rail, under *My Guild*). It exists once your guild has a listing; a plain member never has it.
 
-> **Status:** the panel is written and tested offline; nothing of it has been tried in WoW Forever yet. Since M4.2 the addon of the Guild Master and of every officer **receives** applications by itself while they are online, and since M4.3 the officers' copies **stay in sync** (see below). The floating notification icon comes next.
+> **Status:** the panel, the sync, the notification icon and the cases that close an application by themselves are written and tested offline, on a mock client and in a network simulator (an officer online, an officer coming online later, two officers in sync); nothing of it has been tried in WoW Forever yet. The addon of the Guild Master and of every officer **receives** applications by itself while they are online, and the officers' copies **stay in sync** (see below).
 
 ![Applications](../specs/mockups/img/clean/04-applications.webp)
 
@@ -32,6 +32,14 @@ Only the Guild Master and the officers see the data of an application, and it is
 
 Only one officer needs to act: when two officers decide on the same application at the same moment, **Invite wins over Decline** on every copy.
 
+## Applications that close by themselves
+
+You do not have to touch these:
+
+- **The player joined the guild** by other means (you or another officer typed `/ginvite` by hand, for example): your addon reads the guild's member list and closes the application as *accepted*, with no *by* name in the history (nobody pressed the button). It looks at the list at most once a minute while an application is pending, so it can take a minute or two after the player accepted. Invite from the panel closes the card by itself, as before.
+- **The Guild Master removes the guild from Guild Finder** (*Delist* in My Guild): every pending application is **declined** at once, on the Guild Master's and on every officer's list (the officers who are away get it at their next login). The applicants learn it from the removal itself, and it does **not** start the 7-day wait, since the guild did not turn them down. The Applications tab and the notification icon go away with the listing; an application that still reaches you for a removed guild is ignored.
+- **14 days without a decision**: the application is *expired* in everybody's list at the same moment (the badge and the counters stop counting it).
+
 ## Notifications
 
 Three options, on the left page of the Applications tab and, for the Guild Master and the officers, in a **Notifications** card of **Settings**:
@@ -40,7 +48,7 @@ Three options, on the left page of the Applications tab and, for the Guild Maste
 - **Only when something is pending**
 - **Sound on new application**
 
-They are saved for your account. The icon itself (a round metal button with the number of pending applications) comes with the next version; the options are already there.
+They are saved for your account and drive the notification icon described at the end of this page.
 
 ## How the officers stay in sync
 

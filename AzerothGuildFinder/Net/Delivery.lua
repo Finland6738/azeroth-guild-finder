@@ -24,6 +24,7 @@
 --              name must be the whisper's sender), class, race, level, item level, roles (only those of the class),
 --              the time (not in the future, not older than 14 days). A valid one goes to the store (Delivery.store,
 --              Data/Inbox.lua by default; M4.3 replaces it) and is answered APPACK{id, state}.
+--              (M4.6: not for a guild whose own listing is withdrawn: refused as "delisted", no answer.)
 --   APPPING    answered with the stored state when the id is known and the sender is its applicant; else silence.
 --   APPWD      the stored record becomes withdrawn (an unknown id leaves a tombstone) and is answered "withdrawn"
 --              (or its final state).
@@ -389,6 +390,9 @@ local function onApply(msg, sender)
 	state.stats.received = state.stats.received + 1
 	local rec, why = Delivery.ParseApply(msg, sender, clock())
 	if not rec then return reject(why) end
+	-- the guild withdrew its listing (M4.6): nobody sees the Applications tab any more, so nothing is stored or answered;
+	-- the applicant closes the application itself when the withdrawal reaches it (Applications:CheckClosed)
+	if ns.OwnListing and ns.OwnListing:Status() == "delisted" then return reject("delisted") end
 	local stored, isNew = store():Receive(rec)
 	if not stored then return reject(isNew or "store") end
 	if isNew then state.stats.stored = state.stats.stored + 1 end

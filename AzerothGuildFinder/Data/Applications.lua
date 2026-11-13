@@ -30,6 +30,12 @@
 -- the Bus as APPLICATION_OUTBOX(kind, id); Net/Delivery.lua (M4.2) whispers them to the guild's contacts. An answer from
 -- an officer comes back through `Applications:OnAck(id, state)`.
 -- Every change of a record is announced as APPLICATION_CHANGED(id, state, oldState).
+--
+-- Closing cases that need no officer (M4.6, SPEC-07 §2): the applicant joins the guild of the open application (the role
+-- of the character says it is a member of that guild's key: PLAYER_GUILD_UPDATE through ROLE_CHANGED) -> accepted, `why` =
+-- "joined"; the guild's listing is withdrawn (the catalog says "delisted", whoever sent the DEL) -> declined, `why` =
+-- "delisted", and that decline starts no 7-day cooldown (the guild is not turning the player down). Both are checked by
+-- `Applications:CheckClosed()` on ROLE_CHANGED, CATALOG_UPDATED and PLAYER_ENTERING_WORLD.
 local ADDON_NAME, ns = ...
 ns = ns or {}
 local A = {}
@@ -49,6 +55,7 @@ A.TICK = 3600              -- seconds between two looks for expiry while an appl
 
 A.STATES = { "sent", "received", "accepted", "declined", "withdrawn", "expired" }
 A.OPEN = { sent = true, received = true }
+A.WHY = { joined = true, delisted = true }   -- `why`: how a record was closed without an officer's answer
 A.FINAL = { accepted = 4, declined = 3, withdrawn = 2, expired = 1 }   -- also the tie order of Newer
 A.TRANSITIONS = {
 	sent = { received = true, withdrawn = true, expired = true },
@@ -128,11 +135,12 @@ function A.OpenOf(recs, now)
 	return nil
 end
 
--- APP-06: the time until which guild `k` cannot be applied to again (the latest decline plus 7 days), or nil.
+-- APP-06: the time until which guild `k` cannot be applied to again (the latest decline plus 7 days), or nil. A decline
+-- that only means "the listing was withdrawn" (`why` = "delisted") does not count.
 function A.CooldownUntil(recs, k, now)
 	local untilAt
 	for _, rec in ipairs(recs) do
-		if rec.k == k and rec.state == "declined" then
+		if rec.k == k and rec.state == "declined" and rec.why ~= "delisted" then
 			local t = (rec.upd or rec.at or 0) + A.COOLDOWN
 			if t > now and (not untilAt or t > untilAt) then untilAt = t end
 		end
@@ -254,6 +262,9 @@ function A.Sanitize(rec)
 	if isInt(rec.roles, 1, 15) then out.roles = A.CleanRoles(out.cls, rec.roles) end
 	if type(rec.by) == "string" and #rec.by <= 64 then out.by = rec.by end
 	if rec.wd == true and out.state == "withdrawn" then out.wd = true end
+	if A.WHY[rec.why] and ((rec.why == "joined" and out.state == "accepted") or (rec.why == "delisted" and out.state == "declined")) then
+		out.why = rec.why
+	end
 	if rec.unseen == true then out.unseen = true end
 	return out
 end
@@ -379,7 +390,7 @@ function A:Changed(rec, oldState, notify)
 		local addon, L = ns.addon, ns.L
 		if addon and L then
 			local _, _, name = ns.Listing.ParseKey(rec.k)
-			addon:Print(L["APP_CHAT_" .. rec.state]:format(name or rec.k))
+			addon:Print((L["APP_CHAT_" .. (rec.why or rec.state)] or L["APP_CHAT_" .. rec.state]):format(name or rec.k))
 		end
 	end
 	emit("APPLICATION_CHANGED", rec.id, rec.state, oldState)
@@ -470,6 +481,27 @@ function A:OnAck(id, state)
 	return true
 end
 
+-- The closing cases that need no answer (see the header): the open application's guild is the guild the character is in
+-- now (accepted, "joined"), or its listing was withdrawn (declined, "delisted"). Returns the state it was closed as, or nil.
+-- A "sent" record passes through "received" like any decision that reaches it (stateRev + 2).
+function A:CheckClosed()
+	local rec = A.OpenOf(self:Records(), now())
+	if not rec then return nil end
+	local Role = ns.Role
+	local to, why
+	if Role and Role:Get() ~= "none" and Role:GuildKey() == rec.k then
+		to, why = "accepted", "joined"
+	elseif ns.Catalog and ns.Catalog:Status(rec.k) == "delisted" then
+		to, why = "declined", "delisted"
+	end
+	if not to then return nil end
+	local old = rec.state
+	if not A.ApplyAck(rec, to, now()) then return nil end
+	rec.why = why
+	self:Changed(rec, old, true)
+	return to
+end
+
 -- While an application is open, look again every TICK seconds (or at its expiry, if sooner).
 function A:ArmTimer()
 	local rec = A.OpenOf(self:Records())
@@ -493,6 +525,10 @@ function A:DebugLines()
 	return lines
 end
 
+if ns.Bus then
+	ns.Bus:On("ROLE_CHANGED", function() A:CheckClosed() end)
+	ns.Bus:On("CATALOG_UPDATED", function() A:CheckClosed() end)
+end
 if ns.addon then
 	ns.addon.Applications = A
 	-- Own AceEvent object: the addon object keeps one handler per event and Role already uses PLAYER_ENTERING_WORLD.
@@ -501,6 +537,8 @@ if ns.addon then
 		AceEvent:Embed(A)
 		A:RegisterEvent("PLAYER_ENTERING_WORLD", function()
 			A:Sweep()
+			if ns.Role then ns.Role:Refresh() end
+			A:CheckClosed()
 			A:ArmTimer()
 		end)
 	end

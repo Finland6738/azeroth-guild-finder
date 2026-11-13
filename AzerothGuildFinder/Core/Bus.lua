@@ -30,6 +30,8 @@
 --   APPLICATION_OUTBOX(kind, id)                         Data/Applications.lua; application id needs a message to an officer: kind
 --                                                        "APPLY" or "APPWD" (the network sends it from M4.2: Applications:Outbox()).
 --   APPLICATION_SEEN()                                   Data/Applications.lua; the player looked at the changes (the tab's dot goes).
+--   APPLICATIONS_CLOSED(k, state, count, why)           Data/Decisions.lua; an officer's client closed `count` applications of guild
+--                                                        k without a button: why "delisted" (state declined) or "joined" (accepted).
 -- Later modules add their events here.
 local ADDON_NAME, ns = ...
 ns = ns or {}

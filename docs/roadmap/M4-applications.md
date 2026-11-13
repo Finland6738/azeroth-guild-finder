@@ -64,5 +64,7 @@
 - Depends on: M4.1–M4.5
 - Scope: `PLAYER_GUILD_UPDATE` closes an application as accepted; delisting declines pending applications; expiry; exit check in `docs/checklists/M4.md`.
 - Done when:
-  - [ ] Exit criterion met in game.
+  - [x] Offline: `Data/Applications.lua` closes the open application as accepted (`why` = "joined") when the role says the character is a member of that guild (`PLAYER_GUILD_UPDATE` through `ROLE_CHANGED`, also at login) and as declined (`why` = "delisted", no 7-day cooldown) when the catalog says the guild's listing is withdrawn; `Data/Decisions.lua` declines every open application of the guild on the Guild Master's and on every officer's client when the verified guild copy is withdrawn (an open copy that arrives later by the sync is declined too, an `APPLY` for the withdrawn guild is refused), and accepts the open record of an applicant it sees in the roster (at most once a minute); an application expires on both sides at 14 days, the officers' copies at the same moment (`Tests/test_closing.lua`).
+  - [x] Simulator: the full flow with an officer online, with an officer coming online hours later and with two officers in sync; a join, a delisting (also with an officer away) and the 14-day expiry end with the same state and the same version on both officers (`Tests/test_closing.lua`); the in-game lists and the exit check are in [the M4 checklist](../checklists/M4.md).
+  - [ ] Exit criterion met in game ([checklist](../checklists/M4.md)).
 - Docs: wiki Applying, Managing Applications, FAQ.

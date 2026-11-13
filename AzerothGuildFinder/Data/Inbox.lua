@@ -11,6 +11,8 @@
 --   Inbox:Withdraw(k, id, who)    APPWD: an open record becomes withdrawn; an unknown id leaves a withdrawn tombstone
 --                                 (`tomb = true`) so a late copy and the officers' sync know it is over.
 --   Inbox:Decide(k, id, state, by)  Invite / Decline of the panel (M4.4): a received record becomes accepted / declined.
+--   Inbox:CloseOpen(k, state, by, pick)  M4.6: every open record of guild k that `pick(rec)` takes (nil: all) is decided
+--                                 `state` (accepted | declined) like Decide, one record at a time; returns how many.
 --   Inbox:Merge(k, rec)           a record from another officer (APPSYNC, already checked by Inbox.Sanitize): kept when
 --                                 it wins (Inbox.Version), else ours stays -> stored, "new" | "newer" | "older" | "same".
 --   Inbox:Sweep(now)              APP-05 (open records past 14 days become expired) and the 30-day history.
@@ -343,6 +345,27 @@ function Inbox:Decide(k, id, state, by)
 	if not ok then return false, why end
 	emit("INBOX_CHANGED", k, id, rec.state, old)
 	return true
+end
+
+-- The closing cases of M4.6: every open record of guild k (not one past its 14 days: that one is expired, not decided)
+-- that `pick(rec)` takes, or all of them when `pick` is nil, becomes `state` by `by` (nil: nobody, the applicant joined
+-- by other means). Each change is announced like a decision, so the sync tells the other officers. Returns the number
+-- of records closed.
+function Inbox:CloseOpen(k, state, by, pick)
+	local recs = self:Records(k)
+	if not recs then return 0 end
+	local at, ids = now(), {}
+	for id, rec in pairs(recs) do
+		if type(rec) == "table" and A().IsOpen(rec) and not A().IsExpired(rec, at) and (not pick or pick(rec)) then
+			ids[#ids + 1] = id
+		end
+	end
+	table.sort(ids)   -- the same order on every client
+	local n = 0
+	for _, id in ipairs(ids) do
+		if self:Decide(k, id, state, by) then n = n + 1 end
+	end
+	return n
 end
 
 -- A record of guild k from another officer, already checked by Inbox.Sanitize. Returns the stored record and what

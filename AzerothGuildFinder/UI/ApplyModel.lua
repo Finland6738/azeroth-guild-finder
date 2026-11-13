@@ -137,6 +137,8 @@ local STATUS = {
 	declined = { "MA_DECLINED", "MA_DECLINED_BODY", "bad" },
 	withdrawn = { "MA_WITHDRAWN", "MA_WITHDRAWN_BODY", "default" },
 	withdrawing = { "MA_WITHDRAWING", "MA_WITHDRAWING_BODY", "default" },
+	joined = { "MA_JOINED", "MA_JOINED_BODY", "ok" },           -- accepted because the player joined (M4.6)
+	delisted = { "MA_DELISTED", "MA_DELISTED_BODY", "default" },   -- declined because the guild's listing was withdrawn
 	expired = { "MA_EXPIRED", "MA_EXPIRED_BODY", "default" },
 }
 
@@ -149,7 +151,7 @@ function Model.MyApplication(rec, ctx, L)
 	local A = ns.Applications
 	local now = ctx.now or 0
 	local view = { k = rec.k, name = guildOf(rec), state = rec.state, open = A.IsOpen(rec) }
-	local key = (rec.state == "withdrawn" and rec.wd) and "withdrawing" or rec.state
+	local key = (rec.state == "withdrawn" and rec.wd) and "withdrawing" or rec.why or rec.state
 	local s = STATUS[key] or STATUS.expired
 	view.statusKey, view.title, view.kind = key, L[s[1]], s[3]
 	view.body = L[s[2]]:format(view.name)
@@ -163,7 +165,7 @@ function Model.MyApplication(rec, ctx, L)
 		local days = max(0, ceil((A.ExpiresAt(rec) - now) / 86400))
 		view.expiresText = days <= 1 and L["MA_EXPIRES_1"] or L["MA_EXPIRES"]:format(days)
 	end
-	if rec.state == "declined" then
+	if rec.state == "declined" and rec.why ~= "delisted" then
 		local untilAt = (rec.upd or rec.at or 0) + A.COOLDOWN
 		if untilAt > now then view.again = L["APPLY_AGAIN_ON"]:format(Model.ShortDate(untilAt, L) or "?") end
 	end
