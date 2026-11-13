@@ -97,7 +97,7 @@ Skin.RAIL = {
 Skin.SEGMENT = { onFill = "#5a3315", onText = "#ffeac2", offFill = "#fff4dd", offText = "ink" }
 Skin.STEP = { activeFill = "#7a4a22", idleFill = "#d6b98c", activeCard = "#fbe5b5" }
 Skin.DAYS = { onFill = "#5a3315", onText = "#ffeac2", offFill = "#fff5e1", offFillAlpha = 0.45, offText = "ink3" }
-Skin.BADGE = { fill = "#d32f2f", text = "white" }
+Skin.BADGE = { fill = "#d32f2f", text = "white" } -- l10n-ok: a colour token
 
 -- Tooltip lines are drawn on the game's dark tooltip: the state colours of the parchment are swapped for light ones.
 Skin.ON_DARK = { bad = "badLight", ok = "okLight", warn = "gold" }
@@ -163,6 +163,7 @@ function Skin.Surfaces()
 end
 
 -- Every { name, fg, bg, min } the interface draws. fg and bg are tokens or hex; `min` is the ratio to reach.
+-- l10n-off: the labels of the contrast pairs are for the tests, never shown
 function Skin.TextPairs()
 	local pairsOut = {}
 	local function add(name, fg, bg, min) pairsOut[#pairsOut + 1] = { name = name, fg = fg, bg = bg, min = min or Skin.MIN_CONTRAST } end
@@ -204,6 +205,7 @@ function Skin.TextPairs()
 	add("link field", "linkInk", "fieldBlue")
 	return pairsOut
 end
+-- l10n-on
 
 ---------------------------------------------------------------------------------------------------------------------
 -- Sizes (px at 100 %)

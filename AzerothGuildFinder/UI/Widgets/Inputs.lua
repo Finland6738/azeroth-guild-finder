@@ -720,10 +720,10 @@ function W.CopyField(parent, opts)
 	edit:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
 	edit:SetScript("OnEnterPressed", function(self) self:ClearFocus() end)
 
-	field.button = W.IconButton(field, { glyph = "glyph_copy", size = 28, tooltip = L and L["COPY_SELECT_TIP"] or "Select all",
+	field.button = W.IconButton(field, { glyph = "glyph_copy", size = 28, tooltip = L["COPY_SELECT_TIP"],
 		onClick = function()
 			field:SelectAll()
-			if W.Snackbar then W.Snackbar.Show(opts.hint or (L and L["COPY_HINT"]) or "Selected: press Ctrl+C to copy.", { key = "copyfield" }) end
+			if W.Snackbar then W.Snackbar.Show(opts.hint or L["COPY_HINT"], { key = "copyfield" }) end
 		end })
 	field.button:SetPoint("RIGHT", field, "RIGHT", -6, 0)
 	return field

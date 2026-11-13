@@ -16,8 +16,9 @@ ns.SettingsModel, ns.modules = Model, ns.modules or {}
 ns.modules.SettingsModel = Model
 
 local type, ipairs, pcall = type, ipairs, pcall
+local L = ns.L
 
-Model.PANEL_NAME = "Azeroth Guild Finder"
+Model.PANEL_NAME = L["ADDON_TITLE"]
 
 Model.GROUPS = {
 	{ key = "window", title = "SETTINGS_WINDOW", glyph = "glyph_gear" },
