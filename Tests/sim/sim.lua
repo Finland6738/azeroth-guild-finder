@@ -18,6 +18,7 @@
 --   loss      probability that one delivery is lost (0..1), or function(from, to, entry) -> true to lose it (default 0)
 --   seed      seed of the simulator and of math.random inside the clients (default 1)
 --   step      length of a frame in seconds (default 0.1, the mock client's own frame); bigger is faster, coarser
+--             (sim:setStep(seconds) changes it later, for a run of days)
 --   echo      the sender also receives its own CHANNEL / GUILD / OFFICER message, as the client does (default true)
 --   ready     wait until every client has joined the channel (default true), at most readyTimeout seconds (60)
 --   realm     the realm of every character (default "Test Realm")
@@ -248,6 +249,23 @@ end
 function Sim:advance(seconds)
 	local target = self.slot + math.floor(seconds / self.step + 0.5)
 	while self.slot < target do frame(self) end
+end
+
+-- Changes the length of a frame (days of simulated time need a coarse step): what is in flight keeps its due time and the
+-- clock goes on from the same moment. Use it between two `advance` calls.
+function Sim:setStep(step)
+	local old, slots, inflight = self.step, {}, {}
+	for slot in pairs(self.inflight) do slots[#slots + 1] = slot end
+	table.sort(slots)
+	self.slot = math.floor(self.time / step + 1e-9)
+	self.time = self.slot * step
+	for _, slot in ipairs(slots) do
+		local to = math.max(math.ceil(slot * old / step - 1e-9), self.slot + 1)
+		local bucket = inflight[to]
+		if not bucket then bucket = {} inflight[to] = bucket end
+		for _, item in ipairs(self.inflight[slot]) do bucket[#bucket + 1] = item end
+	end
+	self.inflight, self.lastSlot, self.step = inflight, {}, step
 end
 
 -- Runs until fn() is true (checked every frame), at most `limit` seconds. Returns true when fn() became true, and the

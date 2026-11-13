@@ -20,6 +20,20 @@
 -- message in the next MANUAL_WATCH seconds marks it by itself. From then on the session goes straight to the fallback.
 -- If even the chat box cannot be opened the panel says to invite the player by hand and to whisper.
 --
+-- Closing cases without a button (M4.6, SPEC-07 §2 and §5):
+--   Decisions:OnListing(what, key)  the Guild Master withdrew the listing, or the verified guild copy this officer received
+--                                   says so (OWN_LISTING_CHANGED "delisted" / "received" with the own copy delisted): every
+--                                   open application of the guild becomes declined, by this character. A record that
+--                                   still arrives open afterwards (from an officer who had not heard yet) is declined too.
+--                                   Only the verified guild copy counts, never a DEL heard on the channel (INT-05 is
+--                                   about hiding a listing, not about closing other people's applications).
+--   Decisions:CheckJoined()         the roster says an applicant with an open record is a member of the guild now (he was
+--                                   invited by other means): the record becomes accepted, `by` nil. Read at
+--                                   GUILD_ROSTER_UPDATE at most every ROSTER_GAP seconds, with one more look after the gap
+--                                   when events came meanwhile; nothing is requested from the server [verify in game: the
+--                                   roster events the client gives without the guild window].
+-- Bus: APPLICATIONS_CLOSED(k, state, count, why), why "delisted" or "joined".
+--
 -- Every change needs the role: the Guild Master or an officer of the guild of the key (SPEC-00 §5, APP-07).
 -- Bus: DECISION_STARTED(k, id) when an invite is being watched; DECISION_RESULT(k, id, result, detail) with result
 -- "accepted" | "declined" | "offline" | "refused" | "manual" | "changed" (another officer decided first, or it expired).
@@ -32,6 +46,7 @@ ns.modules.Decisions = Decisions
 local type, pairs, ipairs, tostring = type, pairs, ipairs, tostring
 
 Decisions.WATCH = 3            -- seconds an invite is watched for an error before it counts as sent
+Decisions.ROSTER_GAP = 60      -- seconds between two looks at the roster for applicants who joined
 Decisions.MANUAL_WATCH = 90    -- seconds the game's "invited" message still marks a "/ginvite" typed by the officer
 
 -- The game's messages about an invite: client global string, and the English text used when the client has none
@@ -54,7 +69,9 @@ local function resetState()
 		manual = {},     -- [id] = { k, who, base, until }: the fallback was offered for this application
 		apiBlocked = false,
 		gen = 0,
-		stats = { invites = 0, accepted = 0, offline = 0, refused = 0, manual = 0, declined = 0, blocked = 0 },
+		stats = { invites = 0, accepted = 0, offline = 0, refused = 0, manual = 0, declined = 0, blocked = 0,
+			delisted = 0, joined = 0 },
+		rosterAt = nil, rosterArmed = false,
 	}
 	Decisions.state = state
 end
@@ -254,14 +271,80 @@ local function onBlocked(addon)
 	end
 end
 
+-- true when the guild copy of this character is withdrawn (the verified one: the Guild Master's own, or a GLIST that the
+-- roster's Guild Master sent, Data/OwnListing.lua).
+local function listingWithdrawn()
+	local OL = ns.OwnListing
+	return OL ~= nil and OL:Status() == "delisted"
+end
+
+local function closed(k, st, n, why)
+	state.stats[why] = state.stats[why] + n
+	emit("APPLICATIONS_CLOSED", k, st, n, why)
+end
+
+-- The listing of guild k was withdrawn: its open applications are declined (SPEC-07 §2).
+function Decisions:OnListing(what, k)
+	if what ~= "delisted" and what ~= "received" then return 0 end
+	if not contactOf(k) or not listingWithdrawn() then return 0 end
+	local n = ns.Inbox:CloseOpen(k, "declined", byName())
+	if n > 0 then closed(k, "declined", n, "delisted") end
+	return n
+end
+
 -- A closed application needs no fallback any more.
 -- An invite being watched when the record closes (another officer decided first, the player withdrew) ends there.
-local function onInboxChanged(k, id, st)
+local function onInboxChanged(k, id, st, old, source)
 	if st ~= "received" and st ~= "sent" then
 		state.manual[id] = nil
 		local job = state.pending[id]
 		if job then settle(job, "changed", "state") end
+	elseif source == "sync" and contactOf(k) and listingWithdrawn() then
+		-- a copy that is still open reached us after the guild withdrew its listing: it closes like the others
+		if ns.Inbox:Decide(k, id, "declined", byName()) then closed(k, "declined", 1, "delisted") end
 	end
+end
+
+---------------------------------------------------------------------------------------------------------------------
+-- Applicants who joined
+---------------------------------------------------------------------------------------------------------------------
+-- The names (lower case, without the realm) of the guild's roster, as a set; nil while the roster is empty.
+local function rosterNames()
+	local G = C().Guild
+	local total = (G.RosterCount())   -- (two results: tonumber would read the second as a base)
+	total = math.min(type(total) == "number" and total or 0, G.MAX_ROSTER)
+	if total <= 0 then return nil end
+	local set = {}
+	for i = 1, total do
+		local row = G.RosterRow(i)
+		local base = row and baseName(row.name)
+		if base then set[base] = true end
+	end
+	return set
+end
+
+-- Closes as accepted the open records of the guild whose applicant is in the roster. `force`: ignore the gap.
+function Decisions:CheckJoined(force)
+	local Role = ns.Role
+	local k = Role and Role:GuildKey()
+	if not k or not contactOf(k) or ns.Inbox:Count(k, true) == 0 then return 0 end
+	local t = now()
+	if not force and state.rosterAt and t - state.rosterAt < Decisions.ROSTER_GAP then
+		if not state.rosterArmed then
+			state.rosterArmed = true
+			C().After(Decisions.ROSTER_GAP - (t - state.rosterAt) + 0.5, function()
+				state.rosterArmed = false
+				Decisions:CheckJoined()
+			end)
+		end
+		return 0
+	end
+	state.rosterAt = t
+	local names = rosterNames()
+	if not names then return 0 end
+	local n = ns.Inbox:CloseOpen(k, "accepted", nil, function(rec) return names[baseName(rec.who)] == true end)
+	if n > 0 then closed(k, "accepted", n, "joined") end
+	return n
 end
 
 function Decisions:Reset() resetState() end
@@ -269,13 +352,14 @@ function Decisions:Reset() resetState() end
 function Decisions:DebugLines()
 	local s, n = state.stats, 0
 	for _ in pairs(state.pending) do n = n + 1 end
-	return { ("Decisions: invite by %s%s, tried %d (accepted %d, offline %d, refused %d, blocked %d), manual %d, declined %d, watching %d"):format(
+	return { ("Decisions: invite by %s%s, tried %d (accepted %d, offline %d, refused %d, blocked %d), manual %d, declined %d, watching %d, closed by delisting %d, by joining %d"):format(
 		self:Mode() == "api" and "the game's call" or "/ginvite", state.apiBlocked and " (blocked)" or "", s.invites, s.accepted,
-		s.offline, s.refused, s.blocked, s.manual, s.declined, n) }
+		s.offline, s.refused, s.blocked, s.manual, s.declined, n, s.delisted, s.joined) }
 end
 
 if ns.Bus then
 	ns.Bus:On("INBOX_CHANGED", onInboxChanged)
+	ns.Bus:On("OWN_LISTING_CHANGED", function(what, k) Decisions:OnListing(what, k) end)
 end
 if ns.addon then
 	ns.addon.Decisions = Decisions
@@ -285,6 +369,7 @@ if ns.addon then
 		AceEvent:Embed(Decisions)
 		Decisions:RegisterEvent("UI_ERROR_MESSAGE", function(_, _, message) onText(message, "error") end)
 		Decisions:RegisterEvent("CHAT_MSG_SYSTEM", function(_, text) onText(text, "system") end)
+		Decisions:RegisterEvent("GUILD_ROSTER_UPDATE", function() Decisions:CheckJoined() end)
 		Decisions:RegisterEvent("ADDON_ACTION_FORBIDDEN", function(_, addon) onBlocked(addon) end)
 		Decisions:RegisterEvent("ADDON_ACTION_BLOCKED", function(_, addon) onBlocked(addon) end)
 	end
