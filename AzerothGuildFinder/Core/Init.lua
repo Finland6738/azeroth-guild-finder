@@ -43,6 +43,12 @@ function AGF:AddDebugSection(title, linesFn)
 	self.debugSections[#self.debugSections + 1] = { title = title, linesFn = linesFn }
 end
 
+-- /gf debug: the report in the copy box (UI/DiagnosticsBox.lua); chat lines only when the box is not there.
+function AGF:ShowDebug()
+	if ns.DiagnosticsBox then return ns.DiagnosticsBox:Open() end
+	self:PrintDebug()
+end
+
 function AGF:PrintDebug()
 	local version = ns.Compat and select(2, ns.Compat.Call("C_AddOns.GetAddOnMetadata", ADDON_NAME, "Version"))
 	self:Print("Debug - version " .. tostring(version or "?"))
@@ -84,7 +90,7 @@ function AGF:OnDebugCommand(input)
 		if ns.Sync then return ns.Sync:DebugAnnounce() end
 		return self:Print(L["COMING_SOON"])
 	end
-	self:PrintDebug()
+	self:ShowDebug()
 end
 
 -- Opens or closes the main window (UI/Main.lua): the same call serves /gf, the key binding, the Addon Compartment
@@ -148,6 +154,7 @@ function AGF:OnInitialize()
 end
 
 function AGF:OnEnable()
+	if ns.Diagnostics then ns.Diagnostics.Install() end   -- keeps the addon's own Lua errors for /gf debug
 	if ns.Compat then ns.Compat:Probe() end   -- PLAYER_LOGIN: the capability table for /gf debug and later modules
 	if ns.Entry then ns.Entry:Register() end  -- the minimap button
 	if ns.Notify then ns.Notify:Init() end    -- the applications icon and its chat link

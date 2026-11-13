@@ -19,6 +19,7 @@ Core\Compat.lua
 Core\Config.lua
 Core\Bus.lua
 Core\Role.lua
+Core\Diagnostics.lua
 Core\Normalize.lua
 Data\Enums.lua
 Data\TabardParts.lua
@@ -70,4 +71,5 @@ UI\SettingsPage.lua
 UI\EmblemDesigner.lua
 UI\EditorSteps.lua
 UI\Gallery.lua
+UI\DiagnosticsBox.lua
 UI\Entry.lua

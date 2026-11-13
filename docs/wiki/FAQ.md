@@ -19,3 +19,5 @@
 **My application "expired".** Nobody decided in 14 days. Apply again, and keep an eye on the guild's contacts (Discord or a whisper) meanwhile.
 
 **An officer: an applicant joined the guild, but the card is still pending.** The addon reads the member list at most once a minute, so give it a moment: the card then moves to History as *accepted*. If the player never joined, decline the card.
+
+**How do I send a useful bug report?** Type `/gf debug`, press **Select all**, Ctrl+C, and paste the text into the *Lua errors and /gf debug output* field of the [Bug report form](https://github.com/Finland6738/azeroth-guild-finder/issues/new/choose). The report holds no player or guild names, but read it once before you send it. If the game shows a Lua error box, the last errors of Guild Finder are in the report too (section *Last errors*).

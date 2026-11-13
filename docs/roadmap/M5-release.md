@@ -30,7 +30,8 @@
 - Branch: `step/m5-4-diagnostics`
 - Scope: `/gf debug` report (versions, capabilities, catalog size, sync state, last errors, listen-only reason) in a copy box, with no player names.
 - Done when:
-  - [ ] The bug report form's "debug output" can be filled from it.
+  - [x] Offline: `/gf debug` opens a structured report (`Core/Diagnostics.lua`, pure Lua: header with addon, client, interface and project versions; listen-only reason; last errors; then every debug section: capabilities, catalog size, sync state, role, settings, saved data, and so on) in a read-only multi-line copy box with *Select all* (`UI/DiagnosticsBox.lua`). A ring buffer keeps the last ten errors that name the addon (the game's error handler is wrapped, paths of the player's PC are removed). A test fails if a name of the mock roster or catalog, the character name or the realm appears (`Tests/test_diagnostics.lua`). The bug report form's debug field points to it.
+  - [ ] In game: `/gf debug` opens the box, *Select all* + Ctrl+C copies the whole report, a real Lua error of the addon shows in *Last errors*, and the text pastes into the bug report form ([checklist](../checklists/M5.md)).
 
 ### M5.5 — Packaging and release workflow
 - Branch: `step/m5-5-packaging`
