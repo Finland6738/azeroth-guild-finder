@@ -91,6 +91,7 @@ Config.rules = {
 	["char.ui.filters"] = { type = "table" },
 	["char.ui.notifyPos"] = posRule(),
 	["char.ui.mainPos"] = posRule(),
+	["char.ui.notifyLocked"] = { type = "boolean", optional = true },
 	["char.ui.appsSeenAt"] = { type = "timestamp", optional = true },
 	["char.minimap"] = { type = "table" },
 	["char.minimap.hide"] = { type = "boolean" },

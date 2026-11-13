@@ -57,7 +57,9 @@ describe("slash commands", function()
 	end)
 
 	it("a command with no handler yet says so", function()
-		Mock.Slash("/gf notify")
+		local commands = AzerothGuildFinder.commands
+		commands[#commands + 1] = { name = "later", help = "not there yet" }
+		Mock.Slash("/gf later")
 		contains(table.concat(Mock.PlainOutput(), "\n"), "coming soon")
 	end)
 end)

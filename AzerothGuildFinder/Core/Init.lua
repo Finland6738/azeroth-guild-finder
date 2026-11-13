@@ -27,7 +27,7 @@ end
 
 -- Commands planned for the first version; handlers are replaced by the modules that implement them.
 AGF.commands = {
-	{ name = "notify", help = L["HELP_NOTIFY"] },
+	{ name = "notify", help = L["HELP_NOTIFY"], handler = function(self) self:OnNotifyCommand() end },
 	{ name = "reset", help = L["HELP_RESET"], handler = function(self) self:ResetWindow() end },
 	{ name = "scale", help = L["HELP_SCALE"], handler = function(self, input) self:OnScaleCommand(input) end },
 	{ name = "debug", help = L["HELP_DEBUG"], handler = function(self, input) self:OnDebugCommand(input) end },
@@ -94,6 +94,12 @@ function AGF:Toggle()
 	self:Print(L["COMING_SOON"])
 end
 
+-- /gf notify: shows or hides the applications icon (UI/Notify.lua).
+function AGF:OnNotifyCommand()
+	if not ns.Notify then return self:Print(L["COMING_SOON"]) end
+	ns.Notify:Command()
+end
+
 function AGF:ResetWindow()
 	if not ns.Main then return self:Print(L["COMING_SOON"]) end
 	ns.Main:ResetPosition()
@@ -144,6 +150,7 @@ end
 function AGF:OnEnable()
 	if ns.Compat then ns.Compat:Probe() end   -- PLAYER_LOGIN: the capability table for /gf debug and later modules
 	if ns.Entry then ns.Entry:Register() end  -- the minimap button
+	if ns.Notify then ns.Notify:Init() end    -- the applications icon and its chat link
 end
 
 -- Key binding and AddOn Compartment entry points (globals named in the TOC and Bindings.xml).

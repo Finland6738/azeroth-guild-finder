@@ -116,6 +116,14 @@ Bozzetto: [`05-notification.webp`](mockups/img/05-notification.webp).
 - Si mostra e si nasconde anche con `/gf notify` e dalle impostazioni.
 - Quando arriva una candidatura nuova: il badge si aggiorna, l'icona pulsa una volta, un messaggio in chat ("[Guild Finder] New application from Name (Mage 32)") e un suono facoltativo, attivo di base.
 
+> **Nota di realizzazione (M4.5).** L'icona è in `UI/Notify.lua`, le regole (puro Lua) in `UI/NotifyModel.lua`. Dettagli che il testo non dice:
+>
+> - **Chi la vede**: GM e ufficiali di una gilda con annuncio, poi `notifyIcon` e `onlyWhenPending` (account). Il pulsante appare e sparisce da solo con `ROLE_CHANGED`, `CATALOG_UPDATED`, `INBOX_CHANGED` e `NOTIFY_OPTIONS_CHANGED`; finché è visibile il conteggio viene riletto ogni minuto (una candidatura può scadere).
+> - **Candidatura nuova**: parla (riga in chat, suono se `sound`) solo un record aperto che arriva direttamente dal candidato (`INBOX_CHANGED` senza `source`); una copia da `APPSYNC` (`source` `"sync"`) muove solo il badge, per non inondare un ufficiale che rientra. La riga e il suono arrivano anche con l'icona nascosta. Il badge che sale fa pulsare l'alone una volta (1,4 s).
+> - **Link**: `|Haddon:AzerothGuildFinder:applications|h[Open]|h`, agganciato con `hooksecurefunc("SetItemRef")`; apre la scheda Applications. Non provato nel gioco.
+> - **Lista rapida**: le ultime 5 in attesa (la più nuova per prima), "and n more", Invite e Decline (con domanda) come nel pannello; gli esiti dell'invito vanno in chat se la finestra non è aperta.
+> - **Posizione e blocco**: `char.ui.notifyPos` (punto, punto relativo, x, y) e `char.ui.notifyLocked` per personaggio; una posizione fuori schermo viene riportata dentro. Il menu del clic destro ha Lock position, Show only when something is pending, Sound, Hide icon; `/gf notify` accende e spegne `notifyIcon` e avvisa chi non può averla.
+
 ## 7. Lato candidato: "My Application"
 
 - Una scheda per chi non ha gilda, con la candidatura aperta o lo stato vuoto ("You haven't applied to any guild").

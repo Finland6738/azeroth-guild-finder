@@ -59,4 +59,12 @@ Officers who are never online at the same time still converge: each one passes o
 
 ![Notification icon](../specs/mockups/img/clean/05-notification.webp)
 
-A round metal button with a red badge shows the pending applications. Left click: a quick list with Invite and Decline. Drag: move it. Right click: lock, show only when something is pending, sound, hide. `/gf notify` shows it again. *(Next version.)*
+A round metal button with the guild's emblem and a red badge with the number of pending applications. Only the Guild Master and the officers of a guild with a listing see it.
+
+- **New application**: the badge goes up, the icon glows once, the chat says *New application from Elarin (Mage 32). [Open]* (click *Open* to go to the Applications tab) and, if the sound is on, a short sound plays. Applications that only reach you from another officer, for example when you log in, move the badge without the chat line or the sound.
+- **Left click**: a quick list of the last 5 pending applications with **Invite** and **Decline** (it asks first, as in the panel) and *Open all applications*.
+- **Drag**: moves the icon; the place is saved for each character. **Lock position** stops it from moving.
+- **Right click**: a menu with *Lock position*, *Show only when something is pending*, *Sound on new application* and *Hide icon*.
+- **`/gf notify`** hides the icon, and shows it again. The same switches are in Settings and on the Applications tab.
+
+If you cannot see the icon: you must be the Guild Master or an officer, the guild must have a listing, *Notification icon on screen* must be on, and with *Show only when something is pending* it appears when an application waits.

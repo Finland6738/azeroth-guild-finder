@@ -1,0 +1,421 @@
+-- M4.5: the notification icon on the mock client (UI/Notify.lua): who sees it, the badge, the pulse, the quick list with Invite
+-- and Decline, drag and lock with the position saved per character, the right-click menu, the chat line and its link, the
+-- sound option and /gf notify. The decisions themselves are tested without frames in test_notify_model.lua.
+-- The mock player is "Testchar", Horde Orc Warrior 60 on "Test Realm".
+
+local GUILD = "Aurora"
+local KEY = "TestRealm|Horde|" .. GUILD
+
+local function A() return AzerothGuildFinder end
+local function N() return A().Notify end
+local function icon() return N().frame end
+local function Inbox() return A().Inbox end
+local function click(f, button) Mock.RunScript(f, "OnClick", button or "LeftButton") end
+local function cfg(path) return A().Config:Get(path) end
+local function out() return table.concat(Mock.PlainOutput(), "\n") end
+
+local function putListing()
+	local t = GetServerTime()
+	A().Catalog:PutSummary({ k = KEY, rev = 4, upd = t - 3600, first = 1760000000, own = "0badc0de", sub = "Friendly raiders",
+		lang = 1, lang1 = 1, tags = { 1, 2 }, pace = 2, days = 31, t0 = 1140, t1 = 1380, rec = 1, apps = true,
+		want = { [1] = 4, [5] = 2 }, newb = true, minL = 30 })
+	A().Catalog:PutDetail({ k = KEY, rev = 4, desc = "We raid on weekends.", disc = "wolves1", cont = { "Thrall" }, note = "x" })
+end
+
+local RANK = { member = 3, officer = 1, gm = 0 }
+local function setRole(role)
+	if role == "none" then Mock.guild.Leave(); A().Role:Refresh(); return end
+	Mock.guild.Set{ name = GUILD, myRank = RANK[role], members = { { name = "Thrall", rank = 0 }, { name = "Jaina", rank = 1 } } }
+	A().Role:Refresh()
+end
+
+local function receive(id, extra)
+	local t = GetServerTime()
+	local r = { id = id, k = KEY, state = "received", stateRev = 2, at = t - 2 * 3600, upd = t - 2 * 3600,
+		who = "Elarin-TestRealm", cls = 8, race = 8, lvl = 32, ilvl = 41, roles = 8 }
+	for k, v in pairs(extra or {}) do if v == "nil" then r[k] = nil else r[k] = v end end
+	return assert(Inbox():Receive(r))
+end
+
+local function ready(role)
+	setRole(role or "officer")
+	putListing()
+	N():Refresh()
+end
+
+local function shown() return icon() ~= nil and icon():IsShown() end
+local function badgeText() return icon().badge.text:GetText() end
+local function listRows()
+	local n = 0
+	for _, f in ipairs(N().list.rows) do if f:IsShown() then n = n + 1 end end
+	return n
+end
+
+describe("who sees the icon", function()
+	it("the Guild Master and the officers of a listed guild see it", function()
+		ready("officer")
+		truthy(shown())
+		ready("gm")
+		truthy(shown())
+	end)
+
+	it("a member and a character without a guild do not", function()
+		ready("officer")
+		truthy(shown())
+		setRole("member")
+		falsy(shown())
+		setRole("none")
+		falsy(shown())
+	end)
+
+	it("a guild without a listing has none, and it appears when the listing does", function()
+		setRole("gm")
+		N():Refresh()
+		falsy(shown())
+		putListing()
+		truthy(shown(), "the catalog update shows it")
+	end)
+
+	it("the options hide it", function()
+		ready("officer")
+		A().AppsModel.SetOption("notifyIcon", false)
+		falsy(shown())
+		A().AppsModel.SetOption("notifyIcon", true)
+		truthy(shown())
+		A().AppsModel.SetOption("onlyWhenPending", true)
+		falsy(shown(), "nothing pending")
+		receive("00000001")
+		truthy(shown(), "one pending")
+	end)
+end)
+
+describe("the badge and the pulse", function()
+	it("counts the pending applications and follows decisions", function()
+		ready("officer")
+		eq(badgeText(), "")
+		falsy(icon().badge:IsShown())
+		receive("00000001")
+		receive("00000002", { who = "Mirelle-TestRealm", cls = 5 })
+		receive("00000003", { who = "Brogan-TestRealm", cls = 1 })
+		eq(badgeText(), "3")
+		truthy(icon().badge:IsShown())
+		assert(A().Decisions:Decline(KEY, "00000002"))
+		eq(badgeText(), "2")
+	end)
+
+	it("pulses once for a new application and then settles", function()
+		ready("officer")
+		falsy(icon().glow:IsShown())
+		receive("00000001")
+		truthy(icon().glow:IsShown())
+		Mock.RunOnUpdate(0.5)
+		truthy(icon().glow:IsShown())
+		Mock.RunOnUpdate(2)
+		falsy(icon().glow:IsShown())
+		assert(A().Decisions:Decline(KEY, "00000001"))
+		falsy(icon().glow:IsShown(), "a decision does not pulse")
+	end)
+
+	it("a copy that arrives by sync moves the badge without pulse-speak: no chat line, no sound", function()
+		ready("officer")
+		local plays = 0
+		_G.PlaySound = function() plays = plays + 1 end
+		Mock.ClearOutput()
+		assert(Inbox():Merge(KEY, { id = "00000009", k = KEY, state = "received", stateRev = 2, at = GetServerTime() - 3600,
+			upd = GetServerTime() - 3600, who = "Elarin-TestRealm", cls = 8, lvl = 32, race = 8, roles = 8 }))
+		eq(badgeText(), "1")
+		eq(plays, 0)
+		falsy(out():find("New application", 1, true))
+	end)
+end)
+
+describe("the quick list", function()
+	it("opens on a left click with the last 5 pending, Invite and Decline", function()
+		ready("officer")
+		for i = 1, 7 do receive(("%08d"):format(i), { who = "Player" .. i .. "-TestRealm", at = GetServerTime() - (8 - i) * 3600 }) end
+		click(icon())
+		truthy(N().list:IsShown())
+		eq(listRows(), 5)
+		eq(N().list.rows[1].name:GetText(), "Player7")
+		eq(N().list.more:GetText(), "and 2 more")
+		eq(N().list.title:GetText(), "Pending applications")
+		eq(N().list.guild:GetText(), GUILD)
+		click(icon())
+		falsy(N().list:IsShown(), "a second click closes it")
+	end)
+
+	it("says so when nothing is pending", function()
+		ready("officer")
+		click(icon())
+		eq(listRows(), 0)
+		eq(N().list.empty:GetText(), "No pending applications.")
+	end)
+
+	it("Invite sends the game's invite and the application leaves the list", function()
+		ready("officer")
+		receive("00000001")
+		receive("00000002", { who = "Mirelle-TestRealm", cls = 5, at = GetServerTime() - 3600 })
+		click(icon())
+		click(N().list.rows[2].invite)   -- the older one, Elarin
+		eq(Inbox():Get(KEY, "00000001").state, "accepted")
+		deepEq(Mock.guild.invites, { "Elarin-TestRealm" })
+		eq(listRows(), 1)
+		eq(badgeText(), "1")
+		contains(out(), "Guild invite sent to Elarin.")
+	end)
+
+	it("Decline asks first, then declines; 'Keep' changes nothing", function()
+		ready("officer")
+		receive("00000001")
+		click(icon())
+		click(N().list.rows[1].decline)
+		truthy(N().list.confirm:IsShown())
+		contains(N().list.confirm:GetText(), "Decline Elarin?")
+		click(N().list.no)
+		falsy(N().list.confirm:IsShown())
+		eq(Inbox():Get(KEY, "00000001").state, "received")
+		click(N().list.rows[1].decline)
+		click(N().list.yes)
+		eq(Inbox():Get(KEY, "00000001").state, "declined")
+		eq(listRows(), 0)
+		eq(badgeText(), "")
+	end)
+
+	it("'Open all applications' opens the panel of the main window", function()
+		ready("officer")
+		receive("00000001")
+		click(icon())
+		click(N().list.open)
+		truthy(A().Main:IsShown())
+		eq(A().Main:CurrentTab(), "Applications")
+		falsy(N().list:IsShown())
+	end)
+
+	it("an officer who lost the role cannot act through a stale list", function()
+		ready("officer")
+		receive("00000001")
+		click(icon())
+		setRole("member")
+		deepEq({ N():Invite("00000001") }, { false, "role" })
+		eq(Inbox():Get(KEY, "00000001").state, "received")
+	end)
+end)
+
+describe("drag and lock", function()
+	it("a drag saves the position per character and it is restored", function()
+		ready("officer")
+		icon():ClearAllPoints()
+		icon():SetPoint("TOPLEFT", UIParent, "TOPLEFT", 120, -80)
+		Mock.RunScript(icon(), "OnDragStart")
+		Mock.RunScript(icon(), "OnDragStop")
+		deepEq(cfg("char.ui.notifyPos"), { point = "TOPLEFT", relPoint = "TOPLEFT", x = 120, y = -80 })
+		icon():ClearAllPoints()
+		icon():SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+		N():ApplyPosition()
+		local point, _, relPoint, x, y = icon():GetPoint(1)
+		deepEq({ point, relPoint, x, y }, { "TOPLEFT", "TOPLEFT", 120, -80 })
+	end)
+
+	it("the first time it sits at the default place", function()
+		ready("officer")
+		eq(cfg("char.ui.notifyPos"), nil)
+		local point, _, _, x, y = icon():GetPoint(1)
+		deepEq({ point, x, y }, { "CENTER", A().NotifyModel.DEFAULT_POS.x, A().NotifyModel.DEFAULT_POS.y })
+	end)
+
+	it("a saved position far off the screen is pulled back", function()
+		ready("officer")
+		A().Config:Set("char.ui.notifyPos", { point = "CENTER", relPoint = "CENTER", x = 90000, y = 0 })
+		N():ApplyPosition()
+		local _, _, _, x = icon():GetPoint(1)
+		truthy(x <= UIParent:GetWidth())
+	end)
+
+	it("a locked icon does not start a drag and a drag stays off the saved position", function()
+		ready("officer")
+		N():SetLocked(true)
+		eq(cfg("char.ui.notifyLocked"), true)
+		Mock.RunScript(icon(), "OnDragStart")
+		falsy(N().dragging)
+		N():SetLocked(false)
+		Mock.RunScript(icon(), "OnDragStart")
+		truthy(N().dragging)
+		Mock.RunScript(icon(), "OnDragStop")
+		falsy(N().dragging)
+	end)
+
+	it("the click that ends a drag does not open the list", function()
+		ready("officer")
+		Mock.RunScript(icon(), "OnDragStart")
+		Mock.RunScript(icon(), "OnDragStop")
+		click(icon())
+		falsy(N().list and N().list:IsShown())
+	end)
+
+	it("the position and the lock live in the character's data, not the account's", function()
+		ready("officer")
+		N():SetLocked(true)
+		N():SavePosition()
+		truthy(A().Config.db.char.ui.notifyLocked)
+		truthy(A().Config.db.char.ui.notifyPos)
+		eq(A().Config.db.account.settings.notifyLocked, nil)
+	end)
+end)
+
+describe("the right-click menu", function()
+	it("opens with the entries and their state", function()
+		ready("officer")
+		click(icon(), "RightButton")
+		truthy(N().menu:IsShown())
+		eq(N().menu.items[1].text:GetText(), "Applications icon")
+		eq(N().menu.items[2].text:GetText(), "Lock position")
+		falsy(N().menu.items[2].check:IsShown())
+		truthy(N().menu.items[4].check:IsShown(), "sound is on by default")
+		click(icon(), "RightButton")
+		falsy(N().menu:IsShown())
+	end)
+
+	it("Lock position, only when pending and Sound toggle their options", function()
+		ready("officer")
+		click(icon(), "RightButton")
+		click(N().menu.items[2])
+		eq(cfg("char.ui.notifyLocked"), true)
+		click(icon(), "RightButton")
+		truthy(N().menu.items[2].check:IsShown())
+		click(N().menu.items[4])
+		eq(cfg("account.settings.sound"), false)
+		click(icon(), "RightButton")
+		click(N().menu.items[3])
+		eq(cfg("account.settings.onlyWhenPending"), true)
+		falsy(shown(), "only when pending and nothing pending")
+	end)
+
+	it("Hide icon hides it and turns the option off (Settings shows the same)", function()
+		ready("officer")
+		click(icon(), "RightButton")
+		click(N().menu.items[5])
+		falsy(shown())
+		eq(cfg("account.settings.notifyIcon"), false)
+		falsy(A().AppsModel.GetOption("notifyIcon"))
+	end)
+end)
+
+describe("/gf notify", function()
+	it("hides and shows the icon for an officer", function()
+		ready("officer")
+		Mock.ClearOutput()
+		Mock.Slash("/gf notify")
+		falsy(shown())
+		contains(out(), "Notification icon hidden")
+		Mock.Slash("/gf notify")
+		truthy(shown())
+		contains(out(), "Notification icon shown")
+		eq(#Mock.errors, 0)
+	end)
+
+	it("tells a member, a character without a guild and a guild without a listing that it is not for them", function()
+		setRole("member")
+		putListing()
+		Mock.ClearOutput()
+		Mock.Slash("/gf notify")
+		contains(out(), "for the Guild Master and the officers")
+		eq(cfg("account.settings.notifyIcon"), true, "the option was not touched")
+		setRole("none")
+		Mock.ClearOutput()
+		Mock.Slash("/gf notify")
+		contains(out(), "for the Guild Master and the officers")
+	end)
+
+	it("is listed in /gf help", function()
+		Mock.ClearOutput()
+		Mock.Slash("/gf help")
+		contains(out(), "/gf notify")
+	end)
+end)
+
+describe("the chat line and the sound", function()
+	local plays
+	local function stubSound() plays = 0; _G.PlaySound = function() plays = plays + 1 end end
+
+	it("a new application says so in chat with an Open link and plays the sound", function()
+		ready("officer")
+		stubSound()
+		Mock.ClearOutput()
+		receive("00000001")
+		contains(out(), "New application from Elarin (Mage 32).")
+		contains(table.concat(Mock.output, "\n"), "|Haddon:AzerothGuildFinder:applications|h")
+		eq(plays, 1)
+	end)
+
+	it("the sound option turns the sound off but not the chat line", function()
+		ready("officer")
+		stubSound()
+		A().AppsModel.SetOption("sound", false)
+		Mock.ClearOutput()
+		receive("00000001")
+		contains(out(), "New application from Elarin")
+		eq(plays, 0)
+	end)
+
+	it("the chat line comes even when the icon is switched off", function()
+		ready("officer")
+		stubSound()
+		A().AppsModel.SetOption("notifyIcon", false)
+		Mock.ClearOutput()
+		receive("00000001")
+		contains(out(), "New application from Elarin")
+		eq(plays, 1)
+	end)
+
+	it("a member hears nothing", function()
+		ready("member")
+		stubSound()
+		Mock.ClearOutput()
+		receive("00000001")
+		falsy(out():find("New application", 1, true))
+		eq(plays, 0)
+	end)
+
+	it("a missing PlaySound is not an error", function()
+		ready("officer")
+		_G.PlaySound = nil
+		receive("00000001")
+		eq(#Mock.errors, 0)
+	end)
+
+	it("the Open link opens the Applications panel", function()
+		ready("officer")
+		receive("00000001")
+		local called
+		_G.SetItemRef = function(link) called = link end
+		N().linkHooked = false
+		N():Init()
+		SetItemRef("addon:AzerothGuildFinder:applications")
+		truthy(A().Main:IsShown())
+		eq(A().Main:CurrentTab(), "Applications")
+		A().Main:Hide()
+		SetItemRef("addon:OtherAddon:thing")
+		falsy(A().Main:IsShown(), "someone else's link is not ours")
+		eq(called, "addon:OtherAddon:thing")
+	end)
+end)
+
+describe("time", function()
+	it("an application that expires while the icon is on screen leaves the badge within a minute", function()
+		ready("officer")
+		local t = GetServerTime()
+		receive("00000001", { at = t - 14 * 86400 + 1800, upd = t - 14 * 86400 + 1800 })
+		eq(badgeText(), "1")
+		Mock.Advance(3600, 30)
+		eq(badgeText(), "")
+	end)
+
+	it("nothing keeps ticking while the icon is hidden", function()
+		setRole("member")
+		local before = Mock.PendingTimers()
+		N():Refresh()
+		N():Refresh()
+		eq(Mock.PendingTimers(), before)
+		falsy(N().pollPending)
+	end)
+end)

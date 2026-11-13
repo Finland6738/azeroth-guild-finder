@@ -56,7 +56,8 @@
 - Spec: SPEC-07 §6, mockup [05](../specs/mockups/img/clean/05-notification.webp)
 - Scope: floating metal button with the guild emblem and badge, pulse on new application, quick list (last 5) with Invite and Decline, drag and lock, right-click menu, chat line with "Open", optional sound, `/gf notify`.
 - Done when:
-  - [ ] Shown only to the Guild Master and officers of a listed guild; position saved per character.
+  - [x] Offline: `UI/NotifyModel.lua` (pure Lua) decides who sees the icon (the Guild Master and the officers of a listed guild, then the options), the badge text, the pulse, which arrivals speak, the quick list of the last 5, the chat line with its `Open` link, the menu and the position; `UI/Notify.lua` draws the button, the list, the menu, drag and lock (`char.ui.notifyPos`, `char.ui.notifyLocked`), the chat link hook, the optional sound and `/gf notify` (`Tests/test_notify_model.lua`, `Tests/test_ui_notify.lua`).
+  - [ ] In game: the icon looks like mockup 05, the chat `Open` link works, the sound plays, drag, lock and the saved position survive `/reload` ([checklist](../checklists/M4.md)).
 
 ### M4.6 — Closing cases and milestone check
 - Branch: `step/m4-6-closing`

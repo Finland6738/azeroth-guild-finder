@@ -3,7 +3,7 @@
 | Command | What it does |
 |---|---|
 | `/gf` | Opens or closes Guild Finder |
-| `/gf notify` | Shows or hides the applications notification icon |
+| `/gf notify` | Shows or hides the applications notification icon (for the Guild Master and the officers of a guild with a listing; anyone else gets a note that it is not for them) |
 | `/gf reset` | Puts the window back in the middle of the screen |
 | `/gf scale` | Tells you the window size. `/gf scale 80` sets it to 80 %; the range is 60 to 140 |
 | `/gf debug` | Diagnostics: addon version, client build and project id, every game feature the addon needs as `available`, `missing`, `restricted` or `error`, and the state of the saved data (schema versions, read-only when it comes from a newer version, and any value that was repaired); no character or guild names, and never the account secret |
@@ -28,4 +28,4 @@ Also: the minimap button (left click opens, right click settings), the Addon Com
 | Share anonymous alt count with my guild | on |
 | Window size | 100 % (60 % to 140 %) |
 
-In this version the **Settings** tab of the window has the window size, a *Reset window position* button and, in the **Privacy** card, *Share anonymous alt count with my guild* (see [[Privacy and Data|Privacy-and-Data]]: it tells your guild only how many of your characters played this week, never which ones); the Guild Master and the officers also have a **Notifications** card there (*Notification icon on screen*, *Only when something is pending*, *Sound on new application*; the same three switches are on the Applications tab, see [[Managing Applications|Managing-Applications]]); the other options of the table arrive with the full Settings page. The window position is saved per character, the window size for the whole account.
+In this version the **Settings** tab of the window has the window size, a *Reset window position* button and, in the **Privacy** card, *Share anonymous alt count with my guild* (see [[Privacy and Data|Privacy-and-Data]]: it tells your guild only how many of your characters played this week, never which ones); the Guild Master and the officers also have a **Notifications** card there (*Notification icon on screen*, *Only when something is pending*, *Sound on new application*; the same three switches are on the Applications tab and in the icon's right-click menu, see [[Managing Applications|Managing-Applications]]); the other options of the table arrive with the full Settings page. The window position and the notification icon's position and lock are saved per character, the window size for the whole account.
