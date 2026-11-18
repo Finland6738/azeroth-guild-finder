@@ -4,6 +4,10 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+### Documentation
+
+- CurseForge page kit in `docs/curseforge/`: Italian setup guide, English description, summary and first-release notes, an original 400x400 logo and eight design-preview gallery images (JPG) with captions and alt text, and the list of real screenshots to take after M5.6. Nothing has been created on CurseForge.
+
 ### Design
 
 - Specification of the first version in `docs/specs/` (SPEC-00 to SPEC-10, in Italian): scope and roles, platform and peer-to-peer architecture, network protocol, data model, interface, applications, emblems, quality and release, risks and open questions.

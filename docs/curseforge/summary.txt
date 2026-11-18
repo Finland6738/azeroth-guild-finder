@@ -1,0 +1,1 @@
+An unofficial guild finder for WoW: Forever. Browse and filter guilds, apply with one click; Guild Masters publish a listing, officers manage applications. Peer to peer: no server, no telemetry.
