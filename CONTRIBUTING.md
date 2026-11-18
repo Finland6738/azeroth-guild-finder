@@ -51,6 +51,7 @@ Naming a key: `AREA_THING` or `AREA_THING_PART`, upper case with underscores; th
 
 ```
 python -I -X utf8 tools/check_docs.py
+python -I -X utf8 tools/check_package.py --list   # what the release zip would contain
 python -m pip install lupa==2.8            # once
 python -X utf8 Tests/run_tests.py          # all offline tests
 python -X utf8 Tests/run_tests.py reload   # only the tests whose name contains "reload"; -v adds tracebacks

@@ -33,6 +33,10 @@ jobs:
       - name: Check the documentation
         run: python -I -X utf8 tools/check_docs.py
 
+      # What .pkgmeta would put in the release zip: licences in, development files and dev-only code out (ADR 0022).
+      - name: Check the package contents
+        run: python -I -X utf8 tools/check_package.py
+
       # The libraries are pinned in .pkgmeta and never committed; the tests load the real Ace3 and LibDBIcon from Libs/.
       - name: Run the addon tests
         run: |

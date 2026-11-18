@@ -54,7 +54,8 @@ Un elenco di controllo in `docs/checklists/release.md`:
 
 - **Versioni** semantiche: `v0.x` per le prove con pochi utenti, `v1.0.0` per la V1. Il TOC usa `## Version: @project-version@`.
 - **Pacchetti** creati con il BigWigs Packager in una GitHub Action al push di un tag: pubblica su **GitHub Releases** e su **CurseForge** (servono l'ID del progetto e il token nei segreti del repository).
-- `.pkgmeta`: librerie esterne (Ace3, LibDBIcon, LibDataBroker) a versioni fissate; esclusi `Tests/`, `docs/`, `.idea/`.
+- `.pkgmeta`: librerie esterne (Ace3, LibDBIcon, LibDataBroker) a versioni fissate; esclusi `Tests/`, `docs/`, `tools/`, `.idea/`; **il `LICENSE` GPL-3.0 e i testi OFL dei font viaggiano nel pacchetto**. Il codice di sviluppo (`Config.DEV`) è spento dal packager. `tools/check_package.py` lo verifica senza rete, in CI e sullo zip costruito ([ADR 0022](../adr/0022-release-packaging-with-the-bigwigs-packager.md)).
+- **Workflow** `release.yml`: sul tag `v*` costruisce lo zip, lo controlla, crea la GitHub Release (pre-release per `-alpha`, `-beta`, `-rc`) e carica su CurseForge solo se esistono il segreto `CF_API_KEY` e `## X-Curse-Project-ID` nel TOC; altrimenti salta senza errore. Procedura per il proprietario: [docs/RELEASING.md](../RELEASING.md).
 - Pagina CurseForge e README con: cos'è, come si installa a mano, che è **non ufficiale**, quali dati condivide (catalogo pubblico; nella gilda solo token anonimi) e i limiti del modello P2P.
 - Licenza del codice: da scegliere ([SPEC-10](SPEC-10-risks-open-questions.md)).
 
