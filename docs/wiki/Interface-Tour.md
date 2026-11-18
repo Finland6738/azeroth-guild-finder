@@ -66,3 +66,11 @@ Opening a guild from the list replaces the list with the guild's page and shows 
 ## Fonts
 
 The interface uses the **Roboto** font (and **Roboto Mono** for links, codes, times and commands), included in the addon under the SIL Open Font License, with the sizes never smaller than 12 pixels. They are used only by Guild Finder's own windows: the rest of the game keeps its fonts. If the game cannot load a font file, Guild Finder uses the game's own font instead.
+
+## Previews of every screen
+
+One picture for every case of the interface (the empty and loading states of the list, every status of an application, every step of the listing editor, the notification icon, Settings, the diagnostics box and more) is in the [assets folder](https://github.com/Finland6738/azeroth-guild-finder/tree/main/assets). They are **design previews drawn from the addon's layout and texts, not screenshots of the game**: nothing has run in WoW Forever yet.
+
+![Find a Guild, with filters on](../../assets/find-a-guild-filters.webp)
+
+![The Applications panel](../../assets/applications-pending.webp)

@@ -64,7 +64,7 @@ A guild finder for **World of Warcraft: Forever**: browse guilds by language, ac
 | **Listing editor** | **Emblem designer** |
 | ![Listing editor](docs/specs/mockups/img/clean/08-editor-activity.webp) | ![Emblem designer](docs/specs/mockups/img/clean/07-emblem-designer.webp) |
 
-All screens: [docs/specs/mockups](docs/specs/README.md).
+All screens: [docs/specs/mockups](docs/specs/README.md). One preview for every case of the interface (80 images: empty states, every step of the editor, every status of an application, the notification icon, Settings and more): [assets/](assets/README.md). They are design previews drawn from the addon's layout and texts, not in-game screenshots.
 
 ## How it works
 

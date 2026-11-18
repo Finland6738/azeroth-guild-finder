@@ -82,6 +82,7 @@ In gioco: `/reload`, poi `/gf help`. Configurazione di `tools/local.ini`: [tools
 
 - [Manuale (wiki)](https://github.com/Finland6738/azeroth-guild-finder/wiki), generato da [`docs/wiki/`](docs/wiki/Home.md).
 - [Specifiche](docs/specs/README.md) e [bozzetti](docs/specs/mockups/img/).
+- [Anteprime dell'interfaccia](assets/README.md): un'immagine per ogni caso (liste vuote, ogni passo dell'editor, ogni stato di una candidatura, icona di notifica, Impostazioni...), in inglese. Sono bozzetti di progetto disegnati dal layout dell'addon, non schermate del gioco.
 - [Decisioni (ADR)](docs/adr/README.md) · [Changelog](CHANGELOG.md) · [Roadmap](ROADMAP.md) · [Contribuire](CONTRIBUTING.md).
 
 ## Supporta il progetto
