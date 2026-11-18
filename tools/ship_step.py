@@ -16,7 +16,8 @@ Steps:
   3. merges origin/main into the branch if main moved (a conflict stops the script);
   4. pushes the branch and opens the pull request (or reuses the open one);
   5. waits for the CI checks of the pull request (gh pr checks --watch);
-  6. squash merges with --delete-branch, then updates the local main.
+  6. squash merges with --delete-branch and the noreply address as merge author, then updates the local main and
+     stops if the merge commit carries any other author address.
 The wiki is published by the "Wiki sync" workflow after the merge, not by this script.
 """
 import argparse
@@ -27,6 +28,9 @@ import time
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CO_AUTHOR = "Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+# The squash merge commit is created by GitHub, which would otherwise use the account's primary email as author.
+# Personal addresses never go in the history (CLAUDE.md, Privacy): the merge author is always the noreply address.
+MERGE_AUTHOR_EMAIL = "200480737+Finland6738@users.noreply.github.com"
 
 
 def run(cmd, check=True, capture=True, dry=False):
@@ -117,9 +121,13 @@ def main(argv):
     if a.no_merge:
         print(f"CI is green. Pull request #{number} left open (--no-merge).")
         return 0
-    run(["gh", "pr", "merge", number, "--squash", "--delete-branch"])
+    run(["gh", "pr", "merge", number, "--squash", "--delete-branch", "--author-email", MERGE_AUTHOR_EMAIL])
     run(["git", "switch", "main"], check=False)
     run(["git", "pull", "--ff-only", "origin", "main"], check=False)
+    author = out(["git", "log", "-1", "--format=%ae", "origin/main"])
+    if not author.endswith("@users.noreply.github.com"):
+        sys.exit(f"Stopped: the merge commit of pull request #{number} is not authored by a noreply address. "
+                 "Tell the owner; do not merge anything else until it is fixed.")
     print(f"Merged pull request #{number}. The wiki is published by the 'Wiki sync' workflow.")
     return 0
 
