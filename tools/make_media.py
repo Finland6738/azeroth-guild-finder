@@ -223,6 +223,14 @@ def g_copy(d, ss):
     d.rounded_rectangle([10 * ss, 8 * ss, 44 * ss, 44 * ss], radius=5 * ss, outline=255, width=5 * ss)
 
 
+def g_chat(d, ss):
+    # a generic speech bubble with a tail and three dots: our own mark for "chat server", not a third-party logo (ADR 0023)
+    d.rounded_rectangle([6 * ss, 10 * ss, 58 * ss, 44 * ss], radius=10 * ss, fill=255)
+    d.polygon([(16 * ss, 42 * ss), (16 * ss, 58 * ss), (32 * ss, 43 * ss)], fill=255)
+    for cx in (20, 32, 44):
+        d.ellipse([(cx - 4) * ss, 23 * ss, (cx + 4) * ss, 31 * ss], fill=0)
+
+
 # --------------------------------------------------------------------------------------------------------------------
 # Role badges (colour): a coloured disc with a light ring and a white symbol
 # --------------------------------------------------------------------------------------------------------------------
@@ -525,7 +533,7 @@ TEXTURES = {
     "glyph_check": lambda: glyph(g_check), "glyph_close": lambda: glyph(g_close), "glyph_back": lambda: glyph(g_back),
     "glyph_plus": lambda: glyph(g_plus), "glyph_search": lambda: glyph(g_search), "glyph_gear": lambda: glyph(g_gear),
     "glyph_doc": lambda: glyph(g_doc), "glyph_shield": lambda: glyph(g_shield), "glyph_inbox": lambda: glyph(g_inbox),
-    "glyph_copy": lambda: glyph(g_copy),
+    "glyph_copy": lambda: glyph(g_copy), "glyph_chat": lambda: glyph(g_chat),
     "role_tank": lambda: role_badge("tank"), "role_healer": lambda: role_badge("healer"),
     "role_melee": lambda: role_badge("melee"), "role_ranged": lambda: role_badge("ranged"),
     "parchment": parchment_grain, "shade_h": shade_h, "fade_h": fade_h, "solid": solid,

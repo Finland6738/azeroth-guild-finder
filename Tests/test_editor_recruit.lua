@@ -397,6 +397,15 @@ describe("the Discord box", function()
 		bad({}, "chars")
 	end)
 
+	it("hostile input is never ok, and the prefixes of the models are the one in Listing (ADR 0023)", function()
+		for _, bad in ipairs({ "discord.gg.evil.com/abc", "discordd.gg/abc", "https://discord.gg\64evil.com/abc", "abc\226\128\139",
+			"|cffff0000abc|r", "|Hurl:x|habc|h", "https://bit.ly/abc", "ab\0cd", "\239\188\164iscord.gg/abc" }) do
+			eq(M().DiscordCheck(bad).state, "bad", bad)
+		end
+		eq(M().DISCORD_PREFIX, A().Listing.DISCORD_PREFIX)
+		eq(A().GuildPageModel.DISCORD_PREFIX, A().Listing.DISCORD_PREFIX)
+	end)
+
 	it("the link a code stands for has the fixed prefix", function()
 		eq(M().DISCORD_PREFIX, "https://discord.gg/")
 		eq(M().DiscordLink("aurora-it"), "https://discord.gg/aurora-it")
@@ -884,7 +893,7 @@ describe("the Contact page", function()
 		Mock.TypeInto(page.disc.edit, "aurora-it")
 		eq(editor():Get("disc"), "aurora-it")
 		eq(OL():Draft().disc, "aurora-it")
-		eq(page.discHint:GetText(), "Invite code: aurora-it")
+		eq(page.discHint:GetText(), "Invite code: aurora-it (9 of 32)")
 		eq(states(editor():View()).discord, "ok")
 		eq(editor():View().steps[6].status, "ok")
 	end)
@@ -894,7 +903,7 @@ describe("the Contact page", function()
 		Mock.TypeInto(page.disc.edit, "https://discord.com/invite/wolves1?event=2")
 		eq(page.disc:GetText(), "wolves1")
 		eq(editor():Get("disc"), "wolves1")
-		eq(page.discHint:GetText(), "Invite code: wolves1")
+		eq(page.discHint:GetText(), "Invite code: wolves1 (7 of 32)")
 	end)
 
 	it("junk is explained and kept, the checklist goes red, and fixing it turns it green", function()

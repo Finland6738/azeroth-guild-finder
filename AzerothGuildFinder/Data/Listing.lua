@@ -169,6 +169,15 @@ end
 -- Discord
 ---------------------------------------------------------------------------------------------------------------------
 
+-- The one place the prefix lives: the listing data never carries it (ADR 0023).
+Listing.DISCORD_PREFIX = "https://discord.gg/"
+
+-- The link players are shown, rebuilt from a validated code only; nil when the code is not valid.
+function Listing.DiscordUrl(code)
+	if not Listing.IsValidDiscordCode(code) then return nil end
+	return Listing.DISCORD_PREFIX .. code
+end
+
 -- true when `code` is a valid invite code: ^[A-Za-z0-9-]{2,32}$
 function Listing.IsValidDiscordCode(code)
 	return type(code) == "string" and #code >= LIM.DISCORD_MIN and #code <= LIM.DISCORD_MAX and code:match("^[A-Za-z0-9%-]+$") ~= nil
@@ -179,8 +188,11 @@ end
 -- Returns the code, or nil plus a reason ("empty", "invalid").
 function Listing.ExtractDiscordCode(text)
 	if type(text) ~= "string" then return nil, "invalid" end
-	local s = trim(stripControls(text, false))
+	local s = trim(text)
 	if s == "" then return nil, "empty" end
+	-- ADR 0023: nothing but printable ASCII is ever accepted (no control or invisible characters, no Unicode look-alikes, no
+	-- chat escapes: a `|` is not in the code alphabet either); nothing is "cleaned up", the whole text is refused
+	if #s > 200 or find(s, "[^ -~]") then return nil, "invalid" end
 	local rest = s:gsub("^[Hh][Tt][Tt][Pp][Ss]?://", ""):gsub("^[Ww][Ww][Ww]%.", "")
 	local low = lower(rest)
 	local code

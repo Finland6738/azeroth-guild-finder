@@ -26,3 +26,4 @@
 | Q7 | ~~Licenza del codice~~ | **Decisa: GPL-3.0** ([ADR 0017](../adr/0017-license-gpl-3.md)) |
 | Q8 | ~~Lingua della documentazione~~ | **Decisa**: inglese per README, wiki e ADR; italiano per queste specifiche ([ADR 0016](../adr/0016-english-first-ui-and-documentation-languages.md)) |
 | Q9 | ~~Workflow Git~~ | **Deciso**: come azeroth-unspoken, con commit, push, PR e merge automatici ([ADR 0013](../adr/0013-git-flow-and-automated-shipping.md)) |
+| Q10 | Logo di Discord accanto al campo | **Da decidere (tu)**. Le linee guida di Discord richiedono permesso salvo usi consentiti, vietano di modificare il logo e non parlano di software open source: **non incluso**. Si usa un fumetto originale (`Skin.DISCORD_ICON`); per il logo ufficiale conviene chiedere permesso scritto a Discord ([ADR 0023](../adr/0023-discord-link-fixed-prefix-and-safe-invite-codes.md)) |

@@ -34,7 +34,7 @@ local floor, min, max = math.floor, math.min, math.max
 local sort, concat = table.sort, table.concat
 local lower = string.lower
 
-Model.DISCORD_PREFIX = "https://discord.gg/"
+Model.DISCORD_PREFIX = "https://discord.gg/"   -- equals Listing.DISCORD_PREFIX (a test pins it)
 Model.ONLINE_WINDOW = 3600     -- a contact that announced itself this recently (seconds) counts as online
 Model.MAX_TAGS = 6
 
@@ -54,8 +54,7 @@ end
 
 -- The full invite link: the prefix is fixed, only the code travels (SPEC-03 §3, D13). nil when the code is not valid.
 function Model.DiscordUrl(code)
-	if type(code) ~= "string" or not Listing().IsValidDiscordCode(code) then return nil end
-	return Model.DISCORD_PREFIX .. code
+	return Listing().DiscordUrl(code)
 end
 
 -- "Name-Realm" -> "name" (case folded): contact names are listed with or without the realm.

@@ -1001,10 +1001,15 @@ function Contact.Build(page, editor)
 	local disc = W.Card(page, { kind = "plain", title = L["ED_DISC_LABEL"], height = 134 })
 	disc:SetPoint("TOPLEFT", page, "TOPLEFT", 0, 0)
 	disc:SetPoint("TOPRIGHT", page, "TOPRIGHT", 0, 0)
+	local ICON = 22
+	page.discIcon = W.Texture(disc.body, Skin.DISCORD_ICON, "ARTWORK", "linkInk")
+	page.discIcon:SetSize(ICON, ICON)
+	page.discIcon:SetPoint("LEFT", disc.body, "TOPLEFT", 0, -Skin.METRICS.fieldH / 2)
+	-- the prefix is plain text, not part of the edit box: it cannot be selected into, deleted or edited
 	local prefix = W.Text(disc.body, "mono", "ink2")
-	prefix:SetPoint("LEFT", disc.body, "TOPLEFT", 0, -Skin.METRICS.fieldH / 2)
+	prefix:SetPoint("LEFT", disc.body, "TOPLEFT", ICON + 6, -Skin.METRICS.fieldH / 2)
 	prefix:SetText(Model.DISCORD_PREFIX)
-	local pw = math.ceil(W.TextWidth(Model.DISCORD_PREFIX, "mono")) + 8
+	local pw = ICON + 6 + math.ceil(W.TextWidth(Model.DISCORD_PREFIX, "mono")) + 8
 	page.disc = W.Field(disc.body, { width = INNER_W - pw, placeholder = L["ED_DISC_PLACEHOLDER"], maxLetters = Model.DISCORD_TYPED_MAX,
 		onChange = function(text, user) if user then Contact.OnDisc(page, editor, text) end end })
 	page.disc:SetPoint("TOPLEFT", disc.body, "TOPLEFT", pw, 0)
@@ -1069,7 +1074,7 @@ end
 
 function Contact.DiscordHint(page, check)
 	if check.state == "ok" then
-		page.discHint:SetText(L["ED_DISC_OK"]:format(check.code))
+		page.discHint:SetText(L["ED_DISC_OK"]:format(check.code, #check.code))
 		W.TextColor(page.discHint, "ok")
 	elseif check.state == "bad" then
 		page.discHint:SetText(L["ED_DISC_BAD_" .. check.reason])

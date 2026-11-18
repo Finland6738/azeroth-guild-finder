@@ -467,6 +467,43 @@ describe("Discord", function()
 	end)
 end)
 
+-- ADR 0023: every string a hostile client could send in `disc`. None may ever reach a player as a link.
+local ATTACKS = {
+	"discord.gg.evil.com/abc", "https://discord.gg.evil.com/abc", "discordd.gg/abc", "dlscord.gg/abc", "discord.gg\64evil.com/abc",
+	"https://discord.gg\64evil.com/abc", "https://user:pw\64discord.gg/abc", "discord.gg/abc\64evil.com", "discord.gg/abc\evil.com",
+	"https://evil.com/discord.gg/abc", "https://evil.com?u=discord.gg/abc", "https://bit.ly/abc", "https://tinyurl.com/abc",
+	"discord.com.evil.com/invite/abc", "discord.gg//evil.com", "discord.gg/abc.evil.com",
+	"discord.gg/ab\ncd", "ab\0cd", "ab\tcd", "abc\127", "\1abc",
+	"abc\226\128\139", "\226\128\139abc", "ab\226\128\174cd", "\239\187\191abc", "\239\188\164iscord.gg/abc",
+	"discord.gg/\209\128bc", "discord\226\128\148gg/abc", "\216\167abc", "abc\194\160", "\194\133abc",
+	"|cffff0000abc|r", "|Hurl:evil|habc|h", "|TInterface\Icons\x:16|tabc", "ab|cd", "abc||", "|r|r",
+	"javascript:abc", "data:text/html,abc", "ftp://discord.gg/abc", "//discord.gg/abc", "discord.gg:443/abc",
+	"discord.gg/abc;evil", "discord.gg/abc,evil", "ab_cd", "ab.cd", "ab+cd", "ab%cd", "abc=", "a", string.rep("a", 33),
+	string.rep("a", 300), "https://discord.gg/" .. string.rep("a", 33),
+}
+
+describe("Discord: hostile input (ADR 0023)", function()
+	it("every attack string is refused as a code, as a URL and in a received detail record", function()
+		for i, bad in ipairs(ATTACKS) do
+			isNil(L().ExtractDiscordCode(bad), "extract #" .. i)
+			isNil(L().DiscordUrl(bad), "url #" .. i)
+			local r = L().SanitizeDetail({ k = KEY, rev = 1, desc = "x", disc = bad })
+			isNil(r.disc, "detail #" .. i)
+		end
+	end)
+	it("accepted input becomes exactly the fixed prefix plus the validated code, never anything else", function()
+		for _, good in ipairs({ "abc123", "https://discord.com/invite/abc123?x=1", "discordapp.com/invite/abc123", "DISCORD.GG/abc123/" }) do
+			eq(L().DiscordUrl((L().ExtractDiscordCode(good))), "https://discord.gg/abc123")
+		end
+		eq(L().DISCORD_PREFIX, "https://discord.gg/")
+	end)
+	it("a wrong type never becomes a link", function()
+		isNil(L().DiscordUrl(nil)); isNil(L().DiscordUrl(5)); isNil(L().DiscordUrl({}))
+		isNil(L().SanitizeDetail({ k = KEY, rev = 1, disc = { "abc" } }).disc)
+		isNil(L().SanitizeDetail({ k = KEY, rev = 1, disc = true }).disc)
+	end)
+end)
+
 describe("full record (GLIST)", function()
 	it("keeps summary and detail fields together", function()
 		local rec = L().SanitizeFull(summary({ desc = "Hello|there", disc = "discord.gg/xyz", note = "n" }), OPTS)

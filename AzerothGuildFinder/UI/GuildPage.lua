@@ -124,6 +124,9 @@ local function buildLeft(host)
 	host.divider = W.Divider(left, LW)
 	host.contactTitle = W.Text(left, "overline", "ink3")
 	host.contactTitle:SetText(L["GP_CONTACT"]:upper())
+	host.discIcon = W.Texture(left, Skin.DISCORD_ICON, "ARTWORK", "linkInk")
+	host.discIcon:SetSize(14, 14)
+	host.discIcon:SetPoint("LEFT", host.contactTitle, "RIGHT", 6, 0)
 	host.copy = W.CopyField(left, { width = LW, text = "" })
 	host.detailMsg = W.Text(left, "caption", "ink2")
 	host.detailMsg:SetWidth(LW)
@@ -177,7 +180,7 @@ local function bindLeft(host, view)
 
 	if view.gone then
 		host.sub:SetText("")
-		host.tagHolder:Hide(); host.appsNote:Hide(); host.divider:Hide(); host.contactTitle:Hide(); host.copy:Hide()
+		host.tagHolder:Hide(); host.appsNote:Hide(); host.divider:Hide(); host.contactTitle:Hide(); host.copy:Hide(); host.discIcon:Hide()
 		host.apply:Hide(); host.applyNote:Hide()
 		host.detailMsg:Hide(); host.footer:SetText("")
 		for _, row in ipairs(host.contactRows) do row:Hide() end
@@ -242,7 +245,7 @@ local function bindLeft(host, view)
 		local contacts = view.contacts
 		for _, row in ipairs(host.contactRows) do row:Hide() end
 		if view.detail ~= "ready" then
-			host.copy:Hide()
+			host.copy:Hide(); host.discIcon:Hide()
 			add(host.detailMsg, setWrapped(host.detailMsg, view.detail == "loading" and L["GP_LOADING"] or L["GP_UNAVAILABLE"], LW))
 		else
 			local message
@@ -253,6 +256,7 @@ local function bindLeft(host, view)
 				message = L["GP_NO_DISCORD"]
 			end
 			host.copy:SetShown(view.discord ~= nil)
+			host.discIcon:SetShown(view.discord ~= nil)
 			if #contacts == 0 then message = message and (message .. " " .. L["GP_NO_CONTACTS"]) or L["GP_NO_CONTACTS"] end
 			if message then add(host.detailMsg, setWrapped(host.detailMsg, message, LW)) end
 			pooled(host.contactRows, #contacts, function(i) return createContactRow(host, i) end)
