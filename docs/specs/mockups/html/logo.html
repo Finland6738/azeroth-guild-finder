@@ -1,0 +1,12 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Project logo (original art)</title>
+<style>html,body{margin:0;width:512px;height:512px;overflow:hidden;background:#2a1a0a}
+.bg{position:absolute;inset:0}.bg svg{width:100%;height:100%}
+.shade{position:absolute;inset:0;background:radial-gradient(circle at 50% 55%,rgba(20,12,4,0) 30%,rgba(20,12,4,.65) 100%)}
+.emb{position:absolute;left:96px;top:70px;width:320px;height:384px;filter:drop-shadow(0 10px 14px rgba(0,0,0,.6))}</style></head>
+<body><div class="bg" id="bg"></div><div class="shade"></div><div class="emb" id="emb"></div>
+<script src="agf.js"></script>
+<script>
+document.getElementById('bg').innerHTML = AGF.art('gold', 11).replace('preserveAspectRatio="xMaxYMid slice"','preserveAspectRatio="xMidYMid slice"');
+document.getElementById('emb').innerHTML = AGF.emblem({bg:'#1b2a44',bc:'#d7a84a',ec:'#fff3c4',symbol:'star',border:'double',chief:'#7a1f1f'});
+</script></body></html>

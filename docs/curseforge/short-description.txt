@@ -1,0 +1,1 @@
+First beta of Azeroth Guild Finder for WoW: Forever. Tested offline only, not yet in the real game. Bugs: github.com/Finland6738/azeroth-guild-finder/issues

@@ -33,6 +33,8 @@ python -I -X utf8 tools/check_package.py --list
 
 ## Setting up CurseForge (once)
 
+The texts, images and a step-by-step guide for the project page are in [curseforge/SETUP.md](curseforge/SETUP.md) (Italian).
+
 1. Create a project on [CurseForge](https://www.curseforge.com/wow/addons) for World of Warcraft addons: name *Azeroth Guild Finder*, licence GPL-3.0, the unofficial notice and the privacy summary on the description (SPEC-09 §4). Make sure the project's game versions include **WoW Forever**.
 2. Copy the **Project ID** (a number, on the project's *About* panel) into the TOC: in `AzerothGuildFinder/AzerothGuildFinder.toc` replace the commented line `# ## X-Curse-Project-ID: 0` with `## X-Curse-Project-ID: 12345` (your number, two `#` signs, no space in front). Ship that in a normal pull request.
 3. Create an API token at <https://www.curseforge.com/account/api-tokens>.
