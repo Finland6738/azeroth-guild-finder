@@ -4,6 +4,10 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+### Changed
+
+- Discord link hardened ([ADR 0023](docs/adr/0023-discord-link-fixed-prefix-and-safe-invite-codes.md)): the listing only ever carries an invite code and the link is rebuilt from the validated code everywhere (`Listing.DiscordUrl`); any non-ASCII, control or invisible character, look-alike host, shortener or game escape now refuses the whole input (the old code silently stripped control characters), also on receive. The Discord field has an icon (our own speech bubble, `glyph_chat`, not Discord's logo: its brand terms do not clearly allow bundling it; `Skin.DISCORD_ICON` is the switch), a locked prefix and a character counter. The logo decision is left to the owner (SPEC-10 Q10).
+
 ### Documentation
 
 - CurseForge page kit in `docs/curseforge/`: Italian setup guide, English description, summary and first-release notes, an original 400x400 logo and eight design-preview gallery images (JPG) with captions and alt text, and the list of real screenshots to take after M5.6. Nothing has been created on CurseForge.

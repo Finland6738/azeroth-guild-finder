@@ -160,7 +160,7 @@ Testi (`sub`, `desc`, `note`):
 - i campi sconosciuti vengono scartati; un campo non valido viene omesso (i numeri fuori limite, dove il §2 dà un intervallo, vengono riportati nei limiti); `Listing.IsComplete` dice se il riassunto ha lingua principale, 1–3 tipi di attività e `pace`;
 - `k` è valido se ha la forma `reame|Alliance|nome` oppure `reame|Horde|nome` (≤ 80 caratteri, senza `|` nel nome e senza caratteri di controllo).
 
-Il codice Discord deve corrispondere a `^[A-Za-z0-9%-]{2,32}$`. Se il GM incolla un link intero (`https://discord.gg/abc`, `discord.com/invite/abc`), l'editor estrae da solo il codice.
+Il codice Discord deve corrispondere a `^[A-Za-z0-9%-]{2,32}$`. Se il GM incolla un link intero (`https://discord.gg/abc`, `discord.com/invite/abc`), l'editor estrae da solo il codice. **Sicurezza** ([ADR 0023](../adr/0023-discord-link-fixed-prefix-and-safe-invite-codes.md)): il dato è sempre e solo il codice, il prefisso sta nel codice e il link si ricostruisce ogni volta dal codice validato; qualsiasi byte fuori dall'ASCII stampabile rifiuta l'intero testo (niente pulizia silenziosa); alla ricezione un `disc` non valido viene scartato e l'annuncio resta senza Discord. L'addon non può sapere se l'invito esiste, è scaduto o è stato revocato.
 
 ## 7. Normalizzazione dei nomi (ordinamento e ricerca, D19)
 

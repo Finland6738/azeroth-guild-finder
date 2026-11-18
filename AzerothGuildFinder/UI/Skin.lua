@@ -71,6 +71,10 @@ Skin.KINDS = {
 }
 
 -- Colours of the tag kinds: background and text.
+-- The icon of the Discord field (ADR 0023). Our own generic speech bubble: Discord's brand terms do not clearly allow bundling its
+-- logo in a GPL addon. To adopt the official logo later (owner's decision): add the file to Media/ and change this one line.
+Skin.DISCORD_ICON = "glyph_chat"
+
 Skin.TAGS = {
 	default = { bg = "#d9b98c", text = "#5b391a" },
 	ok = { bg = "#e2efd3", text = "#246227" },

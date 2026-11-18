@@ -30,3 +30,4 @@ They record *why* the project is built a certain way. A decision that changes is
 | [0020](0020-original-media-own-nine-slice-and-font-fallback.md) | Interface construction: generated original media, our own nine-slice, fonts with a fallback | accepted |
 | [0021](0021-guild-copy-of-the-listing-from-the-guild-master-only.md) | The guild copy of the listing comes from the Guild Master only | accepted |
 | [0022](0022-release-packaging-with-the-bigwigs-packager.md) | Release packaging with the BigWigs packager, CurseForge optional | accepted |
+| [0023](0023-discord-link-fixed-prefix-and-safe-invite-codes.md) | Discord link: fixed prefix, safe invite codes, own icon | accepted (logo: owner decides) |

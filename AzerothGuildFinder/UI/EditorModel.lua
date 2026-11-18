@@ -695,7 +695,7 @@ end
 ---------------------------------------------------------------------------------------------------------------------
 Model.CONTACTS_MAX = 3
 Model.SUGGESTIONS = 5
-Model.DISCORD_PREFIX = "https://discord.gg/"
+Model.DISCORD_PREFIX = "https://discord.gg/"   -- equals Listing.DISCORD_PREFIX (a test pins it)
 Model.DISCORD_TYPED_MAX = 120   -- a pasted link is longer than a code
 
 -- What was typed in the Discord box, explained. Returns { state, code, reason, replace }:
@@ -713,7 +713,8 @@ function Model.DiscordCheck(text)
 	end
 	if why == "empty" then return { state = "empty" } end
 	-- find out what is wrong with it, to say so
-	local s = trimmed(LS.StripControls(text, false))
+	local s = trimmed(text)
+	if s:find("[^ -~]") then return { state = "bad", reason = "chars" } end
 	local rest = s:gsub("^[Hh][Tt][Tt][Pp][Ss]?://", ""):gsub("^[Ww][Ww][Ww]%.", "")
 	local low = rest:lower()
 	local candidate
