@@ -137,6 +137,8 @@ def forbidden_reason(path):
         if part in FORBIDDEN_DIRS:
             return f"development folder {part}/"
     name = parts[-1]
+    if path == "CHANGELOG.md":
+        return None   # the packager writes this file itself, from the git history; shipping it is wanted
     if name in FORBIDDEN_FILES or name.endswith(FORBIDDEN_SUFFIXES):
         return "development or documentation file"
     return None
