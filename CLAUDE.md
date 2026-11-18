@@ -24,4 +24,4 @@ Do not decide alone what belongs to the owner (licence, names, scope, deleting t
 
 ## Privacy
 
-No personal data in the repository: no real names, emails (only GitHub noreply addresses), or personal paths (use `<WoW folder>` and similar). `tools/check_docs.py` fails on them.
+No personal data in the repository: no real names, emails (only GitHub noreply addresses), or personal paths (use `<WoW folder>` and similar). `tools/check_docs.py` fails on them. This includes git authorship: merge commits are authored by the noreply address (`ship_step.py` passes `--author-email`); never merge from the GitHub web UI or with plain `gh pr merge`.
