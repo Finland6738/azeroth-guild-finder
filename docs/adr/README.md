@@ -29,3 +29,4 @@ They record *why* the project is built a certain way. A decision that changes is
 | [0019](0019-offline-tests-with-lupa-and-a-mock-client.md) | Offline tests with lupa and a mock client | accepted |
 | [0020](0020-original-media-own-nine-slice-and-font-fallback.md) | Interface construction: generated original media, our own nine-slice, fonts with a fallback | accepted |
 | [0021](0021-guild-copy-of-the-listing-from-the-guild-master-only.md) | The guild copy of the listing comes from the Guild Master only | accepted |
+| [0022](0022-release-packaging-with-the-bigwigs-packager.md) | Release packaging with the BigWigs packager, CurseForge optional | accepted |

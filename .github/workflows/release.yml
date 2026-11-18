@@ -1,0 +1,203 @@
+name: Release
+
+# Builds the addon package with the BigWigs packager and publishes it (ADR 0022, how-to: docs/RELEASING.md).
+#
+#   * Push of a version tag (v1.0.0, v0.9.0-beta.1, v0.9.0-rc.1): build, check the zip, create the GitHub Release
+#     (alpha, beta and rc tags are marked as pre-releases) and, when CurseForge is configured, upload there too.
+#   * Manual run (Actions > Release > Run workflow): build and check the zip, keep it as a workflow artifact, publish
+#     nothing. With "draft_tag" set it also creates a DRAFT GitHub Release of that name (the tag is not pushed), to
+#     look at the real asset before a real release. Neither CurseForge nor a public release is ever touched.
+#
+# CurseForge is optional: the upload runs only when the repository secret CF_API_KEY exists AND the TOC has an
+# "## X-Curse-Project-ID: <number>" line. Until then that step is skipped with a notice and the run stays green.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      draft_tag:
+        description: "Optional: create a draft GitHub Release with this tag name (for example v0.0.1-alpha.1). Nothing is pushed."
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+
+# One release at a time; a later run waits instead of cancelling a publication half way.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Package and publish
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    # contents: write is needed only to create the GitHub Release.
+    permissions:
+      contents: write
+    env:
+      TOC: AzerothGuildFinder/AzerothGuildFinder.toc
+    steps:
+      - name: Check out the repository with its tags
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0   # the packager reads the tags to name the version
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: "3.12"
+
+      # Offline: what .pkgmeta would ship (licences, no dev code, no tests or docs). Fails before anything is built.
+      - name: Check what the package will contain
+        run: python -I -X utf8 tools/check_package.py
+
+      # Decides what this run does. Values reach the shell through env, never pasted into the script.
+      - name: Decide what to publish
+        id: plan
+        env:
+          EVENT: ${{ github.event_name }}
+          REF: ${{ github.ref }}
+          DRAFT_TAG: ${{ inputs.draft_tag }}
+          HAS_CF_KEY: ${{ secrets.CF_API_KEY != '' }}
+        run: |
+          set -euo pipefail
+          tag=""
+          publish="none"
+          if [[ "$EVENT" == "push" && "$REF" == refs/tags/* ]]; then
+            tag="${REF#refs/tags/}"
+            publish="release"
+          elif [[ -n "$DRAFT_TAG" ]]; then
+            tag="$DRAFT_TAG"
+            publish="draft"
+          fi
+
+          prerelease="false"
+          if [[ -n "$tag" ]]; then
+            if ! [[ "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-(alpha|beta|rc)(\.[0-9]+)?)?$ ]]; then
+              echo "::error title=Bad tag::'$tag' is not a version tag. Use vMAJOR.MINOR.PATCH, optionally -alpha, -beta or -rc with .N (v1.0.0, v0.9.0-beta.1)."
+              exit 1
+            fi
+            if [[ "$tag" == *-* ]]; then
+              prerelease="true"
+            fi
+          fi
+
+          # CurseForge: every condition must hold, otherwise skip it without failing.
+          cf="false"
+          cf_reason=""
+          if [[ "$publish" != "release" ]]; then
+            cf_reason="this run does not publish a release (manual runs never upload to CurseForge)"
+          elif [[ "$HAS_CF_KEY" != "true" ]]; then
+            cf_reason="the repository secret CF_API_KEY is not set"
+          elif ! grep -Eq '^## X-Curse-Project-ID:[[:space:]]*[0-9]+[[:space:]]*$' "$TOC"; then
+            cf_reason="$TOC has no '## X-Curse-Project-ID: <number>' line"
+          elif [[ "$tag" == *-rc* ]]; then
+            # The packager knows only alpha and beta; it would file an rc as a stable CurseForge release.
+            cf_reason="release candidates are not uploaded to CurseForge (the packager would mark them as stable)"
+          else
+            cf="true"
+          fi
+
+          {
+            echo "tag=$tag"
+            echo "publish=$publish"
+            echo "prerelease=$prerelease"
+            echo "cf=$cf"
+          } >> "$GITHUB_OUTPUT"
+
+          {
+            echo "### Release plan"
+            echo "- Tag: \`${tag:-none (build only)}\`"
+            echo "- GitHub Release: \`$publish\`$([[ "$prerelease" == "true" ]] && echo ", pre-release")"
+            if [[ "$cf" == "true" ]]; then
+              echo "- CurseForge: upload"
+            else
+              echo "- CurseForge: skipped, $cf_reason"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [[ "$cf" != "true" ]]; then
+            echo "::notice title=CurseForge skipped::$cf_reason"
+          fi
+
+      # A draft run builds from a branch: give the packager the tag locally (never pushed) so the version in the TOC
+      # and the zip name are the ones a real tag would give.
+      - name: Tag the build locally for a draft
+        if: steps.plan.outputs.publish == 'draft'
+        env:
+          TAG: ${{ steps.plan.outputs.tag }}
+        run: |
+          if git rev-parse -q --verify "refs/tags/$TAG" > /dev/null; then
+            echo "The tag $TAG already exists in this checkout, using it."
+          else
+            git -c user.name="release-workflow" -c user.email="release-workflow@users.noreply.github.com" \
+              tag -a "$TAG" -m "Local tag for a draft build, never pushed"
+          fi
+
+      # -d: build only, upload nothing. The zip lands in .release/.
+      - name: Build the package
+        uses: BigWigsMods/packager@01e8631a69c69d7654c788d152630d5fed9e3812 # v2.7.0
+        with:
+          args: -d
+
+      - name: Find the zip
+        id: zip
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          zips=(.release/*.zip)
+          if [[ ${#zips[@]} -ne 1 ]]; then
+            echo "::error title=Zip not found::expected exactly one zip in .release/, found ${#zips[@]}: ${zips[*]:-none}"
+            exit 1
+          fi
+          echo "path=${zips[0]}" >> "$GITHUB_OUTPUT"
+
+      # The built zip itself: licences present, no dev code, no tests or docs, Libs embedded, version filled in.
+      - name: Check the zip
+        env:
+          ZIP: ${{ steps.zip.outputs.path }}
+          TAG: ${{ steps.plan.outputs.tag }}
+        run: |
+          set -euo pipefail
+          python -I -X utf8 tools/check_package.py --zip "$ZIP" ${TAG:+--tag "$TAG"} --list | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: Keep the zip as a workflow artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: AzerothGuildFinder-package
+          path: ${{ steps.zip.outputs.path }}
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Create the GitHub Release
+        if: steps.plan.outputs.publish != 'none'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ steps.plan.outputs.tag }}
+          PUBLISH: ${{ steps.plan.outputs.publish }}
+          PRERELEASE: ${{ steps.plan.outputs.prerelease }}
+          ZIP: ${{ steps.zip.outputs.path }}
+        run: |
+          set -euo pipefail
+          args=(release create "$TAG" "$ZIP" --title "$TAG" --generate-notes)
+          if [[ "$PRERELEASE" == "true" ]]; then
+            args+=(--prerelease)
+          fi
+          if [[ "$PUBLISH" == "draft" ]]; then
+            args+=(--draft --target "$GITHUB_SHA")
+          else
+            args+=(--verify-tag)
+          fi
+          gh "${args[@]}"
+
+      # Same packager, other direction: no GitHub token is given, so it uploads to CurseForge only. It rebuilds the
+      # package from the same commit, which has just passed the checks above.
+      - name: Upload to CurseForge
+        if: steps.plan.outputs.cf == 'true'
+        uses: BigWigsMods/packager@01e8631a69c69d7654c788d152630d5fed9e3812 # v2.7.0
+        env:
+          CF_API_TOKEN: ${{ secrets.CF_API_KEY }}

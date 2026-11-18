@@ -17,6 +17,11 @@ externals:
 move-folders:
   AzerothGuildFinder/AzerothGuildFinder: AzerothGuildFinder
 
+# What stays out of the package. The packager skips every dotfile and dot-folder (.git, .idea, .github, .gitignore, ...)
+# and every file git does not track, and a pattern here is matched against the path from the repository root with *
+# crossing folders. Not listed on purpose, because they must ship: LICENSE (the GPL-3.0 text, which lands inside the
+# addon folder because the repository root is the package) and the OFL texts of the fonts (OFL-*.txt next to the .ttf).
+# tools/check_package.py reads this file and fails if a licence would be left out or a development file would ship.
 ignore:
   - Tests
   - docs
@@ -25,4 +30,3 @@ ignore:
   - .gitignore
   - .luarc.json
   - "*.md"
-  - LICENSE

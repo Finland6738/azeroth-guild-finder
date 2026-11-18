@@ -38,8 +38,9 @@
 - Spec: SPEC-09 §4
 - Scope: `.github/workflows/release.yml` with the BigWigs packager on a version tag: GitHub Release and CurseForge upload (secret `CF_API_KEY`, project id in the TOC); `## Version: @project-version@`; `.pkgmeta` ignores `Tests/`, `docs/`, `tools/`.
 - Done when:
-  - [ ] A test tag produces a correct zip on a draft release.
-- Needs the owner: the CurseForge project and its API token.
+  - [x] Prepared (offline, CurseForge left out): `.github/workflows/release.yml` ([ADR 0022](../adr/0022-release-packaging-with-the-bigwigs-packager.md)): a `v*` tag builds the zip with the BigWigs packager, checks it, creates the GitHub Release (pre-release for `-alpha`, `-beta`, `-rc`), and uploads to CurseForge only when the secret `CF_API_KEY` and `## X-Curse-Project-ID` in the TOC both exist (otherwise skipped with a notice, run stays green); a manual run builds and checks the zip without publishing, and with `draft_tag` makes a draft release. `.pkgmeta` ignores `Tests/`, `docs/`, `tools/`; the GPL-3.0 `LICENSE` and the OFL texts of the fonts ship; `Config.DEV` is switched off by the packager. `tools/check_package.py` (no network, no secrets) works out what ships from `.pkgmeta` and checks a built zip; CI and `tools/check_docs.py` run it. The how-to for the owner is [docs/RELEASING.md](../RELEASING.md). **Not run yet**: no tag, no release, no workflow run.
+  - [ ] **Needs the owner**: a manual run of the workflow and a draft release (`draft_tag`) produce a correct zip, then a test tag does the same ([how to](../RELEASING.md#try-it-without-publishing-anything)).
+  - [ ] **Needs the owner**: the CurseForge project, its project ID in the TOC and the `CF_API_KEY` secret; the upload of a `-beta` tag shows up on CurseForge with the right game version and release type ([how to](../RELEASING.md#setting-up-curseforge-once)).
 
 ### M5.6 — Beta v0.9
 - Branch: `step/m5-6-beta`

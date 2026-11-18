@@ -7,6 +7,7 @@
      (a drive letter path, /home/<name> or /Users/<name>).
   5. Text files use LF line endings.
   6. The rules of tools/check_pr_docs.py behave as documented (a few fixed cases).
+  7. The release package (tools/check_package.py): licences ship, no development files or dev-only code.
 
 Usage: python -I -X utf8 tools/check_docs.py      (exit code 0 = all good, 1 = problems, listed one per line)
 """
@@ -128,6 +129,12 @@ def check_addon(problems):
     addon.check(problems)
 
 
+def check_package(problems):
+    sys.path.insert(0, os.path.join(ROOT, "tools"))
+    import check_package as package
+    package.check(problems)
+
+
 def main():
     problems = []
     files = tracked_files()
@@ -137,6 +144,7 @@ def main():
     check_text_files(files, problems)
     check_rules(problems)
     check_addon(problems)
+    check_package(problems)
     for p in problems:
         print(p)
     print(f"{len(files)} files checked, {len(problems)} problem(s).")

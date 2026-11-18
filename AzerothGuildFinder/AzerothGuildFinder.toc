@@ -11,6 +11,10 @@
 ## IconTexture: Interface\Icons\INV_Misc_Note_01
 ## X-Website: https://github.com/Finland6738/azeroth-guild-finder
 ## X-License: GPL-3.0
+# CurseForge project ID (the number on the project's About page). The packager reads it from the line below, which
+# has to start with two # signs to count: replace "# ## X-Curse-Project-ID: 0" with "## X-Curse-Project-ID: 12345".
+# Until then the release workflow skips the CurseForge upload (docs/RELEASING.md).
+# ## X-Curse-Project-ID: 0
 
 embeds.xml
 Locale\enUS.lua
