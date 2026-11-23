@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="assets/logo-source.webp" alt="Azeroth Guild Finder logo" width="160">
+
 # Azeroth Guild Finder
 
 **Find your guild without leaving the game.**<br>
