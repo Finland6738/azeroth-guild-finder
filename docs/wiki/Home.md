@@ -1,5 +1,7 @@
 # Azeroth Guild Finder
 
+![Azeroth Guild Finder logo](../../assets/logo-source.webp)
+
 **Find your guild without leaving the game.** Azeroth Guild Finder is an addon for **World of Warcraft: Forever** that lets players without a guild browse guild listings and apply with one click, while Guild Masters publish a listing and officers manage the applications.
 
 > **Status: design phase.** This manual describes the planned first version. There is no download yet; screens are design mockups, not in-game screenshots.

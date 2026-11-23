@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="assets/logo-source.webp" alt="Logo di Azeroth Guild Finder" width="160">
+
 # Azeroth Guild Finder
 
 **Trova la tua gilda senza uscire dal gioco.**<br>
